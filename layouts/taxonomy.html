@@ -1,4 +1,5 @@
 {{ define "main" -}}
+<div class="container">
 <header class="page-heading">
   <h1>{{ .Title | default (i18n "tags") }}</h1>
 </header>
@@ -10,4 +11,5 @@
   </li>
   {{- end }}
 </ul>
+</div>
 {{- end }}

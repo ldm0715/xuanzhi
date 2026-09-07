@@ -1,4 +1,5 @@
 {{ define "main" -}}
+<div class="container">
 <header class="page-heading">
   <h1>{{ i18n "tag" }}：{{ .Title }}</h1>
 </header>
@@ -9,4 +10,5 @@
   {{- end }}
 </section>
 {{ partial "pagination.html" $paginator }}
+</div>
 {{- end }}

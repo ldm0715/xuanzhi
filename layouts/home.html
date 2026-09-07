@@ -1,4 +1,5 @@
 {{ define "main" -}}
+<div class="container">
 {{ $pages := where site.RegularPages "Type" "in" site.MainSections -}}
 {{ $paginator := .Paginate $pages 10 -}}
 <section class="post-list">
@@ -7,4 +8,5 @@
   {{- end }}
 </section>
 {{ partial "pagination.html" $paginator }}
+</div>
 {{- end }}

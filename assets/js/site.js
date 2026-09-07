@@ -101,4 +101,28 @@
       }, 1500);
     });
   });
+
+  /* 目录便签 scrollspy：滚动到哪一节，便签上就亮哪一条 */
+  (function () {
+    var memo = document.querySelector('.toc-memo');
+    if (!memo || typeof IntersectionObserver === 'undefined') return;
+    var links = memo.querySelectorAll('nav a[href^="#"]');
+    var map = {};
+    links.forEach(function (l) {
+      map[decodeURIComponent(l.hash.slice(1))] = l;
+    });
+    var heads = Object.keys(map)
+      .map(function (id) { return document.getElementById(id); })
+      .filter(Boolean);
+    if (!heads.length) return;
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        links.forEach(function (l) { l.classList.remove('toc-active'); });
+        var active = map[en.target.id];
+        if (active) active.classList.add('toc-active');
+      });
+    }, { rootMargin: '-70px 0px -70% 0px' });
+    heads.forEach(function (h) { observer.observe(h); });
+  })();
 })();
