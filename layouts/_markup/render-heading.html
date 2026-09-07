@@ -1,0 +1,7 @@
+{{- /*
+  标题渲染钩子：为每个标题追加悬停可见的锚点链接（#），
+  点击后地址栏带上锚点，方便复制分享。
+*/ -}}
+<h{{ .Level }} id="{{ .Anchor }}"{{ with .Attributes }}{{ range $k, $v := . }} {{ $k }}="{{ $v }}"{{ end }}{{ end }}>
+  <a class="heading-anchor" href="#{{ .Anchor }}" aria-label="跳转到此节">#</a>{{ .Text | safeHTML }}
+</h{{ .Level }}>

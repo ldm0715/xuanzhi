@@ -1,0 +1,36 @@
+{{ define "main" -}}
+<article class="post">
+  <header class="post-header">
+    <h1 class="post-title">{{ .Title }}</h1>
+    <div class="post-meta">
+      <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006-01-02" }}</time>
+      <span aria-hidden="true"> · </span>{{ .WordCount }} {{ i18n "words" }}
+      <span aria-hidden="true"> · </span>≈ {{ math.Ceil (div (float .WordCount) 400.0) }} {{ i18n "minutes" }}
+      {{- with .GetTerms "tags" }}
+      <span aria-hidden="true"> · </span>{{- range . }}<a class="tag" href="{{ .RelPermalink }}">#{{ .Title }}</a> {{ end -}}
+      {{- end }}
+    </div>
+  </header>
+
+  {{- $toc := .TableOfContents -}}
+  {{- if findRE "<li" $toc -}}
+  <details class="toc">
+    <summary>{{ i18n "toc" }}</summary>
+    {{ $toc | safeHTML }}
+  </details>
+  {{- end }}
+
+  <div class="post-content">
+    {{ .Content }}
+  </div>
+
+  <footer class="post-footer">
+    {{- with .PrevInSection }}
+    <a class="post-nav" href="{{ .RelPermalink }}">← {{ .Title }}</a>
+    {{- end }}
+    {{- with .NextInSection }}
+    <a class="post-nav post-nav-next" href="{{ .RelPermalink }}">{{ .Title }} →</a>
+    {{- end }}
+  </footer>
+</article>
+{{- end }}

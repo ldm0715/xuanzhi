@@ -1,0 +1,55 @@
+/* ============================================================
+ * Chroma 代码高亮（noClasses = false，类名模式）
+ * 颜色全部走 token 变量，明暗自动跟随
+ * ============================================================ */
+
+.chroma { color: var(--color-text); }
+
+/* 注释 */
+.chroma .c, .chroma .c1, .chroma .ch, .chroma .cm,
+.chroma .cs, .chroma .cd, .chroma .cp, .chroma .cpf { color: var(--code-comment); }
+
+/* 关键字 */
+.chroma .k, .chroma .kc, .chroma .kd, .chroma .kn,
+.chroma .kp, .chroma .kr, .chroma .kt { color: var(--code-keyword); font-weight: 600; }
+
+/* 字符串 */
+.chroma .s, .chroma .s1, .chroma .s2, .chroma .sa, .chroma .sb,
+.chroma .sc, .chroma .dl, .chroma .sd, .chroma .se, .chroma .sh,
+.chroma .si, .chroma .sr, .chroma .ss, .chroma .sx { color: var(--code-string); }
+
+/* 数字 */
+.chroma .m, .chroma .mb, .chroma .mf, .chroma .mh,
+.chroma .mi, .chroma .il, .chroma .mo, .chroma .mx { color: var(--code-number); }
+
+/* 函数 / 内建 */
+.chroma .nf, .chroma .fm { color: var(--code-function); }
+.chroma .nb, .chroma .bp { color: var(--code-function); }
+
+/* 类型 / 类名 */
+.chroma .nc, .chroma .ne, .chroma .nn { color: var(--code-type); }
+
+/* 属性 / 标签 */
+.chroma .na { color: var(--code-attr); }
+.chroma .nt { color: var(--code-attr); }
+
+/* 操作符 / 标点 */
+.chroma .o, .chroma .ow, .chroma .p { color: var(--code-operator); }
+
+/* 名称（普通标识符） */
+.chroma .n, .chroma .nx, .chroma .ni, .chroma .nl,
+.chroma .vc, .chroma .vg, .chroma .vi, .chroma .vm { color: var(--color-text); }
+
+/* diff */
+.chroma .gd { color: var(--code-deleted); }
+.chroma .gi { color: var(--code-added); }
+.chroma .gh { color: var(--color-title); font-weight: 600; }
+.chroma .gu { color: var(--color-text-secondary); font-weight: 600; }
+
+/* 错误：不着色块，只淡化 */
+.chroma .err { color: var(--color-text); background: none; }
+
+/* 行号 */
+.chroma .lntable { display: block; overflow-x: auto; }
+.chroma .hl { background: var(--color-accent-soft); }
+.chroma .ln, .chroma .lnt { color: var(--color-text-secondary); }

@@ -1,0 +1,34 @@
+{{- /*
+  图片渲染钩子：page bundle 内图片走 Hugo image processing（WebP + srcset + 防抖动尺寸），
+  外链图片原样输出。全部 lazy 加载。
+  注意：$ 是 hook 上下文；with 块内 . 是 page resource。
+*/ -}}
+{{- $u := urls.Parse .Destination -}}
+{{- $alt := .PlainText -}}
+{{- $title := .Title -}}
+{{- if $u.IsAbs -}}
+  <img src="{{ $u.String }}" alt="{{ $alt }}" loading="lazy" decoding="async">
+{{- else -}}
+  {{- with .Page.Resources.GetMatch $u.Path -}}
+    {{- if eq .ResourceType "image" -}}
+      {{- $main := .Resize (printf "%dx webp q82" (int (math.Min .Width 1600))) -}}
+      {{- $s1 := .Resize (printf "%dx webp q82" (int (math.Min .Width 640))) -}}
+      {{- $s2 := .Resize (printf "%dx webp q82" (int (math.Min .Width 1024))) -}}
+      {{- $img := printf `<img src="%s" srcset="%s %dw, %s %dw, %s %dw" sizes="(max-width: 840px) 100vw, 800px" width="%d" height="%d" alt="%s" loading="lazy" decoding="async">`
+          $main.RelPermalink
+          $s1.RelPermalink $s1.Width
+          $s2.RelPermalink $s2.Width
+          $main.RelPermalink $main.Width
+          $main.Width $main.Height ($alt | htmlEscape) -}}
+      {{- with $title -}}
+      <figure class="post-figure">{{ $img | safeHTML }}<figcaption>{{ $title }}</figcaption></figure>
+      {{- else -}}
+      {{ $img | safeHTML }}
+      {{- end -}}
+    {{- else -}}
+      <img src="{{ .RelPermalink }}" alt="{{ $alt }}" loading="lazy" decoding="async">
+    {{- end -}}
+  {{- else -}}
+    <img src="{{ $u.String }}" alt="{{ $alt }}" loading="lazy" decoding="async">
+  {{- end -}}
+{{- end -}}

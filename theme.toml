@@ -1,0 +1,10 @@
+name = 'Xuanzhi'
+license = 'MIT'
+licenselink = ''
+description = '宣纸——暖纸底、稿纸格纹、霞鹜文楷、墨阶排版的极简中文博客主题，明暗双模式，陶土橘/黛青双点缀色'
+homepage = ''
+tags = ['blog', 'minimal', 'light', 'dark', 'chinese', 'clean']
+min_version = '0.146.0'
+
+[author]
+  name = 'gcnanmu'

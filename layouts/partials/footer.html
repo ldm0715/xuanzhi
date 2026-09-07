@@ -1,0 +1,13 @@
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-line">
+      <span class="seal" aria-hidden="true">{{ substr site.Title 0 1 | default "宣" }}</span>
+      <p>© {{ now.Format "2006" }} {{ site.Title }}</p>
+      <nav class="footer-links">
+        {{ with site.Home.OutputFormats.Get "rss" -}}
+        <a href="{{ .RelPermalink }}">RSS</a>
+        {{ end -}}
+      </nav>
+    </div>
+  </div>
+</footer>

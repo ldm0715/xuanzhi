@@ -1,0 +1,13 @@
+{{ define "main" -}}
+<header class="page-heading">
+  <h1>{{ .Title | default (i18n "tags") }}</h1>
+</header>
+<ul class="tag-list">
+  {{- range .Data.Terms.ByCount }}
+  <li>
+    <a href="{{ .Page.RelPermalink }}">{{ .Page.Title }}</a>
+    <span class="tag-count">{{ .Count }}</span>
+  </li>
+  {{- end }}
+</ul>
+{{- end }}

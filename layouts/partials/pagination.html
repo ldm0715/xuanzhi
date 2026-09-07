@@ -1,0 +1,11 @@
+{{- if gt .TotalPages 1 -}}
+<nav class="pagination">
+  {{- with .Prev }}
+  <a class="pagination-prev" href="{{ .RelPermalink }}">← {{ i18n "prevPage" }}</a>
+  {{- end }}
+  <span class="pagination-num">{{ .PageNumber }} / {{ .TotalPages }}</span>
+  {{- with .Next }}
+  <a class="pagination-next" href="{{ .RelPermalink }}">{{ i18n "nextPage" }} →</a>
+  {{- end }}
+</nav>
+{{- end -}}
