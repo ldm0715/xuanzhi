@@ -50,12 +50,15 @@
         b.setAttribute('aria-pressed', String((root.dataset.bg || 'grid') === b.dataset.bg));
       });
       panel.querySelectorAll('button[data-accent]').forEach(function (b) {
-        b.setAttribute('aria-pressed', String(root.dataset.accent === b.dataset.accent));
+        b.setAttribute('aria-pressed', String((root.dataset.accent || 'terracotta') === b.dataset.accent));
+      });
+      panel.querySelectorAll('button[data-hr]').forEach(function (b) {
+        b.setAttribute('aria-pressed', String((root.dataset.hr || 'ink') === b.dataset.hr));
       });
     }
 
     panel.addEventListener('click', function (e) {
-      var b = e.target.closest('button[data-bg], button[data-accent]');
+      var b = e.target.closest('button[data-bg], button[data-accent], button[data-hr]');
       if (!b) return;
       if (b.dataset.bg) {
         root.dataset.bg = b.dataset.bg;
@@ -64,6 +67,10 @@
       if (b.dataset.accent) {
         root.dataset.accent = b.dataset.accent;
         try { localStorage.setItem('xuanzhi-accent', b.dataset.accent); } catch (err) {}
+      }
+      if (b.dataset.hr) {
+        root.dataset.hr = b.dataset.hr;
+        try { localStorage.setItem('xuanzhi-hr', b.dataset.hr); } catch (err) {}
       }
       syncPressed();
     });

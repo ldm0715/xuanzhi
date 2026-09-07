@@ -145,7 +145,7 @@ html[data-theme="dark"] #theme-toggle .icon-sun { opacity: 1; }
   top: calc(100% + 10px);
   right: -8px;
   z-index: 30;
-  width: 176px;
+  width: 200px;
   padding: 12px 14px;
   background: var(--color-surface);
   border: 1px solid var(--color-border-light);
@@ -238,6 +238,41 @@ html[data-theme="dark"] .swatch-vignette {
 .swatch-indigo { background-color: #425066; }
 html[data-theme="dark"] .swatch-terracotta { background-color: #E89576; }
 html[data-theme="dark"] .swatch-indigo { background-color: #8FA1C0; }
+
+/* 分隔线缩略图：四种意象的缩小版 */
+.swatch-hr-ink {
+  background-image: linear-gradient(90deg,
+    transparent, rgba(90, 75, 50, 0.8) 40% 60%, transparent);
+  background-size: 100% 2px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.swatch-hr-zhu {
+  background-image:
+    radial-gradient(circle at 50% 50%, rgba(178, 90, 70, 0.8) 0 1.4px, transparent 1.9px),
+    linear-gradient(rgba(178, 90, 70, 0.35), rgba(178, 90, 70, 0.35)),
+    linear-gradient(rgba(178, 90, 70, 0.35), rgba(178, 90, 70, 0.35));
+  background-size: auto, 8px 1px, 8px 1px;
+  background-position: center, 2px center, right 2px center;
+  background-repeat: no-repeat;
+}
+.swatch-hr-dots {
+  background-image:
+    radial-gradient(circle at 7px 50%, rgba(90, 75, 50, 0.8) 0 2px, transparent 2.5px),
+    radial-gradient(circle at 13px 50%, rgba(90, 75, 50, 0.55) 0 1.5px, transparent 2px),
+    radial-gradient(circle at 18px 50%, rgba(90, 75, 50, 0.35) 0 1.1px, transparent 1.6px);
+  background-repeat: no-repeat;
+}
+.swatch-hr-feibai {
+  background-image: repeating-linear-gradient(90deg,
+    rgba(90, 75, 50, 0.8) 0 2px,
+    transparent 2px 3px,
+    rgba(90, 75, 50, 0.5) 3px 4px,
+    transparent 4px 6px);
+  background-size: 20px 1.6px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
 
 /* ============ 首页 / 归档 / 标签文章列表 ============ */
 
@@ -342,20 +377,31 @@ ul.post-list { list-style: none; padding: 0; margin: 0; }
 .post-content h3 { font-size: 1.16rem; }
 .post-content h4 { font-size: 1.02rem; }
 
-/* 标题锚点：默认低调可见（触屏无 hover），悬停所在标题时完全显现 */
+/* 标题评点符号：h2 毛笔朱砂圈，h3/h4 毛笔顿点（SVG 笔触），悬停时被"圈红" */
 .post-content .heading-anchor {
-  margin-right: 8px;
-  color: var(--color-text-secondary);
+  margin-right: 10px;
   text-decoration: none;
-  opacity: 0.25;
+  opacity: 0.62;
+  vertical-align: 0.1em;
 }
+.post-content .mark-circle {
+  display: inline-block;
+  width: 17px;
+  height: 17px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.post-content .heading-l3 .mark-circle { width: 12px; height: 12px; }
+.post-content .heading-l4 .mark-circle { width: 9px; height: 9px; }
+
 .post-content h2:hover .heading-anchor,
 .post-content h3:hover .heading-anchor,
 .post-content h4:hover .heading-anchor,
-.post-content .heading-anchor:focus-visible {
-  opacity: 1;
-  color: var(--color-accent);
-}
+.post-content .heading-anchor:focus-visible { opacity: 1; }
+
+/* 悬停时朱笔"点红"：轻微放大并加深 */
+.post-content h2:hover .mark-circle,
+.post-content h3:hover .mark-circle,
+.post-content h4:hover .mark-circle { transform: scale(1.15); }
 
 .post-content p { margin: 0 0 1.15em; }
 
@@ -383,11 +429,58 @@ ul.post-list { list-style: none; padding: 0; margin: 0; }
 }
 .post-content blockquote p:last-child { margin-bottom: 0; }
 
+/* ============ 分隔线四式（面板 html[data-hr] 切换；默认一笔） ============
+ * 形状 = 手绘 SVG 填充轮廓（书法起收笔、飞白断口）作 mask；
+ * 颜色 = CSS 变量，亮暗自动跟随。形状宽 300、高 16，显示同尺寸。
+ */
+
 .post-content hr {
-  width: 60%;
-  margin: 2.4em auto;
   border: none;
-  border-top: 1px solid var(--color-border);
+  width: 300px;
+  height: 16px;
+  margin: 2.2em auto;
+  padding: 0;
+  background-color: var(--hr-ink-strong);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 16'%3E%3Cpath fill-rule='evenodd' d='M10 4.6 C 50 3.2 130 2.8 205 4.4 C 245 5.2 275 6.4 290 8.2 C 278 9.6 246 10.6 205 11.0 C 130 11.7 55 11.9 22 11.4 C 13 11.2 8 10.0 8 8.1 C 8 6.1 9 5.0 10 4.6 Z M132 5.6 C 148 5.4 165 5.7 178 6.3 C 170 7.3 154 7.7 140 7.5 C 134 7.4 131 6.6 132 5.6 Z M196 6.2 C 210 6.2 224 6.5 236 7.0 C 229 7.7 216 7.8 204 7.5 C 198 7.3 195 6.8 196 6.2 Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 16'%3E%3Cpath fill-rule='evenodd' d='M10 4.6 C 50 3.2 130 2.8 205 4.4 C 245 5.2 275 6.4 290 8.2 C 278 9.6 246 10.6 205 11.0 C 130 11.7 55 11.9 22 11.4 C 13 11.2 8 10.0 8 8.1 C 8 6.1 9 5.0 10 4.6 Z M132 5.6 C 148 5.4 165 5.7 178 6.3 C 170 7.3 154 7.7 140 7.5 C 134 7.4 131 6.6 132 5.6 Z M196 6.2 C 210 6.2 224 6.5 236 7.0 C 229 7.7 216 7.8 204 7.5 C 198 7.3 195 6.8 196 6.2 Z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* 断栏·朱点：两段朱线中间夹一个朱点 */
+html[data-hr="zhu"] .post-content hr {
+  background-color: var(--hr-zhu);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 16'%3E%3Cpath d='M20 6.8 L124 6.8 L124 9.2 L20 9.2 Z M150 5.6 A2.4 2.4 0 1 0 150.01 5.6 Z M176 6.8 L280 6.8 L280 9.2 L176 9.2 Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 16'%3E%3Cpath d='M20 6.8 L124 6.8 L124 9.2 L20 9.2 Z M150 5.6 A2.4 2.4 0 1 0 150.01 5.6 Z M176 6.8 L280 6.8 L280 9.2 L176 9.2 Z'/%3E%3C/svg%3E");
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* 墨点：五枚等大等透明度的小圆点 */
+html[data-hr="dots"] .post-content hr {
+  background-color: var(--hr-ink-strong);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 16'%3E%3Ccircle cx='108' cy='8' r='3' fill-opacity='1'/%3E%3Ccircle cx='129' cy='8' r='3' fill-opacity='0.8'/%3E%3Ccircle cx='150' cy='8' r='3' fill-opacity='0.62'/%3E%3Ccircle cx='171' cy='8' r='3' fill-opacity='0.46'/%3E%3Ccircle cx='192' cy='8' r='3' fill-opacity='0.32'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 16'%3E%3Ccircle cx='108' cy='8' r='3' fill-opacity='1'/%3E%3Ccircle cx='129' cy='8' r='3' fill-opacity='0.8'/%3E%3Ccircle cx='150' cy='8' r='3' fill-opacity='0.62'/%3E%3Ccircle cx='171' cy='8' r='3' fill-opacity='0.46'/%3E%3Ccircle cx='192' cy='8' r='3' fill-opacity='0.32'/%3E%3C/svg%3E");
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* 飞白：四段枯笔，笔画渐细、段间断口，收笔出尖 */
+html[data-hr="feibai"] .post-content hr {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 16'%3E%3Cpath d='M10 5.0 C 24 4.2 42 3.8 58 4.0 C 56 5.4 57 6.4 59 7.4 C 44 7.8 26 7.6 12 7.2 C 9 7.0 8 6.2 8 6.0 C 8 5.6 9 5.2 10 5.0 Z M68 4.4 C 100 3.8 130 3.8 152 4.4 C 149 5.8 150 6.6 153 7.6 C 128 8.2 98 8.2 70 7.6 C 66 7.4 65 5.6 68 4.4 Z M162 4.6 C 186 4.4 208 4.6 226 5.2 C 222 6.2 223 6.8 226 7.4 C 206 7.8 184 7.6 164 7.2 C 160 6.8 159 5.6 162 4.6 Z M236 5.0 C 256 5.0 274 5.4 288 6.2 C 282 7.4 268 8.0 252 8.0 C 244 8.0 238 7.2 236 5.0 Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 16'%3E%3Cpath d='M10 5.0 C 24 4.2 42 3.8 58 4.0 C 56 5.4 57 6.4 59 7.4 C 44 7.8 26 7.6 12 7.2 C 9 7.0 8 6.2 8 6.0 C 8 5.6 9 5.2 10 5.0 Z M68 4.4 C 100 3.8 130 3.8 152 4.4 C 149 5.8 150 6.6 153 7.6 C 128 8.2 98 8.2 70 7.6 C 66 7.4 65 5.6 68 4.4 Z M162 4.6 C 186 4.4 208 4.6 226 5.2 C 222 6.2 223 6.8 226 7.4 C 206 7.8 184 7.6 164 7.2 C 160 6.8 159 5.6 162 4.6 Z M236 5.0 C 256 5.0 274 5.4 288 6.2 C 282 7.4 268 8.0 252 8.0 C 244 8.0 238 7.2 236 5.0 Z'/%3E%3C/svg%3E");
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
 }
 
 .post-content ul,
@@ -521,20 +614,26 @@ ul.post-list { list-style: none; padding: 0; margin: 0; }
   border-color: var(--color-accent);
 }
 
-/* 表格 */
+/* 表格：实底隔开纸的格纹，隔行染色（斑马纹跟点缀色），格线加深 */
 .post-content table {
   width: 100%;
   margin: 1.4em 0;
   border-collapse: collapse;
   font-size: 0.95rem;
+  background: var(--color-surface);
 }
 .post-content th,
 .post-content td {
   padding: 7px 12px;
-  border: 1px solid var(--color-border-light);
+  border: 1px solid var(--color-border);
   text-align: left;
 }
-.post-content th { background: var(--color-surface); color: var(--color-title); }
+.post-content th {
+  background: var(--color-bg);
+  color: var(--color-title);
+  font-weight: 700;
+}
+.post-content tbody tr:nth-child(even) { background: var(--color-accent-soft); }
 
 /* 文末导航 */
 .post-footer {
@@ -607,7 +706,7 @@ ul.post-list { list-style: none; padding: 0; margin: 0; }
 }
 .notfound p { color: var(--color-text-secondary); margin: 0 0 1.4rem; }
 
-/* ============ 目录便签：贴在纸边的一张黄便签 ============ */
+/* ============ 目录笺：纸边的一张朱丝栏笺 ============ */
 
 .post-layout {
   max-width: 1150px;
@@ -625,7 +724,7 @@ ul.post-list { list-style: none; padding: 0; margin: 0; }
     gap: 44px;
   }
   .toc-memo { display: block; }
-  /* 便签在场时，正文内的折叠目录退位 */
+  /* 笺纸在场时，正文内的折叠目录退位 */
   .post > .toc { display: none; }
 }
 
@@ -633,54 +732,74 @@ ul.post-list { list-style: none; padding: 0; margin: 0; }
   position: sticky;
   top: 84px;
   align-self: start;
-  padding: 24px 16px 16px;
-  background-color: #FAEFC3;
-  /* 便签横线：28px 一条，文字正好落在线上 */
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent 0px,
-    transparent 27px,
-    rgba(150, 125, 60, 0.16) 27px,
-    rgba(150, 125, 60, 0.16) 28px
-  );
+  padding: 26px 16px 16px;
+  background-color: #EDDDB5;
+  /* 做旧第一层：低频湍流的陈年黄斑（随机、不重复） */
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 27px,
+      rgba(165, 80, 60, 0.11) 27px,
+      rgba(165, 80, 60, 0.11) 28px
+    ),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='320'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.016' numOctaves='3' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.52 0 0 0 0 0.40 0 0 0 0 0.16 0 0 0 0.45 0'/%3E%3C/filter%3E%3Crect width='420' height='320' filter='url(%23a)'/%3E%3C/svg%3E"),
+    var(--tex-noise);
+  background-size: auto, 420px 320px, 90px 90px;
+  border: 1px solid rgba(140, 100, 45, 0.30);
   border-radius: 1px;
+  /* 做旧第二层：边缘积垢（内阴影向中心晕开） */
   box-shadow:
-    0 1px 2px rgba(60, 45, 20, 0.22),
-    0 5px 14px rgba(60, 45, 20, 0.14);
-  transform: rotate(-1.3deg);
-  color: #55431F;
+    inset 0 0 20px rgba(110, 80, 30, 0.18),
+    0 1px 2px rgba(60, 45, 20, 0.18),
+    0 4px 12px rgba(60, 45, 20, 0.10);
+  color: #4A3A22;
   font-size: 0.85rem;
   line-height: 28px;
 }
 html[data-theme="dark"] .toc-memo {
-  background-color: #3A3425;
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent 0px,
-    transparent 27px,
-    rgba(0, 0, 0, 0.28) 27px,
-    rgba(0, 0, 0, 0.28) 28px
-  );
-  color: #D6C68F;
+  background-color: #332C1F;
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 27px,
+      rgba(190, 100, 75, 0.12) 27px,
+      rgba(190, 100, 75, 0.12) 28px
+    ),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='320'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.016' numOctaves='3' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.40 0'/%3E%3C/filter%3E%3Crect width='420' height='320' filter='url(%23a)'/%3E%3C/svg%3E"),
+    var(--tex-noise);
+  border-color: rgba(190, 100, 75, 0.18);
+  color: #CDBB92;
   box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.45),
-    0 5px 14px rgba(0, 0, 0, 0.35);
+    inset 0 0 20px rgba(0, 0, 0, 0.35),
+    0 1px 2px rgba(0, 0, 0, 0.40),
+    0 4px 12px rgba(0, 0, 0, 0.30);
 }
 
-/* 胶带：贴在纸边的证据 */
-.toc-tape {
+/* 镇纸：一根压在笺纸顶上的胡桃木条 */
+.toc-zhenzhi {
   position: absolute;
-  top: -10px;
+  top: -8px;
   left: 50%;
-  width: 92px;
-  height: 22px;
-  transform: translateX(-50%) rotate(-2.5deg);
-  background: rgba(255, 250, 220, 0.55);
-  border-left: 1px dashed rgba(150, 125, 60, 0.28);
-  border-right: 1px dashed rgba(150, 125, 60, 0.28);
-  box-shadow: 0 1px 2px rgba(60, 45, 20, 0.10);
+  width: 200px;
+  height: 16px;
+  transform: translateX(-50%) rotate(0.8deg);
+  border-radius: 8px;
+  background-color: #6B4A32;
+  background-image: var(--tex-wood);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 235, 200, 0.22),
+    inset 0 -3px 4px rgba(0, 0, 0, 0.30),
+    0 3px 6px rgba(50, 35, 15, 0.35);
 }
-html[data-theme="dark"] .toc-tape { background: rgba(255, 244, 200, 0.14); }
+html[data-theme="dark"] .toc-zhenzhi {
+  background-color: #2A2018;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 235, 200, 0.10),
+    inset 0 -3px 4px rgba(0, 0, 0, 0.45),
+    0 3px 6px rgba(0, 0, 0, 0.45);
+}
 
 .toc-memo-title {
   display: block;
@@ -688,9 +807,9 @@ html[data-theme="dark"] .toc-tape { background: rgba(255, 244, 200, 0.14); }
   font-weight: 600;
   font-size: 0.9rem;
   letter-spacing: 0.2em;
-  color: #55431F;
+  color: #4A3A22;
 }
-html[data-theme="dark"] .toc-memo-title { color: #D6C68F; }
+html[data-theme="dark"] .toc-memo-title { color: #CDBB92; }
 
 .toc-memo nav ul {
   list-style: none;
@@ -700,13 +819,13 @@ html[data-theme="dark"] .toc-memo-title { color: #D6C68F; }
 .toc-memo nav > ul { padding-left: 0; }
 .toc-memo nav a {
   display: block;
-  color: #55431F;
+  color: #4A3A22;
   text-decoration: none;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-html[data-theme="dark"] .toc-memo nav a { color: #C9BA8C; }
+html[data-theme="dark"] .toc-memo nav a { color: #CDBB92; }
 .toc-memo nav a:hover { color: var(--color-accent); }
 .toc-memo nav a.toc-active {
   color: var(--color-accent);

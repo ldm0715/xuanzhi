@@ -1,7 +1,12 @@
 {{- /*
-  标题渲染钩子：为每个标题追加悬停可见的锚点链接（#），
-  点击后地址栏带上锚点，方便复制分享。
+  标题渲染钩子：按级别使用传统评点符号——
+  h2 = 毛笔朱砂圈（粗起笔弧 + 细收锋弧，不闭合，位移滤镜出毛边）
+  h3/h4 = 毛笔顿点（微椭圆）。悬停锚点跳转功能保留。
 */ -}}
 <h{{ .Level }} id="{{ .Anchor }}"{{ with .Attributes }}{{ range $k, $v := . }} {{ $k }}="{{ $v }}"{{ end }}{{ end }}>
-  <a class="heading-anchor" href="#{{ .Anchor }}" aria-label="跳转到此节">#</a>{{ .Text | safeHTML }}
+  <a class="heading-anchor heading-l{{ .Level }}" href="#{{ .Anchor }}" aria-label="跳转到此节">{{ if eq .Level 2 -}}
+  <svg class="mark-circle" viewBox="0 0 24 24" aria-hidden="true"><defs><filter id="mb2"><feTurbulence type="fractalNoise" baseFrequency="0.35" numOctaves="3" seed="5" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2" xChannelSelector="R" yChannelSelector="G"/></filter></defs><g filter="url(#mb2)"><circle cx="5.4" cy="9.2" r="1.7" fill="currentColor"/><g fill="none" stroke="currentColor" stroke-linecap="round"><path d="M 5 9.5 A 8.2 8.2 0 1 1 9.8 19.6" stroke-width="3.6"/><path d="M 9.8 19.6 A 8.2 8.2 0 0 1 5 9.5" stroke-width="1.5"/></g></g></svg>
+  {{- else -}}
+  <svg class="mark-circle" viewBox="0 0 24 24" aria-hidden="true"><defs><filter id="mb3"><feTurbulence type="fractalNoise" baseFrequency="0.5" numOctaves="2" seed="8" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="0.9" xChannelSelector="R" yChannelSelector="G"/></filter></defs><ellipse cx="12" cy="12" rx="4.6" ry="3.3" transform="rotate(-24 12 12)" fill="currentColor" filter="url(#mb3)"/></svg>
+  {{- end }}</a>{{ .Text | safeHTML }}
 </h{{ .Level }}>
