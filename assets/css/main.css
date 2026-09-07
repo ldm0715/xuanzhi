@@ -86,6 +86,28 @@ a:hover { color: var(--color-accent-hover); text-decoration-color: currentColor;
   align-items: center;
   justify-content: space-between;
   height: 56px;
+  transition: max-width 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* 文章页阅读区更宽（1150px）：头栏随页面类型展开/收回。
+   起步宽度由 site.js 在加载与 bfcache 恢复时强制设置，保证过渡每次都播 */
+body[data-layout="page"] .header-inner {
+  max-width: 1150px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .header-inner { transition: none; }
+}
+
+/* 页面入场：与头栏展开/收回同曲线同时长，进出页面时两者同步 */
+main {
+  animation: page-in 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+@keyframes page-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  main { animation: none; }
 }
 
 .site-title {
@@ -758,7 +780,7 @@ html[data-hr="feibai"] .post-content hr {
   line-height: 28px;
 }
 html[data-theme="dark"] .toc-memo {
-  background-color: #332C1F;
+  background-color: #3C3325;
   background-image:
     repeating-linear-gradient(
       to bottom,
@@ -794,7 +816,7 @@ html[data-theme="dark"] .toc-memo {
     0 3px 6px rgba(50, 35, 15, 0.35);
 }
 html[data-theme="dark"] .toc-zhenzhi {
-  background-color: #2A2018;
+  background-color: #33281D;
   box-shadow:
     inset 0 1px 0 rgba(255, 235, 200, 0.10),
     inset 0 -3px 4px rgba(0, 0, 0, 0.45),
@@ -880,4 +902,425 @@ html[data-theme="dark"] .toc-memo nav a { color: #CDBB92; }
 
   .post-nav { max-width: 100%; }
   .footer-links { margin-left: 0; }
+}
+
+/* ============ 首页欢迎区：整屏 + 诗笺（竖排，从左到右） ============ */
+
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+.hero {
+  position: relative;
+  min-height: calc(100vh - 57px);
+  min-height: calc(100svh - 57px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 20px 88px;
+}
+
+.hero-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.hero-greeting {
+  margin: 0 0 1.1rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.52em;
+  text-indent: 0.52em;
+  color: var(--color-text-secondary);
+}
+
+.hero-title {
+  margin: 0 0 2.6rem;
+  font-size: clamp(2.3rem, 6.5vw, 3.4rem);
+  line-height: 1.4;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-indent: 0.18em;
+  color: var(--color-title);
+}
+
+/* 诗笺：一张双线朱丝栏笺，竖排书写，列序从左到右 */
+.poem-scroll {
+  position: relative;
+  writing-mode: vertical-lr;
+  padding: 34px 30px;
+  background-color: var(--color-surface);
+  background-image: var(--tex-noise);
+  background-size: 90px 90px;
+  border: 1px solid var(--color-zhu-soft);
+  border-radius: 2px;
+  box-shadow:
+    0 2px 6px rgba(60, 45, 20, 0.10),
+    0 14px 34px rgba(60, 45, 20, 0.12);
+}
+.poem-scroll::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1px solid var(--color-zhu-soft);
+  pointer-events: none;
+}
+html[data-theme="dark"] .poem-scroll {
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.40),
+    0 14px 34px rgba(0, 0, 0, 0.32);
+}
+
+/* 竖排布局：块级子元素即为一列，沿块轴（从左到右）排列 */
+.poem-scroll > span { display: block; }
+
+.poem-heading {
+  font-size: 1.02rem;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  color: var(--color-title);
+}
+
+.poem-body {
+  margin-block-start: 16px;
+}
+
+/* 每行一列（块级才会在竖排里并排成列），右缘一道朱丝界栏 */
+.poem-line {
+  display: block;
+  font-size: 1.16rem;
+  letter-spacing: 0.3em;
+  color: var(--color-text);
+  padding-block-end: 8px;
+  border-block-end: 1px solid var(--color-zhu-soft);
+}
+.poem-line + .poem-line { margin-block-start: 10px; }
+
+.poem-sign {
+  margin-block-start: 18px;
+  padding-block-start: 4px;
+}
+
+.poem-author {
+  font-size: 0.82rem;
+  letter-spacing: 0.22em;
+  color: var(--color-text-secondary);
+}
+
+.poem-seal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-block-start: 12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 3px;
+  background: var(--color-zhu);
+  color: var(--color-bg);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  transform: rotate(2deg);
+}
+
+/* 逐列淡入：墨迹落纸 */
+.poem-heading,
+.poem-line,
+.poem-sign {
+  opacity: 0;
+  animation: poem-in 0.55s ease-out forwards;
+}
+.poem-heading { animation-delay: 0.05s; }
+.poem-line:nth-child(1) { animation-delay: 0.16s; }
+.poem-line:nth-child(2) { animation-delay: 0.27s; }
+.poem-line:nth-child(3) { animation-delay: 0.38s; }
+.poem-line:nth-child(4) { animation-delay: 0.49s; }
+.poem-line:nth-child(5) { animation-delay: 0.60s; }
+.poem-line:nth-child(6) { animation-delay: 0.71s; }
+.poem-sign { animation-delay: 0.82s; }
+
+@keyframes poem-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-hint {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+.hero-hint:hover { color: var(--color-accent); }
+.hero-hint-text {
+  letter-spacing: 0.35em;
+  margin-right: -0.35em;
+}
+.hero-hint-arrow {
+  display: inline-block;
+  animation: hint-float 2.4s ease-in-out infinite;
+}
+@keyframes hint-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(5px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .poem-heading, .poem-line, .poem-sign {
+    animation: none;
+    opacity: 1;
+  }
+  .hero-hint-arrow { animation: none; }
+}
+
+/* ============ 首页信封卡片：双栏老式竖信封 ============ */
+
+#recent { scroll-margin-top: 84px; }
+
+.home-heading {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin: 0 0 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.5em;
+  text-indent: 0.5em;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+.home-heading::before,
+.home-heading::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+}
+.home-heading::before { background: linear-gradient(to right, transparent, var(--color-border)); }
+.home-heading::after { background: linear-gradient(to left, transparent, var(--color-border)); }
+
+.envelope-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 26px;
+  margin: 0 0 2.2rem;
+}
+
+.envelope {
+  position: relative;
+  background-color: var(--envelope-paper);
+  background-image: var(--tex-noise);
+  background-size: 90px 90px;
+  border: 1px solid var(--color-zhu-soft);
+  border-radius: 2px;
+  box-shadow:
+    0 1px 2px rgba(60, 45, 20, 0.12),
+    0 6px 18px rgba(60, 45, 20, 0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+/* 老式信封的第二道朱框 */
+.envelope::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1px solid var(--color-zhu-soft);
+  border-radius: 1px;
+  pointer-events: none;
+  transition: border-color 0.25s ease;
+}
+html[data-theme="dark"] .envelope {
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.45),
+    0 6px 18px rgba(0, 0, 0, 0.30);
+}
+
+.envelope:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-zhu);
+  box-shadow:
+    0 2px 4px rgba(60, 45, 20, 0.14),
+    0 12px 26px rgba(60, 45, 20, 0.14);
+}
+html[data-theme="dark"] .envelope:hover {
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.5),
+    0 12px 26px rgba(0, 0, 0, 0.4);
+}
+
+.envelope-link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 380px;
+  padding: 22px;
+  color: inherit;
+  text-decoration: none;
+}
+.envelope-link:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+/* 封面：标题一行居中在上，画片横构图（3:2）水平居中，邮戳盖右下角 */
+.envelope-cover {
+  display: block;
+  width: 100%;
+  margin: 0 0 12px;
+}
+.envelope-cover-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  /* 恒占两行高：单行标题的卡与两行的画框对齐 */
+  height: 3.4em;
+  margin: 0 0 10px;
+  font-size: 1.02rem;
+  font-weight: 600;
+  line-height: 1.7;
+  letter-spacing: 0.06em;
+  text-align: center;
+  color: var(--color-title);
+}
+.envelope-cover-frame {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 1px 4px rgba(60, 45, 20, 0.16);
+  transform: rotate(-0.6deg);
+  overflow: hidden;
+  transition: border-color 0.25s ease;
+}
+html[data-theme="dark"] .envelope-cover-frame {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+.envelope-link:hover .envelope-cover-frame { border-color: var(--color-zhu-soft); }
+
+.envelope-cover-img,
+.envelope-cover-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background-color: var(--color-surface);
+}
+.envelope-cover-art {
+  background-image: var(--tex-noise);
+  background-size: 90px 90px;
+}
+.envelope-cover-art.art-flip { transform: scaleX(-1); }
+
+/* 水墨小品用色：全走 token，明暗与点缀色自动跟随 */
+.envelope-cover-art .ink-strong { fill: var(--color-title); }
+.envelope-cover-art .ink-mid { fill: var(--color-text); }
+.envelope-cover-art .ink-soft { fill: var(--color-text-secondary); }
+.envelope-cover-art .cov-moon { fill: var(--color-accent-soft); }
+.envelope-cover-art .cov-zhu { fill: var(--color-zhu); }
+.envelope-cover-art .rain line {
+  stroke: var(--color-text-secondary);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+.envelope-cover-art .geese path {
+  fill: none;
+  stroke: var(--color-title);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+}
+
+/* 邮戳：朱砂双环 + 纸底托，盖在封面右下角，戳内是寄出日期 */
+.envelope-postmark {
+  position: absolute;
+  right: 9px;
+  bottom: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border: 1.5px solid var(--color-zhu);
+  border-radius: 50%;
+  background: var(--cover-wash);
+  color: var(--color-zhu);
+  transform: rotate(-12deg);
+}
+.envelope-postmark::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1px dashed var(--color-zhu);
+  border-radius: 50%;
+  opacity: 0.7;
+}
+.envelope-postmark time {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 摘要落在朱丝栏地址横线上 */
+.envelope-summary {
+  display: block;
+  margin: 6px 2px 12px;
+  max-height: 4em;
+  overflow: hidden;
+  font-size: 0.88rem;
+  line-height: 2;
+  color: var(--color-text-secondary);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(2em - 1px),
+    var(--color-zhu-soft) calc(2em - 1px),
+    var(--color-zhu-soft) 2em
+  );
+}
+
+/* 底部折口虚线：标签在左，「缄」在右 */
+.envelope-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px dashed var(--color-border);
+}
+.envelope-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+.envelope-tag {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+.envelope-jian {
+  font-size: 1rem;
+  color: var(--color-zhu);
+  opacity: 0.85;
+}
+
+@media (max-width: 640px) {
+  .hero {
+    min-height: calc(100vh - 57px);
+    min-height: calc(100svh - 57px);
+    padding: 40px 16px 76px;
+  }
+  .hero-greeting { font-size: 0.85rem; letter-spacing: 0.4em; text-indent: 0.4em; }
+  .poem-line { font-size: 1.05rem; letter-spacing: 0.24em; }
+
+  .envelope-grid { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .envelope-link { min-height: 350px; }
 }

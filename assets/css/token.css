@@ -39,6 +39,17 @@
   --hr-zhu: rgba(178, 90, 70, 0.5);
   --hr-zhu-soft: rgba(178, 90, 70, 0.3);
 
+  /* 朱砂印色：诗笺落款印 / 信封朱框 / 邮票火漆印 */
+  --color-zhu: #B25A46;
+  --color-zhu-strong: #96432F;
+  --color-zhu-soft: rgba(178, 90, 70, 0.34);
+
+  /* 信封纸：比面板纸面略暖一度的旧纸 */
+  --envelope-paper: #FAF4E4;
+
+  /* 邮戳底托：覆在封面画上的半透明纸 */
+  --cover-wash: rgba(252, 250, 244, 0.85);
+
   /* 点缀色：默认陶土橘 */
   --color-accent: #DA7756;
   --color-accent-hover: #C4684A;
@@ -69,33 +80,46 @@ html[data-accent="indigo"] {
   --color-accent: #425066;
   --color-accent-hover: #333F52;
   --color-accent-soft: rgba(66, 80, 102, 0.14);
+
+  /* 朱饰随点缀色转青：印泥、信封朱框、邮戳（青印） */
+  --color-zhu: #425066;
+  --color-zhu-strong: #333F52;
+  --color-zhu-soft: rgba(66, 80, 102, 0.34);
 }
 
 /* ============ 夜墨 ============ */
 html[data-theme="dark"] {
-  --color-bg: #1F1B17;
-  --color-surface: #28231E;
-  --color-code-bg: #171310;
-  --color-header-bg: rgba(31, 27, 23, 0.86);
-  --color-border: #3A332C;
-  --color-border-light: #2F2924;
+  --color-bg: #282219;
+  --color-surface: #332B22;
+  --color-code-bg: #211B13;
+  --color-header-bg: rgba(40, 34, 25, 0.86);
+  --color-border: #4A4238;
+  --color-border-light: #3B332B;
 
-  --color-title: #F0EAD9;
-  --color-text: #E0D9C9;
-  --color-text-secondary: #A39C8E;
+  --color-title: #F4EEDF;
+  --color-text: #E7E1D2;
+  --color-text-secondary: #AEA79A;
 
-  --grid-line: rgba(224, 217, 201, 0.05);
+  --grid-line: rgba(228, 221, 205, 0.06);
 
   /* 暗色噪点颗粒（纸色）与更深的暗角 */
   --tex-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.88 0 0 0 0 0.85 0 0 0 0 0.78 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
-  --vignette: rgba(0, 0, 0, 0.22);
+  --vignette: rgba(0, 0, 0, 0.16);
 
   /* 暗色分隔线用色（纸色墨） */
-  --hr-ink-strong: rgba(216, 206, 182, 0.7);
-  --hr-ink-mid: rgba(216, 206, 182, 0.42);
-  --hr-ink-soft: rgba(216, 206, 182, 0.26);
+  --hr-ink-strong: rgba(220, 210, 188, 0.7);
+  --hr-ink-mid: rgba(220, 210, 188, 0.42);
+  --hr-ink-soft: rgba(220, 210, 188, 0.26);
   --hr-zhu: rgba(205, 120, 95, 0.5);
   --hr-zhu-soft: rgba(205, 120, 95, 0.3);
+
+  --color-zhu: #CD785F;
+  --color-zhu-strong: #E0927A;
+  --color-zhu-soft: rgba(205, 120, 95, 0.32);
+
+  --envelope-paper: #383026;
+
+  --cover-wash: rgba(56, 48, 39, 0.85);
 
   --color-accent: #E89576;
   --color-accent-hover: #F0A88B;
@@ -117,4 +141,8 @@ html[data-theme="dark"][data-accent="indigo"] {
   --color-accent: #8FA1C0;
   --color-accent-hover: #A9B9D3;
   --color-accent-soft: rgba(143, 161, 192, 0.18);
+
+  --color-zhu: #8FA1C0;
+  --color-zhu-strong: #A9B9D3;
+  --color-zhu-soft: rgba(143, 161, 192, 0.32);
 }

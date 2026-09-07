@@ -1,0 +1,79 @@
+{{/* 首页信封卡封面：front matter 给 cover（page bundle 内文件名或图片 URL）则用自定义图；
+否则按标题哈希生成一幅横构图（3:2）水墨小品——四式轮换（远山雾月 / 竹影 / 夜雨灯火 / 汀洲孤雁），
+种子、翻转亦由哈希决定，每篇文章稳定且各不相同。墨晕毛边用 feTurbulence 位移，同标题圈点工艺。 */}}
+{{- $md5 := md5 .Title -}}
+{{- $hash := int (hash.FNV32a .Title) -}}
+{{- $variant := mod $hash 4 -}}
+{{- $seed := add (mod (div $hash 7) 900) 1 -}}
+{{- $flip := mod (div $hash 13) 2 -}}
+{{- $uid := substr $md5 14 8 -}}
+{{- with .Params.cover -}}
+  {{- with $.Resources.GetMatch . -}}
+    {{- $thumb := . -}}
+    {{- if and (eq .ResourceType "image") (not (in .MediaType.SubType "svg")) (not (eq .MediaType.SubType "gif")) -}}
+      {{- $thumb = .Resize "600x400 webp q80" -}}
+    {{- end -}}
+    <img class="envelope-cover-img" src="{{ $thumb.RelPermalink }}" alt="" loading="lazy">
+  {{- else -}}
+    <img class="envelope-cover-img" src="{{ . | relURL }}" alt="" loading="lazy">
+  {{- end -}}
+{{- else -}}
+<svg class="envelope-cover-art{{ with $flip }} art-flip{{ end }}" viewBox="0 0 390 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="ink-{{ $uid }}" x="-40%" y="-40%" width="180%" height="180%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.013 0.02" numOctaves="3" seed="{{ $seed }}" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="30"/>
+    </filter>
+    <filter id="pen-{{ $uid }}" x="-40%" y="-40%" width="180%" height="180%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.09 0.12" numOctaves="2" seed="{{ $seed }}" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="6"/>
+    </filter>
+  </defs>
+  {{- if eq $variant 0 }}
+  <circle class="cov-moon" cx="308" cy="62" r="28"/>
+  <rect class="ink-soft" x="-30" y="142" width="450" height="55" filter="url(#ink-{{ $uid }})" opacity="0.5"/>
+  <rect class="ink-mid" x="-30" y="172" width="450" height="60" filter="url(#ink-{{ $uid }})" opacity="0.55"/>
+  <rect class="ink-strong" x="-30" y="208" width="450" height="70" filter="url(#ink-{{ $uid }})" opacity="0.85"/>
+  {{- else if eq $variant 1 }}
+  <g filter="url(#pen-{{ $uid }})">
+    <rect class="ink-mid" x="98" y="-12" width="9" height="200" opacity="0.7"/>
+    <rect class="ink-strong" x="248" y="28" width="12" height="240" opacity="0.9"/>
+  </g>
+  <g filter="url(#pen-{{ $uid }})">
+    <ellipse class="ink-strong" cx="122" cy="44" rx="28" ry="6.5" transform="rotate(-38 122 44)"/>
+    <ellipse class="ink-mid" cx="142" cy="66" rx="24" ry="5.5" transform="rotate(24 142 66)" opacity="0.8"/>
+    <ellipse class="ink-soft" cx="108" cy="76" rx="20" ry="5" transform="rotate(-12 108 76)" opacity="0.8"/>
+    <ellipse class="ink-strong" cx="274" cy="108" rx="28" ry="6.5" transform="rotate(30 274 108)" opacity="0.9"/>
+    <ellipse class="ink-mid" cx="252" cy="128" rx="22" ry="5.5" transform="rotate(-28 252 128)" opacity="0.75"/>
+  </g>
+  {{- else if eq $variant 2 }}
+  <g class="rain" filter="url(#pen-{{ $uid }})">
+    <line x1="40" y1="8" x2="12" y2="60"/>
+    <line x1="108" y1="-6" x2="80" y2="50"/>
+    <line x1="176" y1="14" x2="146" y2="70"/>
+    <line x1="250" y1="-4" x2="220" y2="56"/>
+    <line x1="318" y1="10" x2="288" y2="66"/>
+    <line x1="70" y1="104" x2="46" y2="152"/>
+    <line x1="150" y1="116" x2="124" y2="168"/>
+    <line x1="236" y1="100" x2="210" y2="154"/>
+    <line x1="312" y1="122" x2="286" y2="176"/>
+    <line x1="36" y1="196" x2="16" y2="238"/>
+    <line x1="120" y1="208" x2="96" y2="252"/>
+    <line x1="206" y1="198" x2="182" y2="244"/>
+  </g>
+  <circle class="cov-zhu" cx="76" cy="198" r="15" opacity="0.16"/>
+  <circle class="cov-zhu" cx="76" cy="198" r="6"/>
+  {{- else }}
+  <g filter="url(#ink-{{ $uid }})">
+    <rect class="ink-soft" x="-30" y="190" width="450" height="55" opacity="0.45"/>
+    <rect class="ink-mid" x="-30" y="220" width="450" height="55" opacity="0.5"/>
+  </g>
+  <ellipse class="ink-mid" cx="64" cy="210" rx="4.5" ry="24" transform="rotate(14 64 210)" filter="url(#pen-{{ $uid }})" opacity="0.7"/>
+  <g class="geese" filter="url(#pen-{{ $uid }})">
+    <path d="M52 52 q8 -9 16 0 q8 -9 16 0"/>
+    <path d="M116 76 q7 -8 14 0 q7 -8 14 0" opacity="0.7"/>
+    <path d="M172 98 q5 -6 10 0 q5 -6 10 0" opacity="0.5"/>
+  </g>
+  {{- end }}
+</svg>
+{{- end -}}

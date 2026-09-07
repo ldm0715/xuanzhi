@@ -1,12 +1,56 @@
 {{ define "main" -}}
-<div class="container">
-{{ $pages := where site.RegularPages "Type" "in" site.MainSections -}}
-{{ $paginator := .Paginate $pages 10 -}}
-<section class="post-list">
-  {{- range $paginator.Pages }}
-  {{ partial "post-item.html" . }}
-  {{- end }}
+{{/* ============ 欢迎区 · 诗笺 ============ */}}
+{{/* 构建期预取一首七言绝句烘进 HTML（try 兜底《鹿柴》），浏览器端 site.js 每次到访再随机刷新 */}}
+{{ $poem := dict "title" "鹿柴" "dynasty" "唐" "author" "王維"
+  "content" (slice "空山不見人，但聞人語響。" "返景入深林，復照青苔上。") }}
+{{ with try (resources.GetRemote "https://poetry.palemoky.com/api/poems/random?type=%E4%B8%83%E8%A8%80%E7%BB%9D%E5%8F%A5&lang=zh-Hant") }}
+  {{ if not .Err }}
+    {{ with try (.Value | transform.Unmarshal) }}
+      {{ if not .Err }}
+        {{ with .Value.data }}
+          {{ if and .title (gt (len .content) 0) }}
+            {{ $lines := .content }}
+            {{ if gt (len $lines) 6 }}{{ $lines = first 6 $lines }}{{ end }}
+            {{ $dyn := "" }}{{ with .dynasty }}{{ $dyn = .name | default "" }}{{ end }}
+            {{ $auth := "" }}{{ with .author }}{{ $auth = .name | default "" }}{{ end }}
+            {{ $poem = dict "title" (.title | string) "dynasty" $dyn "author" $auth "content" $lines }}
+          {{ end }}
+        {{ end }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+{{ $author := $poem.author | default "佚名" }}
+{{ $sign := $author }}
+{{ with $poem.dynasty }}{{ $sign = printf "%s · %s" . $author }}{{ end }}
+<section class="hero">
+  <div class="hero-inner">
+    <p class="hero-greeting">{{ or site.Params.hero.greeting "一纸短笺，见字如面" }}</p>
+    <h1 class="hero-title">{{ site.Title }}</h1>
+    <div class="poem-scroll" id="poem-scroll" data-poem-api="https://poetry.palemoky.com/api/poems/random" aria-label="随机诗词">
+      <span class="poem-heading">「{{ $poem.title }}」</span>
+      <span class="poem-body">
+      {{- range $line := $poem.content }}<span class="poem-line">{{ $line }}</span>{{ end -}}
+      </span>
+      <span class="poem-sign">
+        <span class="poem-author">{{ $sign }}</span>
+        <span class="poem-seal" aria-hidden="true">{{ substr $author 0 1 }}</span>
+      </span>
+    </div>
+  </div>
+  <a class="hero-hint" href="#recent"><span class="hero-hint-text">向下翻阅</span><span class="hero-hint-arrow" aria-hidden="true">↓</span></a>
 </section>
-{{ partial "pagination.html" $paginator }}
+
+{{/* ============ 信封卡片 · 双栏 ============ */}}
+<div class="container" id="recent">
+  <h2 class="home-heading">近期文章</h2>
+  {{ $pages := where site.RegularPages "Type" "in" site.MainSections -}}
+  {{ $paginator := .Paginate $pages 8 -}}
+  <section class="envelope-grid">
+    {{- range $paginator.Pages }}
+    {{ partial "post-card.html" . }}
+    {{- end }}
+  </section>
+  {{ partial "pagination.html" $paginator }}
 </div>
 {{- end }}

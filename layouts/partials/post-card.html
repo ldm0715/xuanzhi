@@ -1,0 +1,24 @@
+{{/* 老式信封文章卡片（仅首页使用；归档/标签页仍用 post-item.html）
+     标题一行居中在封面画片上方；横构图画片（自定义图或生成水墨小品），
+     日期邮戳盖在画片右下角；摘要落在朱丝栏地址横线上；底部标签 + 缄 */}}
+{{ $tags := .GetTerms "tags" }}
+<article class="envelope">
+  <a class="envelope-link" href="{{ .RelPermalink }}" aria-label="{{ .Title }}">
+    <span class="envelope-cover">
+      <span class="envelope-cover-title">{{ .Title }}</span>
+      <span class="envelope-cover-frame">
+        {{ partial "post-card-cover.html" . }}
+        <span class="envelope-postmark" aria-hidden="true">
+          <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006.01.02" }}</time>
+        </span>
+      </span>
+    </span>
+    <span class="envelope-summary">{{ .Summary | plainify | chomp | truncate 42 }}</span>
+    <span class="envelope-foot">
+      <span class="envelope-tags">
+        {{- range $tags }}<span class="envelope-tag">#{{ .LinkTitle }}</span>{{ end -}}
+      </span>
+      <span class="envelope-jian" aria-hidden="true">缄</span>
+    </span>
+  </a>
+</article>

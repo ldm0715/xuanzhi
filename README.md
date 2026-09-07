@@ -3,16 +3,19 @@
 暖纸底、稿纸格纹、霞鹜文楷、墨阶排版的极简中文博客主题（Hugo ≥ 0.146）。
 
 - 亮色 = 宣纸：`#F7F4EC` 底 + 24px 稿纸格纹 + 墨阶四档文字
-- 暗色 = 夜墨：`#1F1B17` 底 + 纸色文字（跟随系统或手动切换，带防闪白）
-- 点缀色双版并存，`hugo.toml` 一行切换：
-  - `terracotta` 陶土橘 `#DA7756`（默认）
-  - `indigo` 黛青 `#425066`
+- 暗色 = 夜墨：`#282219` 底 + 纸色文字（跟随系统或手动切换，带防闪白）
+- 点缀色双版并存，`hugo.toml` 一行切换，主页朱饰（信封框/邮戳/落款印）随点缀色换色：
+  - `terracotta` 陶土橘 `#DA7756`（默认，朱砂装饰）
+  - `indigo` 黛青 `#425066`（青印装饰）
 - **外观面板**（导航栏调色板按钮）：访客可实时切换背景纹理与点缀色，选择存 localStorage
   - 背景 5 种：稿纸格（默认）/ 素纸 / 微噪点 / 噪点+暗角 / 稀疏信笺纹
   - 点缀色 2 种：陶土橘 / 黛青
   - 无记录时回落到 `hugo.toml` 的 `params.accent` 与默认格纹
+- 首页两段式：诗笺欢迎区（诗泉 API 随机绝句、繁体竖排，构建期预取兜底）+ 双栏老式信封卡片（支持 front matter `cover` 自定义封面）
+- 头栏宽度随页面类型过渡（窄 800px / 文章页 1150px），页面入场淡入，时长同曲线
 - 霞鹜文楷 GB 自托管切片字体（cn-font-split，按 unicode-range 按需加载，首屏只拉几十 KB）
 - 800px 单栏；代码高亮明暗两套（CSS 变量驱动）；代码复制按钮（全站唯一 JS）
+- 首页 = 诗笺欢迎区（诗泉 API 随机绝句，竖排）+ 双栏老式信封卡片
 - 图片管线：page bundle 图片自动 WebP + 三档 srcset + lazy + 宽高防抖动
 - 内置：归档按年分组、标签、目录（TOC）、分页、RSS、404
 
@@ -47,6 +50,10 @@ theme = 'xuanzhi'
 [params]
   accent = 'terracotta'   # 点缀色：terracotta（陶土橘）/ indigo（黛青）
 
+  # 首页诗笺欢迎语
+  [params.hero]
+    greeting = '一纸短笺，见字如面'
+
 [markup]
   [markup.highlight]
     noClasses = false        # 必须，主题用 class 模式接管高亮配色
@@ -70,18 +77,31 @@ content/posts/my-post/
 
 正文中直接 `![说明](photo.jpg)`，构建时自动压缩转 WebP 并生成响应式 srcset。**不要把图片放到外部图床**——图片和文章在同一个 Git 仓库里，是本主题和整个博客架构的根基约定。
 
+### 首页信封卡封面
+
+首页的每封信会带一幅「画片」。默认按文章标题哈希自动生成四式水墨小品（远山雾月 / 竹影 / 夜雨灯火 / 汀洲孤雁），同一篇文章永远同一幅。想用自定义封面，在 front matter 里给 `cover`：
+
+```yaml
+---
+title: "我的文章"
+cover: "cover.jpg"   # page bundle 内的文件名，或以 / 开头的静态图片路径
+---
+```
+
+自定义图会经图片管线压成 WebP；不填 `cover` 就用生成的封面。
+
 ## 目录结构
 
 ```
 layouts/
 ├── baseof.html          # 全站骨架
-├── home.html            # 首页（最近 10 篇）
+├── home.html            # 首页（诗笺欢迎区 + 信封卡片，最近 8 篇）
 ├── list.html            # 归档（按年分组）
 ├── single.html          # 文章页
 ├── taxonomy.html        # 标签汇总
 ├── term.html            # 单个标签下的文章
 ├── 404.html
-├── partials/            # head / header / footer / post-item / pagination
+├── partials/            # head / header / footer / post-item / post-card / post-card-cover / pagination
 └── _markup/
     └── render-image.html  # 图片渲染钩子（WebP/srcset 管线）
 assets/
