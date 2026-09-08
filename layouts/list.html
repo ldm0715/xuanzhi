@@ -11,9 +11,10 @@
 {{- $y := int .Key }}
 <section class="year-group">
   <h2 class="year">{{ .Key }}<span class="year-note" aria-hidden="true">岁在{{ index $gan (mod (sub $y 4) 10) }}{{ index $zhi (mod (sub $y 4) 12) }}</span></h2>
+  <div class="year-rule" aria-hidden="true"></div>
   {{- range .Pages.GroupByDate "01" }}
   <div class="archive-month">
-    <h3 class="month">{{ .Key }}月</h3>
+    <h3 class="month"><span class="month-chip">{{ .Key }}月</span><span class="month-count">{{ partial "seal-count.html" (len .Pages) }}篇</span></h3>
     <ul class="post-list">
       {{- range .Pages }}
       <li>{{ partial "post-item.html" . }}</li>
