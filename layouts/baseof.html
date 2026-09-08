@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="{{ site.Language.Lang }}"
       data-theme="light"
-      data-accent="{{ or site.Params.accent "terracotta" }}">
+      data-accent="{{ or site.Params.accent "terracotta" }}"
+      data-copy="{{ i18n "copy" }}"
+      data-copied="{{ i18n "copied" }}">
 <head>
   {{ partial "head.html" . }}
 </head>

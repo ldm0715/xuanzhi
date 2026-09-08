@@ -9,7 +9,7 @@
 
 档位：**P0 已修** · **P1 已实施** · **P2 结构性**（改动大，看需求）。
 
-> **状态（2026-09-08）**：P1 三篇（`seo-and-distribution.md` / `content-elements.md` / `rendering-pipeline.md`）已全部实施完毕，实现约定与踩到的坑已并入 `CLAUDE.md`。这三篇保留作**决策记录**（为什么当初要做、当时怎么想），不再是待办；P2 与「其他」两篇仍是待办。
+> **状态（2026-09-08）**：P1 三篇（`seo-and-distribution.md` / `content-elements.md` / `rendering-pipeline.md`）已全部实施完毕，实现约定与踩到的坑已并入 `CLAUDE.md`。这三篇保留作**决策记录**（为什么当初要做、当时怎么想），不再是待办。P2 的**菜单系统**与 **i18n 补齐**也已完成；**搜索索引**调研后搁置（结论见 `structure.md`），「其他」一篇仍是待办。
 
 ---
 
@@ -43,7 +43,8 @@
 
 ### P2 · 结构性 —— [`structure.md`](structure.md)
 
-**已勾选**：菜单系统 · i18n 补齐 · 搜索索引
+**已完成**：菜单系统 ✅ · i18n 补齐 ✅（实现约定见 `CLAUDE.md`）
+**待评估**：搜索索引（2026-09-08 调研后搁置，结论与选型对比已写入 `structure.md`）
 **备查**：相关文章 · `lastmod` / `enableGitInfo` · 面包屑 · series 分类法 · 作者页
 
 ### 其他 —— [`uncovered-paths.md`](uncovered-paths.md)

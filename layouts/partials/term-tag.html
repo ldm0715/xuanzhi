@@ -6,8 +6,8 @@
   <h1 class="sr-only">{{ .Title }}</h1>
   <span class="term-tag-seal-wrap" aria-hidden="true"><span class="term-tag-seal{{ if le $runes 2 }} term-tag-seal--vert{{ else if gt $runes 4 }} term-tag-seal--sm{{ end }}">{{ .Title }}</span></span>
   <div class="term-tag-meta">
-    <span class="term-tag-count">{{ partial "seal-count.html" (len .Pages) }}篇</span>
-    <span class="term-tag-note">钤于此页</span>
+    <span class="term-tag-count">{{ partial "seal-count.html" (len .Pages) }}{{ i18n "unitPosts" }}</span>
+    <span class="term-tag-note">{{ i18n "stampedHere" }}</span>
   </div>
 </header>
 {{ $paginator := .Paginate .Pages -}}

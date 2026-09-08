@@ -105,8 +105,10 @@
     syncPressed();
   })();
 
-  var COPY = '复制';
-  var COPIED = '已复制';
+  /* 复制按钮文案由 baseof.html 写在 <html data-copy/data-copied> 上——
+     JS 拿不到 Hugo 的 i18n，只能由模板传进来；没传时退回中文默认值 */
+  var COPY = document.documentElement.dataset.copy || '复制';
+  var COPIED = document.documentElement.dataset.copied || '已复制';
 
   document.querySelectorAll('.post-content pre > code').forEach(function (code) {
     var pre = code.parentElement;

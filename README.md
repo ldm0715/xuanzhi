@@ -26,6 +26,8 @@
 - 800px 单栏；代码高亮明暗两套（CSS 变量驱动）；代码复制按钮
 - 图片管线：page bundle 图片自动 WebP + 三档 srcset + lazy + 宽高防抖动；每张图再包一层指向最大档的链接，供图窗使用
 - **图窗（点开看大图）**：点正文图，照片在同一张纸上放大——「同纸虚化」遮罩（当前纸色 90% + 高斯模糊，明暗自动跟随，照片仍像贴在同一张宣纸上）+「画框立轴」裱装（18px 宽裱边、`--color-frame` 细框、一道朱砂内细边、深柔影），图注沿用题跋式两侧引线。支持 ←→ 翻页（篇数是汉字）、滚轮/双击缩放、拖动平移、双指捏合、窄屏左右滑动翻页、Esc 与点遮罩关闭。**无 JS 时退化为「点开看原图」的普通链接**
+- **分发与 SEO**：`robots.txt`（声明 sitemap）、Open Graph 全套（含 `og:image`——取 front matter `cover` 裁成 1200×630，没有就用主题默认图）、`BlogPosting` / `WebSite` JSON-LD、自定义 RSS（摘要是纯文本、完整正文进 `<content:encoded>`、去掉阅读器里会变成乱码的锚点 SVG）
+- **渲染与排版**：公式**构建期**渲染（`transform.ToMath`，禁 JS / 爬虫 / RSS 阅读器都能拿到排好版的公式，客户端不再加载 300KB JS）、外链在服务端标记并开新标签、`@media print` 打印样式（隐藏界面元素、黑白还原、外链印出地址）、`:target` 落点朱砂短竖、滚动条随点缀色、语义元素（`abbr`/`cite`/`q`/`var`…）与定义列表、`<em>` 用中文着重号代替假斜体
 - 内置：归档按年/月分组、分类、标签、目录（TOC）、分页、RSS、404
 
 ## 引入你的博客
@@ -51,28 +53,101 @@ rmdir themes\xuanzhi             # 删掉 junction 本身（不影响 F:\hugo_th
 git submodule add <你的主题仓库地址> themes/xuanzhi
 ```
 
-## 站点配置示例（hugo.toml）
+## 站点配置（hugo.toml）
+
+主题有一批功能**模板在主题、开关在站点**——不配就是没有。全清单如下，按「不配会怎样」排：
+
+### 功能 → 需要的配置 → 不配的后果
+
+| 主题功能 | 需要的配置 | 不配会怎样 |
+|---|---|---|
+| `robots.txt` | `enableRobotsTXT = true` | 主题的 `layouts/robots.txt` **不生成**，构建产物里没有这个文件 |
+| emoji 短代码 | `enableEmoji = true`（**顶层**） | `:+1:` 原样输出。写进 `[markup.goldmark.extensions]` 不报错但静默失效 |
+| 代码高亮跟随明暗 | `markup.highlight.noClasses = false` | 用 Hugo 的内联样式，切明暗时代码块不跟随 |
+| 标题自定义锚点 `{#id}` | `markup.goldmark.parser.attribute.block = true` | 锚点语法被当字面文本渲染出来 |
+| 公式**构建期**渲染 | `markup.goldmark.extensions.passthrough.enable = true` + delimiters | 公式不被识别，页面上是原始 LaTeX（客户端渲染已移除，没有回落） |
+| 正文手写 HTML | `markup.goldmark.renderer.unsafe = true` | `<mark>` / `<kbd>` / `<figure>` / 语义标签被转义成文本 |
+| 头栏菜单 | `[[menus.main]]` | **退回自动导航**（主内容段 + 分类法页）——不是坏，但加页面就得改模板 |
+| 绝对地址正确 | `baseURL`（末尾带 `/`） | sitemap / canonical / og:url / og:image / JSON-LD / RSS 全指向 `example.org` |
+| 首页欢迎语 | `params.hero.greeting` | 用主题默认（i18n 的 `greeting`） |
+| 默认点缀色 | `params.accent` | `terracotta`（访客仍可在外观面板自行切换） |
+| JSON-LD 作者 | `params.author` | 回落成站点 `title` |
+| 界面文案 | 站点 `i18n/zh-cn.yaml` 覆盖 | 用主题自带的中文 |
+
+### 复制粘贴
 
 ```toml
+baseURL = 'https://你的域名/'
+title = '站点名'
 theme = 'xuanzhi'
 
-[params]
-  accent = 'terracotta'   # 点缀色：terracotta（陶土橘）/ indigo（黛青）
-
-  # 首页诗笺欢迎语
-  [params.hero]
-    greeting = '一纸短笺，见字如面'
+enableRobotsTXT = true
+enableEmoji = true
 
 [markup]
   [markup.highlight]
-    noClasses = false        # 必须，主题用 class 模式接管高亮配色
-  [markup.tableOfContents]
-    startLevel = 2
-    endLevel = 4
+    noClasses = false
+  [markup.goldmark.parser]
+    attribute.block = true
+  [markup.goldmark.extensions.passthrough]
+    enable = true
+    [markup.goldmark.extensions.passthrough.delimiters]
+      inline = [['\(', '\)']]
+      block = [['\[', '\]'], ['$$', '$$']]
+  [markup.goldmark.renderer]
+    unsafe = true
+
+[params]
+  accent = 'terracotta'   # terracotta（陶土橘）/ indigo（黛青）
+  author = '你的名字'      # 可省；省略则回落成站点 title
+  [params.hero]
+    greeting = '一纸短笺，见字如面'
+
+# 头栏导航：加页面只改这里，不用动模板
+[[menus.main]]
+  name = '归档'
+  pageRef = '/posts'
+  weight = 10
+[[menus.main]]
+  name = '分类'
+  pageRef = '/categories'
+  weight = 20
+[[menus.main]]
+  name = '标签'
+  pageRef = '/tags'
+  weight = 30
 ```
+
+> `passthrough` 的键是 **`enable`**，写成 `enabled` 不报错但静默失效。
+
+### 改界面文案
+
+界面上的字（外观面板、归档的「岁在」「N 篇」、上下篇、复制按钮…）全在主题的 `i18n/zh-cn.yaml`。**站点想改哪个词，就在自己的 `i18n/zh-cn.yaml` 里写同名 key 覆盖**——Hugo 会合并主题与站点的 i18n 目录，站点优先：
+
+```yaml
+# 站点 i18n/zh-cn.yaml
+recentPosts: 最新文章
+scrollHint: 往下翻
+unitPosts: 则
+```
+
+> 主题的 i18n key 一律**扁平**，别写成嵌套 map 再用点号取（`i18n "posts.other"` 会静默返回空串）。
+
+### 不用配（Hugo 默认已开，主题直接吃）
+
+`definitionList`（定义列表）、`footnote`（脚注）、`table`、`taskList`、`strikethrough`、`linkify` —— 这些不写进 `hugo.toml` 也生效。`tableOfContents` 的 `startLevel` / `endLevel` 可按需调（示例用 2–4）。
+
+### 两条容易踩的
+
+- **主题目录必须叫 `xuanzhi`**。`head.html` 用 `fileExists "themes/xuanzhi/static/fonts/..."` 探测自托管字体，改名（或挂到别的路径）会**静默不加载字体**，页面掉回系统字体。
+- **`public/` 里看到的 URL 依赖 `baseURL`**。开发服务器运行时 Hugo 会把 baseURL 覆盖成 `http://localhost:1314/`，所以别在 `hugo server` 开着的时候去 `public/` 检查绝对地址——那会儿看什么都是 localhost。跑一次 `hugo` 再看。
+
+### 行为说明
 
 - 明暗模式：访客首次进入跟随系统偏好，点页头按钮手动切换后记忆在 localStorage（键 `xuanzhi-theme`）
 - 站名首字会渲染成页脚的印章，改 `title` 即生效
+- 滚动条滑块、着重号、缩写点线、外链 ↗、锚点落点的朱砂短竖、首页「续读」——这些**装饰性标记**都走朱饰系，随 `accent` 在朱砂/黛青之间切换；`strong` 的浓墨、`del` 的褪色、定义列表的引导虚线属于**语义性**标记，留墨阶不动
+- 公式在**构建期**渲染（`transform.ToMath`），禁 JS、爬虫、RSS 阅读器都能拿到排好版的公式；客户端只加载 `katex.min.css`
 
 ## 写作约定
 

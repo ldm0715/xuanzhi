@@ -3,18 +3,18 @@
 <div class="container sealbook-page">
 <header class="page-heading">
   <h1>{{ .Title | default (i18n "tags") }}</h1>
-  <p class="sealbook-note">钤印{{ partial "seal-count.html" (len .Data.Terms.ByCount) }}枚</p>
+  <p class="sealbook-note">{{ i18n "sealbookNote" }}{{ partial "seal-count.html" (len .Data.Terms.ByCount) }}{{ i18n "countSeals" }}</p>
 </header>
 <ul class="seal-wall">
   {{- range .Data.Terms.ByCount }}
   {{- $name := .Page.Title }}
   {{- $runes := countrunes $name }}
   <li class="seal-tile">
-    <a class="seal-stamp" href="{{ .Page.RelPermalink }}" aria-label="{{ $name }} {{ .Count }} {{ i18n "posts" }}">
+    <a class="seal-stamp" href="{{ .Page.RelPermalink }}" aria-label="{{ $name }} {{ .Count }} {{ i18n "unitPosts" }}">
       <span class="seal-face">
         <span class="seal-name{{ if le $runes 2 }} seal-name--vert{{ else if gt $runes 4 }} seal-name--sm{{ end }}">{{ $name }}</span>
       </span>
-      <span class="seal-side">{{ partial "seal-count.html" .Count }}篇</span>
+      <span class="seal-side">{{ partial "seal-count.html" .Count }}{{ i18n "unitPosts" }}</span>
     </a>
   </li>
   {{- end }}

@@ -47,6 +47,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 - **归档/分类页刻意不放摘要**：`.post-item` 是传统目录式（日期居左、点线引导、题名贴右），加一行摘要会破坏这个语言——试过又撤了，别再往上加。只有首页卡片带摘要：`.Summary | plainify | chomp | replaceRE \s+ " " | truncate`（`.Summary` 是 `template.HTML`，不 plainify 会带出各级标题文字）
 - **打印样式**：`main.css` 末尾 `@media print` 是全站**唯一刻意不用 token 的地方**（打印必须黑白，宣纸底/夜墨底都要还原成纸），隐藏头栏/页脚/目录/外观面板，外链把地址印出来
 - 正文 `<em>` 用**着重号**（`text-emphasis: filled dot` + `text-emphasis-color: var(--color-zhu)`）而不是斜体：`--font-sans` 是文楷，没有真斜体字面，浏览器合成假斜在汉字上很脏
+- **导航走 Hugo 菜单**：`header.html` 读 `site.Menus.main`（站点在 `hugo.toml` 配 `[[menus.main]] name/pageRef/weight`），加页面只改配置；站点没配菜单时兜底成「`site.MainSections` + 分类法页」的旧算法，所以主题单独拿去也能用
+- **界面文案全在 `i18n/zh-cn.yaml`**：模板里禁止硬编码中文界面词。**key 必须扁平**——`i18n "posts.other"` 这种点号访问嵌套 key 会**静默返回空串**（踩过，归档页的「篇」消失）。JS 拿不到 i18n，复制按钮文案由 `baseof.html` 写到 `<html data-copy/data-copied>`，`site.js` 读 dataset 并留中文兜底
 - **滚动条**：滑块走 `--scrollbar-thumb`（token.css 里由 `color-mix(in srgb, var(--color-zhu) 55%, transparent)` 派生，随点缀色换朱砂/黛青，派生式写法不必补四象限）。作用域是 `html`（窗口那根竖向滚动条）+ 内容里**四个**横向滚动容器：`pre`、`.lntable`（chroma 带行号代码块，定义在 chroma.css，最容易漏）、`.table-wrap`、`.katex-display`
 - **新增标记先问它是「装饰」还是「语义」**：装饰性的一律走朱饰系（`--color-zhu` / `--color-zhu-soft`），随 `data-accent` 换色——着重号、缩写点线、外链 ↗、锚点落点朱砂短竖、「续读」都是这一类；语义性的留墨阶——`strong` 浓墨、`del` 褪色、`dd`/`ul ul` 引导虚线（引导线要和墨阶一致，染色会喧宾夺主）
 - `static/` 下约 30MB 是自托管资产（霞鹜文楷切片、思源宋体 700 切片、JetBrains Mono、KaTeX），属正常入库内容
@@ -76,6 +78,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 - 全屏遮罩层用 `position:absolute`、被遮的内容用 `static` 时，**遮罩会盖在内容之上**：定位元素绘在流内元素之上。图窗第一版就是这样——图片被遮罩挡掉，滚轮/拖动/滑动全部失灵，图还被洗淡（看着像"渲染正常"）。遮罩里的内容必须自己进定位层（`.lightbox-figure` 给 `position:relative`），或在 DOM 里排在遮罩之后且同样定位
 - `<script>` 里输出 JSON 必须 `jsonify | safeJS`：html/template 把 `<script>` 当 JS 上下文，只写 `{{ . | jsonify }}` 会被转义成一个**带引号的字符串字面量**，页面看着正常、`JSON.parse` 却拿到字符串（JSON-LD 踩过，表现为 `Object.keys` 全是数字下标）
 - `:target` 的 `:is(...)` 白名单要**含 h1**：给标题加落点标记时只写了 h2–h6，正文 h1 永远匹配不到——而 h1 恰恰是"最少见、最容易漏测"的那一档
+- **`i18n` 不认嵌套 key 的点号写法**：`i18n/zh-cn.yaml` 里写 `posts:\n  other: 篇`，模板里 `{{ i18n "posts.other" }}` 不报错、**返回空串**，页面上的字直接消失（归档页的「七篇」变成「七」）。一律用扁平 key（`unitPosts: 篇`）
 - PowerShell 5.1 把**无 BOM 的 UTF-8 `.ps1` 按 GBK 读**：脚本里写中文字面量（连注释也算）会让解析器报 `MissingEndParenthesisInMethodCall`。生成 OG 图的脚本踩过，改成全 ASCII + `[char]0x5BA3` 取字形才通
 
 ## 相关文档

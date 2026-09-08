@@ -1,9 +1,17 @@
+# 宣纸主题 · 界面文案
+#
+# 主题自带的这份就能生效——Hugo 会合并主题与站点的 i18n 目录，
+# 站点想改某个词，只需在自己的 i18n/zh-cn.yaml 里写同名 key 覆盖。
+#
+# 命名约定：扁平 camelCase；面板/首页/归档等成组的用前缀区分。
+# 新增界面文案一律进这里，别在模板里硬编码中文。
+
+# ---- 通用 ----
 archive: 归档
 tags: 标签
 tag: 标签
-posts:
-  other: 篇
 toc: 目录
+unitPosts: 篇        # 篇数单位（归档/分类/标签页的「N 篇」）
 prevPage: 上一页
 nextPage: 下一页
 newer: 较新一篇
@@ -12,5 +20,49 @@ notFound: 页面不存在，可能已被风吹走了
 backHome: 回到首页
 words: 字
 minutes: 分钟
-copied: 已复制
 copy: 复制
+copied: 已复制
+
+# ---- 头栏 / 外观面板 ----
+appearance: 外观设置
+appearanceTitle: 外观
+toggleTheme: 切换明暗模式
+panelBackground: 背景
+panelAccent: 点缀色
+panelDivider: 分隔线
+bgGrid: 稿纸格
+bgPlain: 素纸
+bgNoise: 噪点
+bgVignette: 暗角
+bgRuled: 信笺
+accentTerracotta: 陶土橘
+accentIndigo: 黛青
+hrInk: 一笔
+hrZhu: 断栏
+hrDots: 墨点
+hrFeibai: 飞白
+
+# ---- 首页 ----
+greeting: 一纸短笺，见字如面
+poemLabel: 随机诗词
+anonymous: 佚名
+scrollHint: 向下翻阅
+recentPosts: 近期文章
+
+# ---- 文章页 ----
+postedAt: 撰于
+jumpToSection: 跳转到此节
+readMore: 续读
+
+# ---- 归档页 ----
+yearNote: 岁在
+monthUnit: 月
+
+# ---- 分类法 ----
+category: 分类
+categoryMark: 类
+shelfNote: 架上存函
+countVolumes: 只
+sealbookNote: 钤印
+countSeals: 枚
+stampedHere: 钤于此页

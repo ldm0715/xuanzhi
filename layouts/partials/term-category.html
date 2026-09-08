@@ -6,9 +6,9 @@
   <div class="term-cat-body">
     <div class="term-cat-label">
       <h1 class="term-cat-name">{{ .Title }}</h1>
-      <span class="term-cat-count">{{ partial "seal-count.html" (len .Pages) }}篇</span>
+      <span class="term-cat-count">{{ partial "seal-count.html" (len .Pages) }}{{ i18n "unitPosts" }}</span>
     </div>
-    <span class="term-cat-seal" aria-hidden="true">类</span>
+    <span class="term-cat-seal" aria-hidden="true">{{ i18n "categoryMark" }}</span>
   </div>
 </header>
 {{ $paginator := .Paginate .Pages -}}

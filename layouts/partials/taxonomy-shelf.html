@@ -20,8 +20,8 @@
 
 <div class="container shelf-page">
 <header class="page-heading">
-  <h1>{{ .Title | default "分类" }}</h1>
-  <p class="shelf-note">架上存函{{ partial "seal-count.html" (len .Data.Terms.ByCount) }}只</p>
+  <h1>{{ .Title | default (i18n "category") }}</h1>
+  <p class="shelf-note">{{ i18n "shelfNote" }}{{ partial "seal-count.html" (len .Data.Terms.ByCount) }}{{ i18n "countVolumes" }}</p>
 </header>
 <div class="shelf-row">
   <span class="shelf-prop shelf-prop--l" aria-hidden="true"><svg width="60" height="75"><use href="#shelf-prop-vase"></use></svg></span>
@@ -31,12 +31,12 @@
     {{- $name := .Page.Title }}
     {{- $runes := countrunes $name }}
     <li>
-      <a class="shelf-folder" href="{{ .Page.RelPermalink }}" aria-label="{{ $name }} {{ .Count }} {{ i18n "posts" }}">
+      <a class="shelf-folder" href="{{ .Page.RelPermalink }}" aria-label="{{ $name }} {{ .Count }} {{ i18n "unitPosts" }}">
         <span class="folder-label">
           <span class="folder-name{{ if gt $runes 4 }} folder-name--sm{{ end }}">{{ $name }}</span>
-          <span class="folder-count">{{ partial "seal-count.html" .Count }}篇</span>
+          <span class="folder-count">{{ partial "seal-count.html" .Count }}{{ i18n "unitPosts" }}</span>
         </span>
-        <span class="folder-seal" aria-hidden="true">类</span>
+        <span class="folder-seal" aria-hidden="true">{{ i18n "categoryMark" }}</span>
       </a>
     </li>
     {{- end }}
