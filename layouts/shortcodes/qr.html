@@ -1,0 +1,44 @@
+{{- /*
+  覆盖 Hugo 内置 qr：唯一改动是 alt 默认取被编码的文本。
+
+  为什么改：内置版 alt 缺省为空，主题其他图片路径一律带 alt，短代码出来的却是个
+  无 alt 的 <img>（读屏用户只听到"图片"）。这里保留内置版全部参数与校验，
+  只在 alt 为空时回落成 $text。
+*/ -}}
+{{- $validLevels := slice "low" "medium" "quartile" "high" }}
+{{- $minimumScale := 2 }}
+
+{{- $text := or (.Get "text") (strings.TrimSpace .Inner) "" }}
+{{- $level := or (.Get "level") "medium" }}
+{{- $scale := or (.Get "scale") 4 }}
+{{- $targetDir := or (.Get "targetDir") "" }}
+{{- $alt := or (.Get "alt") $text }}
+{{- $class := or (.Get "class") "" }}
+{{- $id := or (.Get "id") "" }}
+{{- $title := or (.Get "title") "" }}
+{{- $loading := or (.Get "loading") "" }}
+
+{{- $errors := false }}
+{{- if not $text }}
+	{{- errorf "The %q shortcode requires a %q argument. See %s" .Name "text" .Position }}
+	{{- $errors = true }}
+{{- end }}
+{{- if not (in $validLevels $level) }}
+	{{- errorf "The %q argument passed to the %q shortcode must be one of %s. See %s" "level" .Name (delimit $validLevels ", " ", or ") .Position }}
+	{{- $errors = true }}
+{{- end }}
+{{- if or (lt $scale $minimumScale) (ne $scale (int $scale)) }}
+	{{- errorf "The %q argument passed to the %q shortcode must be an integer greater than or equal to %d. See %s" "scale" .Name $minimumScale .Position }}
+	{{- $errors = true }}
+{{- end }}
+
+{{- if not $errors }}
+	{{- $opts := dict "level" $level "scale" $scale "targetDir" $targetDir }}
+	{{- with images.QR $text $opts -}}
+		<img src="{{ .RelPermalink }}" width="{{ .Width }}" height="{{ .Height }}"
+			{{- with $alt }} alt="{{ $alt }}" {{- end }}
+			{{- with $class }} class="{{ $class }}" {{- end }}
+			{{- with $id }} id="{{ $id }}" {{- end }}
+			{{- with $title }} title="{{ $title }}" {{- end -}}{{- with $loading }} loading="{{ $loading }}" {{- end -}}>
+	{{- end }}
+{{- end -}}

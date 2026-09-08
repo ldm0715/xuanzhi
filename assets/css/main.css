@@ -882,6 +882,7 @@ details[open]::details-content {
   }
 }
 
+.post-content h1,
 .post-content h2,
 .post-content h3,
 .post-content h4,
@@ -894,6 +895,9 @@ details[open]::details-content {
   color: var(--color-title);
   font-weight: 700;
 }
+/* h1 是正文里的一级标题（文章标题本身是 .post-title，不走这里）。
+   没有这条时 h1 会掉回浏览器默认的 2em 无衬线，和 h2–h6 的宋体标题栈断裂 */
+.post-content h1 { font-size: 1.6rem; }
 .post-content h2 { font-size: 1.35rem; }
 .post-content h3 { font-size: 1.16rem; }
 .post-content h4 { font-size: 1.02rem; }
@@ -1359,6 +1363,32 @@ html[data-hr="feibai"] .post-content hr {
   color: var(--color-text-secondary);
 }
 .post-content .footnotes li { margin: 0.25em 0; }
+/* 正文里的脚注角标：走宋体、朱色、不带下划线——全局 a 的强调色下划线在这里太吵 */
+.post-content .footnote-ref {
+  padding: 0 0.12em;
+  font-family: var(--font-title);
+  font-size: 0.78em;
+  text-decoration: none;
+  color: var(--color-zhu);
+}
+.post-content .footnote-ref:hover { color: var(--color-zhu-strong); }
+/* 回跳箭头：默认是「↩︎」全尺寸带下划线，收小、去线、悬停才染朱 */
+.post-content .footnote-backref {
+  margin-left: 0.35em;
+  font-size: 0.85em;
+  text-decoration: none;
+  color: var(--color-text-secondary);
+}
+.post-content .footnote-backref:hover { color: var(--color-zhu); }
+/* 脚注区自带一道 border-top，Goldmark 又吐一个 <hr>（还会被 .post-content hr
+   接成 300px 毛笔横线），两条分割线叠在一起——藏掉 <hr> 那一条 */
+.post-content .footnotes > hr { display: none; }
+/* 从角标跳回正文 / 从正文跳到脚注时高亮落点，否则读者不知道落到哪一行 */
+.post-content .footnotes li:target {
+  background: var(--color-accent-soft);
+  border-radius: 3px;
+  box-shadow: 0 0 0 4px var(--color-accent-soft);
+}
 
 /* 行内标记与键盘按键 */
 .post-content mark {
@@ -1470,10 +1500,24 @@ html[data-hr="feibai"] .post-content hr {
   border-color: var(--color-accent);
 }
 
-/* 表格：手写账目式——浅褐表头、极细虚线格，不设粗重外框 */
+/* KaTeX 长公式：display 模式不换行，超出正文栏时给横向滚动，别顶破版心 */
+.post-content .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 0;
+}
+
+/* 表格：手写账目式——浅褐表头、极细虚线格，不设粗重外框。
+   宽表格靠外层 .table-wrap 横向滚动（render-table.html 包的一层）；
+   直接给 table 设 overflow 会破坏表格布局。表格 auto 布局下 width:100% 只是下限，
+   列撑不开时表格会自然超出，滚动条随之出现 */
+.post-content .table-wrap {
+  margin: 1.4em 0;
+  overflow-x: auto;
+}
 .post-content table {
   width: 100%;
-  margin: 1.4em 0;
+  margin: 0;
   border-collapse: collapse;
   font-size: 0.95rem;
   background: var(--color-surface);

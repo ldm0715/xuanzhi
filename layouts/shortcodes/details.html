@@ -1,0 +1,28 @@
+{{- /*
+  覆盖 Hugo 内置 details：中文默认标题 + 兼容旧写法。
+
+  为什么改：
+  - 内置版 summary 缺省是英文 "Details"，中文站点里很突兀；这里默认「展卷」。
+  - 旧内容按内置版文档误写成了 title="…"，那个参数其实是 HTML 的 title 提示属性，
+    于是可见标题丢了、只剩悬停提示。这里在 summary 缺席时把 title 当标题用，
+    让旧内容不至于继续错着——但新内容请一律写 summary=。
+
+  渲染出的 <details> 不带类，样式由 main.css 里那套「书函折叠块」的裸元素规则接管。
+*/ -}}
+{{- $class := or (.Get "class") "" }}
+{{- $name := or (.Get "name") "" }}
+{{- $summary := or (.Get "summary") (.Get "title") "展卷" }}
+{{- $open := false }}
+{{- if in (slice "false" false 0) (.Get "open") }}
+	{{- $open = false }}
+{{- else if in (slice "true" true 1) (.Get "open") }}
+	{{- $open = true }}
+{{- end }}
+
+<details
+	{{- with $class }} class="{{ . }}" {{- end }}
+	{{- with $name }} name="{{ . }}" {{- end }}
+	{{- with $open }} open {{- end -}}>
+	<summary>{{ $summary | .Page.RenderString }}</summary>
+	{{ .Inner | .Page.RenderString (dict "display" "block") -}}
+</details>

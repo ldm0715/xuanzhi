@@ -1,0 +1,23 @@
+{{- /*
+  表格渲染钩子：结构与 Hugo 默认渲染一致（GFM），外面多包一层横向滚动容器。
+
+  为什么：正文栏固定 800px，列多的表格会顶出版心；而给 <table> 自己设 overflow
+  会破坏表格布局，只能靠外层容器（样式见 main.css 的 .post-content .table-wrap）。
+  单元格对齐沿用内联 style，与 Goldmark 默认输出一致。
+  上下文来自 Hugo 表格渲染钩子：.THead / .TBody 是「行 → 单元格」的二维切片，
+  单元格有 .Alignment 与 .Text 两个字段。
+*/ -}}
+<div class="table-wrap">
+  <table{{ range $k, $v := .Attributes }}{{ if $v }}{{ printf " %s=%q" $k $v | safeHTMLAttr }}{{ end }}{{ end }}>
+    <thead>
+      {{- range .THead }}
+      <tr>{{ range . }}<th{{ with .Alignment }}{{ printf " style=%q" (printf "text-align: %s" .) | safeHTMLAttr }}{{ end }}>{{ .Text }}</th>{{ end }}</tr>
+      {{- end }}
+    </thead>
+    <tbody>
+      {{- range .TBody }}
+      <tr>{{ range . }}<td{{ with .Alignment }}{{ printf " style=%q" (printf "text-align: %s" .) | safeHTMLAttr }}{{ end }}>{{ .Text }}</td>{{ end }}</tr>
+      {{- end }}
+    </tbody>
+  </table>
+</div>

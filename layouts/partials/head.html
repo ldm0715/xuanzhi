@@ -3,7 +3,14 @@
 
 <title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title }} · {{ site.Title }}{{ end }}</title>
 
-{{- $desc := or .Description .Summary site.Params.description -}}
+{{- /* 摘要：.Summary 是 template.HTML，直接塞进属性不会被转义，而且自动摘要会带上
+   换行与各级标题文字（实测 hello-xuanzhi 达 326 字符、16 个换行）——先 plainify 压成
+   单行再截断。front matter 的 description 优先，最后回落站点描述 */ -}}
+{{- $desc := .Description -}}
+{{- if not $desc -}}
+  {{- $desc = .Summary | plainify | chomp | replaceRE `\s+` " " | truncate 160 -}}
+{{- end -}}
+{{- $desc = or $desc site.Params.description -}}
 {{- with $desc -}}
 <meta name="description" content="{{ . }}">
 {{- end -}}
