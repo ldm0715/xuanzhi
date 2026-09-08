@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 杨柳岸 · 山水画框卡封面预览稿(亮色调,固定种子)
+     页面渲染由 layouts/partials/post-card-cover.html 按题哈希内联生成
+     (种子随文、明暗跟随),改形状请两处同步 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 260" role="img" aria-label="杨柳岸">
+  <rect width="390" height="260" fill="#FCFAF4"/>
+  <defs>
+    <filter id="ink" x="-40%" y="-40%" width="180%" height="180%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.013 0.02" numOctaves="3" seed="341" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="30"/>
+    </filter>
+    <filter id="pen" x="-40%" y="-40%" width="180%" height="180%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.09 0.12" numOctaves="2" seed="341" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="6"/>
+    </filter>
+  </defs>
+  <rect x="-30" y="176" width="450" height="40" fill="#8C877B" filter="url(#ink)" opacity="0.4"/>
+  <path d="M390 26 Q320 34 268 52" fill="none" stroke="#26241F" stroke-width="3" stroke-linecap="round" filter="url(#pen)"/>
+  <path d="M268 52 Q262 94 268 134" fill="none" stroke="#3A3833" stroke-width="1.8" stroke-linecap="round" opacity="0.7" filter="url(#pen)"/>
+  <path d="M300 44 Q296 98 306 160" fill="none" stroke="#3A3833" stroke-width="1.8" stroke-linecap="round" opacity="0.6" filter="url(#pen)"/>
+  <path d="M330 40 Q330 102 342 172" fill="none" stroke="#3A3833" stroke-width="1.8" stroke-linecap="round" opacity="0.7" filter="url(#pen)"/>
+  <path d="M356 34 Q358 92 370 148" fill="none" stroke="#3A3833" stroke-width="1.8" stroke-linecap="round" opacity="0.55" filter="url(#pen)"/>
+</svg>

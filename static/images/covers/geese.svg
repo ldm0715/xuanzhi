@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 汀洲孤雁 · 山水画框卡封面预览稿(亮色调,固定种子)
+     页面渲染由 layouts/partials/post-card-cover.html 按题哈希内联生成
+     (种子随文、明暗跟随),改形状请两处同步 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 260" role="img" aria-label="汀洲孤雁">
+  <rect width="390" height="260" fill="#FCFAF4"/>
+  <defs>
+    <filter id="ink" x="-40%" y="-40%" width="180%" height="180%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.013 0.02" numOctaves="3" seed="305" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="30"/>
+    </filter>
+    <filter id="pen" x="-40%" y="-40%" width="180%" height="180%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.09 0.12" numOctaves="2" seed="305" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="6"/>
+    </filter>
+  </defs>
+  <g filter="url(#ink)">
+    <rect x="-30" y="190" width="450" height="55" fill="#8C877B" opacity="0.45"/>
+    <rect x="-30" y="220" width="450" height="55" fill="#3A3833" opacity="0.5"/>
+  </g>
+  <ellipse cx="64" cy="210" rx="4.5" ry="24" fill="#3A3833" transform="rotate(14 64 210)" filter="url(#pen)" opacity="0.7"/>
+  <g filter="url(#pen)" fill="none" stroke="#26241F" stroke-width="2.6" stroke-linecap="round">
+    <path d="M52 52 q8 -9 16 0 q8 -9 16 0"/>
+    <path d="M116 76 q7 -8 14 0 q7 -8 14 0" opacity="0.7"/>
+    <path d="M172 98 q5 -6 10 0 q5 -6 10 0" opacity="0.5"/>
+  </g>
+</svg>

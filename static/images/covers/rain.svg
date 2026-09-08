@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 空亭听雨 · 山水画框卡封面预览稿(亮色调,固定种子)
+     页面渲染由 layouts/partials/post-card-cover.html 按题哈希内联生成
+     (种子随文、明暗跟随),改形状请两处同步 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 260" role="img" aria-label="空亭听雨">
+  <rect width="390" height="260" fill="#FCFAF4"/>
+  <defs>
+    <filter id="pen" x="-40%" y="-40%" width="180%" height="180%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.14 0.2" numOctaves="2" seed="128" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="3"/>
+    </filter>
+  </defs>
+  <g fill="none" stroke="#8C877B" stroke-width="1.6" stroke-linecap="round" filter="url(#pen)">
+    <line x1="36" y1="12" x2="30" y2="30" opacity="0.75"/>
+    <line x1="100" y1="62" x2="94" y2="80" opacity="0.55"/>
+    <line x1="36" y1="108" x2="30" y2="126" opacity="0.65"/>
+    <line x1="100" y1="152" x2="94" y2="170" opacity="0.5"/>
+    <line x1="30" y1="192" x2="24" y2="210" opacity="0.75"/>
+    <line x1="100" y1="226" x2="94" y2="244" opacity="0.55"/>
+    <line x1="152" y1="18" x2="146" y2="36" opacity="0.6"/>
+    <line x1="216" y1="10" x2="210" y2="28" opacity="0.75"/>
+    <line x1="252" y1="32" x2="246" y2="50" opacity="0.5"/>
+    <line x1="302" y1="44" x2="296" y2="62" opacity="0.7"/>
+    <line x1="362" y1="16" x2="356" y2="34" opacity="0.55"/>
+    <line x1="296" y1="112" x2="290" y2="130" opacity="0.75"/>
+    <line x1="362" y1="102" x2="356" y2="120" opacity="0.55"/>
+    <line x1="302" y1="182" x2="296" y2="200" opacity="0.7"/>
+    <line x1="366" y1="186" x2="360" y2="204" opacity="0.5"/>
+    <line x1="296" y1="236" x2="290" y2="254" opacity="0.75"/>
+  </g>
+  <g fill="none" stroke-linecap="round" filter="url(#pen)">
+    <path d="M132 138 Q164 108 195 102 Q226 108 258 138" stroke="#26241F" stroke-width="3.2"/>
+    <line x1="171" y1="112" x2="171" y2="174" stroke="#3A3833" stroke-width="2.2"/>
+    <line x1="219" y1="112" x2="219" y2="174" stroke="#3A3833" stroke-width="2.2"/>
+    <line x1="148" y1="184" x2="242" y2="184" stroke="#8C877B" stroke-width="2" opacity="0.6"/>
+  </g>
+  <g stroke="#8C877B" stroke-width="1.6" stroke-linecap="round" opacity="0.9">
+    <line x1="131.5" y1="142" x2="131.5" y2="152"/>
+    <line x1="258.5" y1="142" x2="258.5" y2="150"/>
+  </g>
+  <g fill="#8C877B" opacity="0.85">
+    <ellipse cx="131" cy="162" rx="1.5" ry="3"/>
+    <ellipse cx="259" cy="160" rx="1.5" ry="3"/>
+  </g>
+</svg>

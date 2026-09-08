@@ -1,9 +1,11 @@
-{{/* 首页信封卡封面：front matter 给 cover（page bundle 内文件名或图片 URL）则用自定义图；
-否则按标题哈希生成一幅横构图（3:2）水墨小品——四式轮换（远山雾月 / 竹影 / 夜雨灯火 / 汀洲孤雁），
-种子、翻转亦由哈希决定，每篇文章稳定且各不相同。墨晕毛边用 feTurbulence 位移，同标题圈点工艺。 */}}
+{{/* 首页画框卡封面：front matter 给 cover（page bundle 内文件名或图片 URL）则用自定义图；
+否则按标题哈希生成一幅横构图（3:2）水墨小品——八式轮换（远山晓日 / 竹影 / 空亭听雨 / 汀洲孤雁 /
+孤舟远影 / 红杏出墙 / 云岫 / 杨柳岸），种子、翻转亦由哈希决定，每篇文章稳定且各不相同。
+墨晕毛边用 feTurbulence 位移，同标题圈点工艺。
+各式的定妆预览稿在 static/images/covers/（固定种子、亮色调自包含），改形状请两处同步。 */}}
 {{- $md5 := md5 .Title -}}
 {{- $hash := int (hash.FNV32a .Title) -}}
-{{- $variant := mod $hash 4 -}}
+{{- $variant := mod $hash 8 -}}
 {{- $seed := add (mod (div $hash 7) 900) 1 -}}
 {{- $flip := mod (div $hash 13) 2 -}}
 {{- $uid := substr $md5 14 8 -}}
@@ -13,12 +15,12 @@
     {{- if and (eq .ResourceType "image") (not (in .MediaType.SubType "svg")) (not (eq .MediaType.SubType "gif")) -}}
       {{- $thumb = .Resize "600x400 webp q80" -}}
     {{- end -}}
-    <img class="envelope-cover-img" src="{{ $thumb.RelPermalink }}" alt="" loading="lazy">
+    <img class="inkcard-art-img" src="{{ $thumb.RelPermalink }}" alt="" loading="lazy">
   {{- else -}}
-    <img class="envelope-cover-img" src="{{ . | relURL }}" alt="" loading="lazy">
+    <img class="inkcard-art-img" src="{{ . | relURL }}" alt="" loading="lazy">
   {{- end -}}
-{{- else -}}
-<svg class="envelope-cover-art{{ with $flip }} art-flip{{ end }}" viewBox="0 0 390 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+  {{- else -}}
+<svg class="inkcard-art-svg{{ with $flip }} art-flip{{ end }}" viewBox="0 0 390 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
   <defs>
     <filter id="ink-{{ $uid }}" x="-40%" y="-40%" width="180%" height="180%">
       <feTurbulence type="fractalNoise" baseFrequency="0.013 0.02" numOctaves="3" seed="{{ $seed }}" result="n"/>
@@ -28,9 +30,13 @@
       <feTurbulence type="fractalNoise" baseFrequency="0.09 0.12" numOctaves="2" seed="{{ $seed }}" result="n"/>
       <feDisplacementMap in="SourceGraphic" in2="n" scale="6"/>
     </filter>
+    <filter id="rainp-{{ $uid }}" x="-40%" y="-40%" width="180%" height="180%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.14 0.2" numOctaves="2" seed="{{ $seed }}" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="3"/>
+    </filter>
   </defs>
   {{- if eq $variant 0 }}
-  <circle class="cov-moon" cx="308" cy="62" r="28"/>
+  <circle class="cov-sun" cx="308" cy="62" r="28"/>
   <rect class="ink-soft" x="-30" y="142" width="450" height="55" filter="url(#ink-{{ $uid }})" opacity="0.5"/>
   <rect class="ink-mid" x="-30" y="172" width="450" height="60" filter="url(#ink-{{ $uid }})" opacity="0.55"/>
   <rect class="ink-strong" x="-30" y="208" width="450" height="70" filter="url(#ink-{{ $uid }})" opacity="0.85"/>
@@ -46,23 +52,72 @@
     <ellipse class="ink-strong" cx="274" cy="108" rx="28" ry="6.5" transform="rotate(30 274 108)" opacity="0.9"/>
     <ellipse class="ink-mid" cx="252" cy="128" rx="22" ry="5.5" transform="rotate(-28 252 128)" opacity="0.75"/>
   </g>
-  {{- else if eq $variant 2 }}
-  <g class="rain" filter="url(#pen-{{ $uid }})">
-    <line x1="40" y1="8" x2="12" y2="60"/>
-    <line x1="108" y1="-6" x2="80" y2="50"/>
-    <line x1="176" y1="14" x2="146" y2="70"/>
-    <line x1="250" y1="-4" x2="220" y2="56"/>
-    <line x1="318" y1="10" x2="288" y2="66"/>
-    <line x1="70" y1="104" x2="46" y2="152"/>
-    <line x1="150" y1="116" x2="124" y2="168"/>
-    <line x1="236" y1="100" x2="210" y2="154"/>
-    <line x1="312" y1="122" x2="286" y2="176"/>
-    <line x1="36" y1="196" x2="16" y2="238"/>
-    <line x1="120" y1="208" x2="96" y2="252"/>
-    <line x1="206" y1="198" x2="182" y2="244"/>
+  {{- else if eq $variant 4 }}
+  <rect class="ink-soft" x="-30" y="148" width="450" height="26" filter="url(#ink-{{ $uid }})" opacity="0.3"/>
+  <rect class="ink-soft" x="-30" y="196" width="450" height="34" filter="url(#ink-{{ $uid }})" opacity="0.45"/>
+  <path class="ink-stroke" d="M148 188 Q196 204 246 186" stroke-width="3"/>
+  <path class="ink-stroke-mid" d="M176 184 Q196 166 216 184" stroke-width="2.4"/>
+  <line class="ink-stroke-soft" x1="182" y1="216" x2="228" y2="216" stroke-width="2" opacity="0.5"/>
+  {{- else if eq $variant 5 }}
+  <path class="ink-stroke" d="M-30 146 Q90 140 204 145 Q212 146 212 153" stroke-width="4.5"/>
+  <g class="ink-stroke-soft" filter="url(#rainp-{{ $uid }})">
+    <path d="M48 151 Q46 176 44 197" stroke-width="1.5" opacity="0.4"/>
+    <path d="M128 150 Q131 172 129 194" stroke-width="1.5" opacity="0.35"/>
+    <path d="M180 151 Q177 167 175 183" stroke-width="1.5" opacity="0.45"/>
   </g>
-  <circle class="cov-zhu" cx="76" cy="198" r="15" opacity="0.16"/>
-  <circle class="cov-zhu" cx="76" cy="198" r="6"/>
+  <path class="ink-stroke" d="M390 88 Q316 92 272 106 Q246 116 230 132" stroke-width="3"/>
+  <path class="ink-stroke-mid" d="M272 106 Q258 106 248 112" stroke-width="1.8"/>
+  <g class="art-zhu" filter="url(#pen-{{ $uid }})">
+    <circle cx="302" cy="90" r="3.5" opacity="0.55"/>
+    <circle cx="272" cy="105" r="4" opacity="0.7"/>
+    <circle cx="248" cy="112" r="3" opacity="0.5"/>
+    <circle cx="234" cy="136" r="4" opacity="0.7"/>
+    <circle cx="218" cy="150" r="3.5" opacity="0.6"/>
+    <circle cx="206" cy="164" r="3" opacity="0.45"/>
+  </g>
+  {{- else if eq $variant 6 }}
+  <path class="ink-soft" d="M40 208 L150 84 Q160 72 172 86 L300 208 Z" filter="url(#ink-{{ $uid }})" opacity="0.5"/>
+  <path class="ink-mid" d="M196 208 L268 126 L352 208 Z" filter="url(#ink-{{ $uid }})" opacity="0.35"/>
+  <rect class="ink-soft" x="-30" y="148" width="450" height="28" filter="url(#ink-{{ $uid }})" opacity="0.5"/>
+  <path class="ink-stroke" d="M92 70 Q99 62 106 70 Q113 62 120 70" stroke-width="2.2"/>
+  {{- else if eq $variant 7 }}
+  <rect class="ink-soft" x="-30" y="176" width="450" height="40" filter="url(#ink-{{ $uid }})" opacity="0.4"/>
+  <path class="ink-stroke" d="M390 26 Q320 34 268 52" stroke-width="3"/>
+  <path class="ink-stroke-mid" d="M268 52 Q262 94 268 134" stroke-width="1.8" opacity="0.7"/>
+  <path class="ink-stroke-mid" d="M300 44 Q296 98 306 160" stroke-width="1.8" opacity="0.6"/>
+  <path class="ink-stroke-mid" d="M330 40 Q330 102 342 172" stroke-width="1.8" opacity="0.7"/>
+  <path class="ink-stroke-mid" d="M356 34 Q358 92 370 148" stroke-width="1.8" opacity="0.55"/>
+  {{- else if eq $variant 2 }}
+  <g class="rain" filter="url(#rainp-{{ $uid }})">
+    <line x1="36" y1="12" x2="30" y2="30" opacity="0.75"/>
+    <line x1="100" y1="62" x2="94" y2="80" opacity="0.55"/>
+    <line x1="36" y1="108" x2="30" y2="126" opacity="0.65"/>
+    <line x1="100" y1="152" x2="94" y2="170" opacity="0.5"/>
+    <line x1="30" y1="192" x2="24" y2="210" opacity="0.75"/>
+    <line x1="100" y1="226" x2="94" y2="244" opacity="0.55"/>
+    <line x1="152" y1="18" x2="146" y2="36" opacity="0.6"/>
+    <line x1="216" y1="10" x2="210" y2="28" opacity="0.75"/>
+    <line x1="252" y1="32" x2="246" y2="50" opacity="0.5"/>
+    <line x1="302" y1="44" x2="296" y2="62" opacity="0.7"/>
+    <line x1="362" y1="16" x2="356" y2="34" opacity="0.55"/>
+    <line x1="296" y1="112" x2="290" y2="130" opacity="0.75"/>
+    <line x1="362" y1="102" x2="356" y2="120" opacity="0.55"/>
+    <line x1="302" y1="182" x2="296" y2="200" opacity="0.7"/>
+    <line x1="366" y1="186" x2="360" y2="204" opacity="0.5"/>
+    <line x1="296" y1="236" x2="290" y2="254" opacity="0.75"/>
+  </g>
+  <g class="pavilion" filter="url(#rainp-{{ $uid }})">
+    <path class="pav-roof" d="M132 138 Q164 108 195 102 Q226 108 258 138"/>
+    <line class="pav-col" x1="171" y1="112" x2="171" y2="174"/>
+    <line class="pav-col" x1="219" y1="112" x2="219" y2="174"/>
+    <line class="pav-ground" x1="148" y1="184" x2="242" y2="184"/>
+  </g>
+  <g class="drip">
+    <line x1="131.5" y1="142" x2="131.5" y2="152"/>
+    <ellipse cx="131" cy="162" rx="1.5" ry="3"/>
+    <line x1="258.5" y1="142" x2="258.5" y2="150"/>
+    <ellipse cx="259" cy="160" rx="1.5" ry="3"/>
+  </g>
   {{- else }}
   <g filter="url(#ink-{{ $uid }})">
     <rect class="ink-soft" x="-30" y="190" width="450" height="55" opacity="0.45"/>

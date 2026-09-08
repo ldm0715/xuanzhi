@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 远山晓日 · 山水画框卡封面预览稿(亮色调,固定种子)
+     页面渲染由 layouts/partials/post-card-cover.html 按题哈希内联生成
+     (种子随文、明暗跟随),改形状请两处同步 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 260" role="img" aria-label="远山晓日">
+  <rect width="390" height="260" fill="#FCFAF4"/>
+  <defs>
+    <filter id="ink" x="-40%" y="-40%" width="180%" height="180%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.013 0.02" numOctaves="3" seed="42" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="30"/>
+    </filter>
+  </defs>
+  <circle cx="308" cy="62" r="28" fill="#DA7756" opacity="0.14"/>
+  <rect x="-30" y="142" width="450" height="55" fill="#8C877B" filter="url(#ink)" opacity="0.5"/>
+  <rect x="-30" y="172" width="450" height="60" fill="#3A3833" filter="url(#ink)" opacity="0.55"/>
+  <rect x="-30" y="208" width="450" height="70" fill="#26241F" filter="url(#ink)" opacity="0.85"/>
+</svg>

@@ -1136,155 +1136,170 @@ html[data-theme="dark"] .poem-scroll {
 .home-heading::before { background: linear-gradient(to right, transparent, var(--color-border)); }
 .home-heading::after { background: linear-gradient(to left, transparent, var(--color-border)); }
 
-.envelope-grid {
+/* ---- 山水画框文章卡片：一张托裱在墨墙上的宣纸信笺 ---- */
+
+.inkcard-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 26px;
   margin: 0 0 2.2rem;
 }
 
-.envelope {
+/* 纸笺本体：无外框，浅褐内发光模拟纸厚，细噪点做旧 */
+.inkcard {
   position: relative;
   background-color: var(--envelope-paper);
   background-image: var(--tex-noise);
   background-size: 90px 90px;
-  border: 1px solid var(--color-zhu-soft);
-  border-radius: 2px;
+  border-radius: 3px;
   box-shadow:
-    0 1px 2px rgba(60, 45, 20, 0.12),
-    0 6px 18px rgba(60, 45, 20, 0.08);
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    inset 0 0 0 1px rgba(139, 122, 92, 0.16),
+    inset 0 1px 3px rgba(139, 122, 92, 0.12),
+    0 1px 2px rgba(60, 45, 20, 0.10);
+  transition: all 0.3s ease;
 }
-/* 老式信封的第二道朱框 */
-.envelope::before {
-  content: "";
-  position: absolute;
-  inset: 5px;
-  border: 1px solid var(--color-zhu-soft);
-  border-radius: 1px;
-  pointer-events: none;
-  transition: border-color 0.25s ease;
-}
-html[data-theme="dark"] .envelope {
+html[data-theme="dark"] .inkcard {
   box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.45),
-    0 6px 18px rgba(0, 0, 0, 0.30);
+    inset 0 0 0 1px rgba(228, 221, 205, 0.10),
+    inset 0 1px 3px rgba(0, 0, 0, 0.25),
+    0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
-.envelope:hover {
-  transform: translateY(-3px);
-  border-color: var(--color-zhu);
+/* 悬停：纸笺飘起，暖灰柔影在底部铺开 */
+.inkcard:hover {
+  transform: translateY(-6px);
   box-shadow:
-    0 2px 4px rgba(60, 45, 20, 0.14),
-    0 12px 26px rgba(60, 45, 20, 0.14);
+    inset 0 0 0 1px rgba(139, 122, 92, 0.18),
+    inset 0 1px 3px rgba(139, 122, 92, 0.12),
+    0 8px 16px rgba(94, 82, 62, 0.12),
+    0 24px 48px rgba(94, 82, 62, 0.18);
 }
-html[data-theme="dark"] .envelope:hover {
+html[data-theme="dark"] .inkcard:hover {
   box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.5),
-    0 12px 26px rgba(0, 0, 0, 0.4);
+    inset 0 0 0 1px rgba(228, 221, 205, 0.12),
+    inset 0 1px 3px rgba(0, 0, 0, 0.25),
+    0 8px 16px rgba(0, 0, 0, 0.35),
+    0 24px 48px rgba(0, 0, 0, 0.45);
 }
 
-.envelope-link {
+.inkcard-link {
   display: flex;
   flex-direction: column;
   height: 100%;
   min-height: 380px;
-  padding: 22px;
   color: inherit;
   text-decoration: none;
+  border-radius: inherit;
 }
-.envelope-link:focus-visible {
+.inkcard-link:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 3px;
 }
 
-/* 封面：标题一行居中在上，画片横构图（3:2）水平居中，邮戳盖右下角 */
-.envelope-cover {
-  display: block;
-  width: 100%;
-  margin: 0 0 12px;
-}
-.envelope-cover-title {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-  /* 恒占两行高：单行标题的卡与两行的画框对齐 */
-  height: 3.4em;
-  margin: 0 0 10px;
-  font-size: 1.02rem;
-  font-weight: 600;
-  line-height: 1.7;
-  letter-spacing: 0.06em;
-  text-align: center;
-  color: var(--color-title);
-}
-.envelope-cover-frame {
+/* 画区：约四成视高，底缘渐隐晕入纸底，如墨迹洇进宣纸 */
+.inkcard-art {
   position: relative;
   display: block;
-  width: 100%;
-  aspect-ratio: 3 / 2;
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  box-shadow: 0 1px 4px rgba(60, 45, 20, 0.16);
-  transform: rotate(-0.6deg);
+  aspect-ratio: 21 / 10;
   overflow: hidden;
-  transition: border-color 0.25s ease;
+  -webkit-mask-image: linear-gradient(to bottom, #000 58%, transparent 97%);
+  mask-image: linear-gradient(to bottom, #000 58%, transparent 97%);
 }
-html[data-theme="dark"] .envelope-cover-frame {
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
-}
-.envelope-link:hover .envelope-cover-frame { border-color: var(--color-zhu-soft); }
-
-.envelope-cover-img,
-.envelope-cover-art {
+.inkcard-art-img,
+.inkcard-art-svg {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
   background-color: var(--color-surface);
 }
-.envelope-cover-art {
+.inkcard-art-svg {
   background-image: var(--tex-noise);
   background-size: 90px 90px;
 }
-.envelope-cover-art.art-flip { transform: scaleX(-1); }
+.inkcard-art-svg.art-flip { transform: scaleX(-1); }
 
 /* 水墨小品用色：全走 token，明暗与点缀色自动跟随 */
-.envelope-cover-art .ink-strong { fill: var(--color-title); }
-.envelope-cover-art .ink-mid { fill: var(--color-text); }
-.envelope-cover-art .ink-soft { fill: var(--color-text-secondary); }
-.envelope-cover-art .cov-moon { fill: var(--color-accent-soft); }
-.envelope-cover-art .cov-zhu { fill: var(--color-zhu); }
-.envelope-cover-art .rain line {
-  stroke: var(--color-text-secondary);
-  stroke-width: 2.4;
+.inkcard-art-svg .ink-strong { fill: var(--color-title); }
+.inkcard-art-svg .ink-mid { fill: var(--color-text); }
+.inkcard-art-svg .ink-soft { fill: var(--color-text-secondary); }
+.inkcard-art-svg .cov-sun { fill: var(--color-accent-soft); }
+/* 通用笔意线条：新式水墨小品（孤舟/红杏/云岫/杨柳岸）共用，线宽逐笔另定 */
+.inkcard-art-svg .ink-stroke {
+  fill: none;
+  stroke: var(--color-title);
   stroke-linecap: round;
 }
-.envelope-cover-art .geese path {
+.inkcard-art-svg .ink-stroke-mid {
+  fill: none;
+  stroke: var(--color-text);
+  stroke-linecap: round;
+}
+.inkcard-art-svg .ink-stroke-soft {
+  fill: none;
+  stroke: var(--color-text-secondary);
+  stroke-linecap: round;
+}
+.inkcard-art-svg .art-zhu { fill: var(--color-zhu); }
+.inkcard-art-svg .rain line {
+  stroke: var(--color-text-secondary);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+/* 空亭：一笔弧顶 + 细柱 + 地线，与孤雁同笔意，不取实形 */
+.inkcard-art-svg .pavilion path {
+  fill: none;
+  stroke: var(--color-title);
+  stroke-width: 3.2;
+  stroke-linecap: round;
+}
+.inkcard-art-svg .pavilion .pav-col {
+  stroke: var(--color-text);
+  stroke-width: 2.2;
+}
+.inkcard-art-svg .pavilion .pav-ground {
+  stroke: var(--color-text-secondary);
+  stroke-width: 2;
+  opacity: 0.6;
+}
+/* 檐角滴水：水丝 + 半空坠滴 */
+.inkcard-art-svg .drip line {
+  stroke: var(--color-text-secondary);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  opacity: 0.9;
+}
+.inkcard-art-svg .drip ellipse {
+  fill: var(--color-text-secondary);
+  opacity: 0.85;
+}
+.inkcard-art-svg .geese path {
   fill: none;
   stroke: var(--color-title);
   stroke-width: 2.6;
   stroke-linecap: round;
 }
 
-/* 邮戳：朱砂双环 + 纸底托，盖在封面右下角，戳内是寄出日期 */
-.envelope-postmark {
+/* 日期邮戳：朱砂印泥质感双环，盖画区右上 */
+.inkcard-postmark {
   position: absolute;
-  right: 9px;
-  bottom: 9px;
+  top: 10px;
+  right: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   border: 1.5px solid var(--color-zhu);
   border-radius: 50%;
-  background: var(--cover-wash);
+  background:
+    radial-gradient(circle at 32% 30%, var(--color-zhu-soft), transparent 72%),
+    var(--cover-wash);
   color: var(--color-zhu);
   transform: rotate(-12deg);
+  opacity: 0.92;
 }
-.envelope-postmark::before {
+.inkcard-postmark::before {
   content: "";
   position: absolute;
   inset: 3px;
@@ -1292,55 +1307,102 @@ html[data-theme="dark"] .envelope-cover-frame {
   border-radius: 50%;
   opacity: 0.7;
 }
-.envelope-postmark time {
+.inkcard-postmark time {
   font-family: var(--font-mono);
   font-size: 9.5px;
   letter-spacing: 0.04em;
   font-variant-numeric: tabular-nums;
 }
+/* 悬停「盖章」：极轻的一按，1.0 -> 1.05 -> 1.0 */
+@keyframes stamp-press {
+  0% { transform: rotate(-12deg) scale(1); }
+  45% { transform: rotate(-12deg) scale(1.05); }
+  100% { transform: rotate(-12deg) scale(1); }
+}
+.inkcard-link:hover .inkcard-postmark { animation: stamp-press 0.5s ease; }
 
-/* 摘要落在朱丝栏地址横线上 */
-.envelope-summary {
+/* 文本区：题字式标题左对齐，摘要灰褐两行 */
+.inkcard-body {
   display: block;
-  margin: 6px 2px 12px;
-  max-height: 4em;
+  padding: 14px 20px 0;
+}
+.inkcard-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   overflow: hidden;
-  font-size: 0.88rem;
-  line-height: 2;
-  color: var(--color-text-secondary);
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent 0,
-    transparent calc(2em - 1px),
-    var(--color-zhu-soft) calc(2em - 1px),
-    var(--color-zhu-soft) 2em
-  );
+  /* 恒占两行高：单行标题的卡与两行的画框对齐 */
+  min-height: 3.1em;
+  margin: 0 0 8px;
+  font-family: var(--font-title);
+  font-size: 1.18rem;
+  font-weight: 600;
+  line-height: 1.55;
+  letter-spacing: 0.05em;
+  text-align: left;
+  color: var(--color-title);
+}
+.inkcard-summary {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  letter-spacing: 0.03em;
+  color: var(--color-text-note);
 }
 
-/* 底部折口虚线：标签在左，「缄」在右 */
-.envelope-foot {
+/* 底部信息栏：批注式标签（细竖线分隔）在左，「缄」印在右 */
+.inkcard-foot {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
   margin-top: auto;
-  padding-top: 10px;
-  border-top: 1px dashed var(--color-border);
+  padding: 12px 20px 16px;
 }
-.envelope-tags {
+.inkcard-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 10px;
+  align-items: center;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  color: var(--color-text-note);
 }
-.envelope-tag {
-  font-size: 0.8rem;
-  color: var(--color-text-secondary);
+.inkcard-tag { display: inline-flex; align-items: center; }
+.inkcard-tag + .inkcard-tag::before {
+  content: "";
+  width: 1px;
+  height: 0.85em;
+  margin: 0 9px;
+  background-color: var(--color-border);
 }
-.envelope-jian {
-  font-size: 1rem;
-  color: var(--color-zhu);
-  opacity: 0.85;
+/* 朱砂小印：朱底纸字，微倾带噪，像随手钤盖 */
+.inkcard-seal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 2px;
+  background-color: var(--color-zhu);
+  background-image: var(--tex-noise);
+  background-size: 90px 90px;
+  color: var(--color-surface);
+  font-size: 0.82rem;
+  line-height: 1;
+  opacity: 0.88;
+  transform: rotate(-3deg);
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .inkcard,
+  .inkcard:hover { transition: none; transform: none; }
+  .inkcard-link:hover .inkcard-postmark { animation: none; }
+}
+
 
 @media (max-width: 640px) {
   .hero {
@@ -1351,6 +1413,6 @@ html[data-theme="dark"] .envelope-cover-frame {
   .hero-greeting { font-size: 0.85rem; letter-spacing: 0.4em; text-indent: 0.4em; }
   .poem-line { font-size: 1.05rem; letter-spacing: 0.24em; }
 
-  .envelope-grid { grid-template-columns: minmax(0, 1fr); gap: 20px; }
-  .envelope-link { min-height: 350px; }
+  .inkcard-grid { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .inkcard-link { min-height: 340px; }
 }

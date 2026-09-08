@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 竹影 · 山水画框卡封面预览稿(亮色调,固定种子)
+     页面渲染由 layouts/partials/post-card-cover.html 按题哈希内联生成
+     (种子随文、明暗跟随),改形状请两处同步 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 260" role="img" aria-label="竹影">
+  <rect width="390" height="260" fill="#FCFAF4"/>
+  <defs>
+    <filter id="pen" x="-40%" y="-40%" width="180%" height="180%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.09 0.12" numOctaves="2" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="6"/>
+    </filter>
+  </defs>
+  <g filter="url(#pen)">
+    <rect x="98" y="-12" width="9" height="200" fill="#3A3833" opacity="0.7"/>
+    <rect x="248" y="28" width="12" height="240" fill="#26241F" opacity="0.9"/>
+  </g>
+  <g filter="url(#pen)">
+    <ellipse cx="122" cy="44" rx="28" ry="6.5" fill="#26241F" transform="rotate(-38 122 44)"/>
+    <ellipse cx="142" cy="66" rx="24" ry="5.5" fill="#3A3833" transform="rotate(24 142 66)" opacity="0.8"/>
+    <ellipse cx="108" cy="76" rx="20" ry="5" fill="#8C877B" transform="rotate(-12 108 76)" opacity="0.8"/>
+    <ellipse cx="274" cy="108" rx="28" ry="6.5" fill="#26241F" transform="rotate(30 274 108)" opacity="0.9"/>
+    <ellipse cx="252" cy="128" rx="22" ry="5.5" fill="#3A3833" transform="rotate(-28 252 128)" opacity="0.75"/>
+  </g>
+</svg>

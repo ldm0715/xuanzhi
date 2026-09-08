@@ -41,12 +41,12 @@
   <a class="hero-hint" href="#recent"><span class="hero-hint-text">向下翻阅</span><span class="hero-hint-arrow" aria-hidden="true">↓</span></a>
 </section>
 
-{{/* ============ 信封卡片 · 双栏 ============ */}}
+{{/* ============ 山水画框卡片 · 双栏 ============ */}}
 <div class="container" id="recent">
   <h2 class="home-heading">近期文章</h2>
   {{ $pages := where site.RegularPages "Type" "in" site.MainSections -}}
   {{ $paginator := .Paginate $pages 8 -}}
-  <section class="envelope-grid">
+  <section class="inkcard-grid">
     {{- range $paginator.Pages }}
     {{ partial "post-card.html" . }}
     {{- end }}

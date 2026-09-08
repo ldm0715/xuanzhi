@@ -18,6 +18,7 @@
   --color-title: #26241F;
   --color-text: #3A3833;
   --color-text-secondary: #8C877B;
+  --color-text-note: #5E5848;   /* 画框卡摘要/批注标签：比次档墨深半档的灰褐 */
 
   /* 稿纸格纹（墨调，极淡） */
   --grid-line: rgba(116, 104, 82, 0.07);
@@ -70,6 +71,10 @@
   /* 版式 */
   --font-sans: 'LXGW WenKai GB', 'LXGW WenKai', 'Kaiti SC', 'STKaiti', 'KaiTi',
     -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  /* 画框题字：宋体优先（本机装有思源宋/Noto 宋则用之），
+     无则回落自托管文楷——刻意不排 SimSun，避免点阵感破坏古典观感 */
+  --font-title: 'Source Han Serif SC', 'Source Han Serif CN', 'Noto Serif SC',
+    'Noto Serif CJK SC', 'Songti SC', 'STSong', 'LXGW WenKai GB', 'LXGW WenKai', serif;
   --font-mono: 'JetBrains Mono', 'LXGW WenKai GB', 'LXGW WenKai', 'Cascadia Code',
     Consolas, 'Liberation Mono', Menlo, monospace;
   --content-width: 800px;
@@ -99,6 +104,7 @@ html[data-theme="dark"] {
   --color-title: #F4EEDF;
   --color-text: #E7E1D2;
   --color-text-secondary: #AEA79A;
+  --color-text-note: #B0A896;
 
   --grid-line: rgba(228, 221, 205, 0.06);
 

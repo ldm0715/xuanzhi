@@ -25,7 +25,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 - `assets/js/site.js`：全站唯一 JS（明暗切换、外观面板、代码复制、目录 scrollspy）。新增交互必须并进这个文件
 - 外观系统全走 `html` 的 `data-*` 属性 + CSS 变量：`data-theme`(light/dark)、`data-accent`(terracotta/indigo)、`data-bg`(5 种纸面纹理)、`data-hr`(4 种分隔线)；选择持久化在 localStorage（键前缀 `xuanzhi-`），`head.html` 内联脚本负责防闪烁恢复
 - `layouts/` 是 0.146+ 顶层模板结构；`_markup/render-image.html`（page bundle 图片 → WebP/srcset）和 `_markup/render-heading.html`（标题毛笔圈点 + 锚点）是渲染钩子
-- 首页 = 诗笺 + 信封卡片两段：诗笺由 `home.html` 构建期 `resources.GetRemote` 预取绝句（`try` + 内置《鹿柴》兜底）、`site.js` 每次到访随机刷新（`lang=zh-Hant` 繁体）；信封卡片 = `partials/post-card.html`（结构）+ `partials/post-card-cover.html`（封面：front matter `cover` 自定义图，否则按标题哈希生成四式水墨小品）
+- 首页 = 诗笺 + 山水画框卡片两段：诗笺由 `home.html` 构建期 `resources.GetRemote` 预取绝句（`try` + 内置《鹿柴》兜底）、`site.js` 每次到访随机刷新（`lang=zh-Hant` 繁体）；画框卡片 = `partials/post-card.html`（结构）+ `partials/post-card-cover.html`（封面：front matter `cover` 自定义图，否则按标题哈希生成八式水墨小品——远山晓日/竹影/空亭听雨/汀洲孤雁/孤舟远影/红杏出墙/云岫/杨柳岸，定妆预览稿在 `static/images/covers/`）；卡片颜色一律走 token（摘要/标签用 `--color-text-note`，题字字体栈 `--font-title` 宋体优先、无则落文楷）
 - 朱饰系 token（`--color-zhu` / `--color-zhu-strong` / `--color-zhu-soft`）随 `data-accent` 换色：terracotta = 朱砂，indigo = 黛青（青印）；新增装饰色一律进 token.css 并补齐亮暗 + 双点缀色四象限
 - 头栏是半透明宣纸毛玻璃（`--color-header-bg` + backdrop-filter）；头栏宽度随页面类型过渡：窄 `--content-width` / 文章页 1150px，CSS 基础值与 `site.js`「头栏宽度过渡」段的 NARROW/WIDE 常量必须同步改
 - 明暗切换圆形揭示：`site.js`「明暗切换」段写 `--theme-x/y/r`（**百分比**，理由见已知坑），`main.css`「明暗切换圆形揭示」段定义方向与 keyframes；方向靠「动画运行时 `data-theme` 已是新值」判定（dark 收缩旧快照、light 扩张新快照），改时长/曲线只动 main.css 两条 `animation`
@@ -41,6 +41,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 - 测试文章日期写成未来时间会"消失"（默认不渲染 future content）
 - CSS mask 方案里 `background-color: transparent` 会让整条形状消失——mask 只管形状，颜色必须给非透明 `background-color`
 - SVG 图标 path 一律从官方 npm 包取（`@material-design-icons/svg`），不凭记忆手写
+- 画区容器 21:10 且 SVG 居中裁切（slice）：可见窗口约 viewBox y 37~222，145 以下开始渐隐淡出——新水墨小品的关键元素必须落在这窗口内（杨柳的水岸带曾整个掉出窗口，已踩）
+- 水墨小品的语言约定：疏笔淡墨、大面积留白，单式元素 ≤6，线条/晕带为主、忌实心大色块与机械直线（空亭听雨曾因实心亭子+满幅雨丝显得格格不入，返工过）；同一式的形状在 `post-card-cover.html` 与 `static/images/covers/` 预览稿两处同步
 - View Transitions 的快照盒在**浏览器缩放≠100% 时不按 CSS 像素取尺寸**（Edge 页面缩放 125% 实测圆心大幅偏移）：圆形揭示的圆心/半径必须写**百分比**（对 `root.clientWidth/clientHeight` 取比例，半径对 `sqrt(w²+h²)/√2` 解析基准取比例），绝对 px 只在 100% 缩放下正确（已踩过）
 
 ## 相关文档
