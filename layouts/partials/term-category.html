@@ -1,0 +1,21 @@
+{{/* 分类 term 页 · 打开函套：顶边露出一排册脊，函面保留折痕，
+     素纸签条写类名与篇数，右端压「类」印——延续分类索引页的函套叙事。 */}}
+<div class="container term-page">
+<header class="term-cat-head">
+  <div class="term-cat-slot" aria-hidden="true"></div>
+  <div class="term-cat-body">
+    <div class="term-cat-label">
+      <h1 class="term-cat-name">{{ .Title }}</h1>
+      <span class="term-cat-count">{{ partial "seal-count.html" (len .Pages) }}篇</span>
+    </div>
+    <span class="term-cat-seal" aria-hidden="true">类</span>
+  </div>
+</header>
+{{ $paginator := .Paginate .Pages -}}
+<section class="post-list term-list">
+  {{- range $paginator.Pages }}
+  {{ partial "post-item.html" . }}
+  {{- end }}
+</section>
+{{ partial "pagination.html" $paginator }}
+</div>

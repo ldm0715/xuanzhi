@@ -1,14 +1,11 @@
+{{/* term 页分发器：分类走「开函」，标签走「钤印」。
+     用父分类页的 .Data.Plural 分流——term 页自身的 .Data.Plural 不可靠。 */}}
 {{ define "main" -}}
-<div class="container">
-<header class="page-heading">
-  <h1>{{ i18n "tag" }}：{{ .Title }}</h1>
-</header>
-{{ $paginator := .Paginate .Pages -}}
-<section class="post-list">
-  {{- range $paginator.Pages }}
-  {{ partial "post-item.html" . }}
-  {{- end }}
-</section>
-{{ partial "pagination.html" $paginator }}
-</div>
+{{- $plural := "" -}}
+{{- with .Parent }}{{ $plural = .Data.Plural }}{{ end -}}
+{{- if eq $plural "categories" -}}
+  {{ partial "term-category.html" . }}
+{{- else -}}
+  {{ partial "term-tag.html" . }}
+{{- end -}}
 {{- end }}

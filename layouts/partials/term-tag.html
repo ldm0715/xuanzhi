@@ -1,0 +1,20 @@
+{{/* 标签 term 页 · 钤在纸上：印谱里是待钤的印，点进来这枚印钤到了纸上——
+     放大到 96px、印泥毛边蒙版照旧，外圈一圈极淡的朱色晕（印泥洇开）。 */}}
+{{- $runes := countrunes .Title -}}
+<div class="container term-page">
+<header class="term-tag-head">
+  <h1 class="sr-only">{{ .Title }}</h1>
+  <span class="term-tag-seal-wrap" aria-hidden="true"><span class="term-tag-seal{{ if le $runes 2 }} term-tag-seal--vert{{ else if gt $runes 4 }} term-tag-seal--sm{{ end }}">{{ .Title }}</span></span>
+  <div class="term-tag-meta">
+    <span class="term-tag-count">{{ partial "seal-count.html" (len .Pages) }}篇</span>
+    <span class="term-tag-note">钤于此页</span>
+  </div>
+</header>
+{{ $paginator := .Paginate .Pages -}}
+<section class="post-list term-list">
+  {{- range $paginator.Pages }}
+  {{ partial "post-item.html" . }}
+  {{- end }}
+</section>
+{{ partial "pagination.html" $paginator }}
+</div>
