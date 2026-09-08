@@ -1,0 +1,81 @@
+# 演示站配置 —— 同时也是给用户抄的「配置样板」。
+#
+# 本地预览：hugo server --source exampleSite
+# 部署：GitHub Actions 见仓库根的 .github/workflows/demo.yml
+
+# 部署到 GitHub Pages 项目站点时是子路径，CI 会用 --baseURL 覆盖成
+# https://<owner>.github.io/<repo>/。本地跑用默认值即可。
+baseURL = 'http://localhost:1314/'
+
+title = '见字如面'
+defaultContentLanguage = 'zh-cn'
+locale = 'zh-cn'
+
+enableRobotsTXT = true
+enableEmoji = true
+
+# 站内搜索：首页多输出一份 json（主题的 layouts/home.json 生成 /index.json）
+[outputs]
+  home = ['html', 'rss', 'json']
+
+[markup]
+  [markup.highlight]
+    style = 'monokailight'
+    noClasses = false
+  [markup.tableOfContents]
+    startLevel = 2
+    endLevel = 4
+  [markup.goldmark.parser]
+    attribute.block = true
+  [markup.goldmark.extensions.passthrough]
+    enable = true
+    [markup.goldmark.extensions.passthrough.delimiters]
+      inline = [['\(', '\)']]
+      block = [['\[', '\]'], ['$$', '$$']]
+  [markup.goldmark.renderer]
+    unsafe = true
+
+[params]
+  accent = 'terracotta'
+  author = 'gcnanmu'
+  description = '宣纸——暖纸底、稿纸格纹、霞鹜文楷、墨阶排版的极简中文博客主题，明暗双模式，陶土橘/黛青双点缀色'
+
+  [params.hero]
+    greeting = '一纸短笺，见字如面'
+
+# 头栏导航：加页面只改这里，不用动模板
+[[menus.main]]
+  name = '归档'
+  pageRef = '/posts'
+  weight = 10
+[[menus.main]]
+  name = '分类'
+  pageRef = '/categories'
+  weight = 20
+[[menus.main]]
+  name = '标签'
+  pageRef = '/tags'
+  weight = 30
+
+# ---- 主题本体怎么接进来（只影响这个演示站，用户站点不用抄这段）----
+#
+# 主题在仓库根目录，比演示站高一级。这里用 module mount 把它的四个目录直接挂进来，
+# **没有**用 `themesDir = '../..' + theme = 'xuanzhi'`——那套写法要求仓库目录名必须
+# 叫 xuanzhi，本地克隆换个名字就报 "module not found"。挂载用相对路径，不挑目录名。
+#
+# 站点接入主题仍走常规的 `theme = 'xuanzhi'`，见 README「引入你的博客」。
+#
+# 注意：TOML 里 [module] 一旦开始，后面的键就全归它了——所以这段必须放在文件最后。
+[module]
+  [[module.mounts]]
+    source = '../layouts'
+    target = 'layouts'
+  [[module.mounts]]
+    source = '../assets'
+    target = 'assets'
+  [[module.mounts]]
+    source = '../static'
+    target = 'static'
+  [[module.mounts]]
+    source = '../i18n'
+    target = 'i18n'

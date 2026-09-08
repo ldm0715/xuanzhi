@@ -1,0 +1,62 @@
+name: demo
+
+# 把 exampleSite/ 构建成主题演示站，发布到 GitHub Pages。
+#
+# 仓库 Settings → Pages → Build and deployment → Source 要选 **GitHub Actions**，
+# 否则这个 workflow 跑完也不会发布。
+#
+# 演示站地址：https://<owner>.github.io/<repo>/
+# 因为项目型 Pages 站点在子路径下，构建时用 --baseURL 带上 /<repo>/，
+# 不然 CSS / 字体 / 图片全 404。
+
+on:
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同一时间只跑一个部署，新的 push 顶掉排队中的旧任务
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          # 与 theme.toml 的 min_version 对齐
+          hugo-version: '0.165.0'
+          extended: true
+
+      - name: Build demo
+        run: |
+          hugo --source exampleSite --minify \
+            --baseURL "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: exampleSite/public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

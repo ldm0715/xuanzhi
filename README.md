@@ -33,6 +33,58 @@
 - **文章工具栏**：右下角一枚朱印（站名首字），点开展开「回到顶部 / 分享 / 目录」。**整枚可拖动**（位置记忆在 localStorage，拖出视口会被夹回来，上边界让开吸顶头栏）；按钮栈默认朝上开，上方放不下时自动翻到下方，朱印始终不动。分享把「站名 - 标题 - 地址」写进剪贴板并弹出一张牛皮纸卡片（6 秒自动收起，Esc / 点外面也能收）；目录在宽屏滚到侧栏便签、窄屏把同一份便签当浮层打开。悬停有即时出现的牛皮纸标签
 - 内置：归档按年/月分组、分类、标签、目录（TOC）、分页、RSS、404
 
+## 把主题推到 GitHub
+
+主题仓库目前**没有远端**（`git remote -v` 为空），提交都只在本地。首次发布按四步走。
+
+### 1. 在 GitHub 建一个空仓库
+
+- 仓库名建议就叫 **`xuanzhi`**——README 和 `theme.toml` 的例子都用这个名字
+- **不要**勾 "Add a README / .gitignore / license"：本地已经是完整仓库，勾了会多出一个无关的初始提交，推的时候冲突
+
+### 2. 关联远端并推送
+
+```powershell
+cd F:\hugo_theme
+git remote add origin https://github.com/<你的用户名>/xuanzhi.git
+git push -u origin master        # 本仓库当前分支是 master
+```
+
+> 想让默认分支叫 `main` 的话，先 `git branch -M main` 再推。演示站的 workflow 两个分支都监听了。
+
+### 3. 开启 GitHub Pages（演示站）
+
+仓库 **Settings → Pages → Build and deployment → Source** 选 **GitHub Actions**。
+
+不选的话 `.github/workflows/demo.yml` 跑完也不会发布。设好之后每次 push 自动更新：
+
+```
+https://<你的用户名>.github.io/xuanzhi/
+```
+
+### 4. 回填 `theme.toml` 的 homepage
+
+还空着，填上仓库地址（Hugo 主题站提交表单会读这一项）：
+
+```toml
+homepage = 'https://github.com/<你的用户名>/xuanzhi'
+```
+
+```powershell
+git add theme.toml
+git commit -m 'docs: fill theme homepage'
+git push
+```
+
+### 之后每次改动
+
+```powershell
+cd F:\hugo_theme
+git add -A
+git commit -m 'type(scope): subject'
+git push
+```
+
 ## 引入你的博客
 
 当前为开发期挂载（junction），主题改动即时生效，无需同步文件：
@@ -41,20 +93,36 @@
 # 已存在：F:\hugo_gcnanmu\themes\xuanzhi -> F:\hugo_theme
 ```
 
-定稿后推荐改为 submodule 方式（主题独立仓库 + 站点锁定版本）：
+定稿后推荐改为 submodule 方式（主题独立仓库 + 站点锁定版本）。**先按上一节把主题推到 GitHub**，然后：
 
 ```powershell
-# 1. 把本仓库推到 GitHub
-cd F:\hugo_theme
-git remote add origin <你的主题仓库地址>
-git push -u origin main
-
-# 2. 站点里替换为 submodule
 cd F:\hugo_gcnanmu
 git rm --cached themes/xuanzhi   # 移除 junction 记录（文件仍在 F:\hugo_theme）
 rmdir themes\xuanzhi             # 删掉 junction 本身（不影响 F:\hugo_theme）
 git submodule add <你的主题仓库地址> themes/xuanzhi
 ```
+
+## 演示站
+
+仓库里的 `exampleSite/` 就是主题演示站——内容用的是主题的测试稿（代码高亮、数学公式、图片管线、短代码、长文排版…），用来展示主题在各种内容形态下的样子。
+
+本地预览：
+
+```bash
+hugo server --source exampleSite      # http://localhost:1313/
+```
+
+`exampleSite/hugo.toml` 用 **module mount** 把仓库根目录的主题挂进来（**不是** `themesDir = '../..'` + `theme = 'xuanzhi'`），所以**不挑仓库目录名**——克隆下来的目录叫 `hugo_theme` 还是 `xuanzhi` 都行。那套常规写法要求目录名必须等于主题名，换个名字就报 `module not found`。站点接入主题本身仍走 `theme = 'xuanzhi'`。
+
+部署：`.github/workflows/demo.yml` 在 push 时构建 `exampleSite` 并发布到 GitHub Pages：
+
+```
+https://<owner>.github.io/<repo>/
+```
+
+首次启用要去仓库 **Settings → Pages → Build and deployment → Source** 选 **GitHub Actions**，否则 workflow 跑完也不发布。
+
+> 项目型 Pages 站点在 `/<repo>/` 子路径下，所以 workflow 里用 `--baseURL` 带上这个前缀——不带的 CSS、字体、图片会全 404。
 
 ## 站点配置（hugo.toml）
 

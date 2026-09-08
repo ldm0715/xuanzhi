@@ -2,8 +2,7 @@ name = 'Xuanzhi'
 license = 'MIT'
 licenselink = 'https://opensource.org/license/mit'
 description = '宣纸——暖纸底、稿纸格纹、霞鹜文楷、墨阶排版的极简中文博客主题，明暗双模式，陶土橘/黛青双点缀色'
-# homepage 留空：推到远端后填仓库地址（Hugo 主题站提交表单会读这一项）
-homepage = ''
+homepage = 'https://github.com/ldm0715/xuanzhi'
 tags = ['blog', 'minimal', 'light', 'dark', 'chinese', 'clean']
 min_version = '0.146.0'
 
