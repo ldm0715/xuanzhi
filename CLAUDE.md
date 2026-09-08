@@ -25,6 +25,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 - `assets/js/site.js`：全站唯一 JS（明暗切换、外观面板、代码复制、目录 scrollspy、长目录折叠）。新增交互必须并进这个文件
 - 外观系统全走 `html` 的 `data-*` 属性 + CSS 变量：`data-theme`(light/dark)、`data-accent`(terracotta/indigo)、`data-bg`(5 种纸面纹理)、`data-hr`(4 种分隔线)；选择持久化在 localStorage（键前缀 `xuanzhi-`），`head.html` 内联脚本负责防闪烁恢复
 - `layouts/` 是 0.146+ 顶层模板结构；`_markup/render-image.html`（page bundle 图片 → WebP/srcset）和 `_markup/render-heading.html`（标题毛笔圈点 + 锚点）是渲染钩子
+- 图窗（点开看大图）：`render-image.html` 把每张正文图包进 `<a class="img-zoom" href="{最大档 WebP}">`——**这是渐进增强，不是唯一入口**，无 JS 时它就是「点开看原图」的链接，所以别把 href 换成 `#`。`site.js`「图片灯箱」段接管点击：开合 + ←→ 翻页 + 滚轮/双击缩放 + 拖动平移 + 双指捏合 + 窄屏滑动翻页 + Esc + 焦点锁/回焦。样式在 `main.css`「图片灯箱」段，遮罩取**同纸虚化**（当前纸色 90% + blur 10px，照片仍像贴在同一张纸上）、大图裱成**画框立轴**（`--lb-mat: 18px` 宽裱边 + `--color-frame` 细框 + 一道 `--color-zhu-soft` 内细边 + `--lb-shadow`），图注复刻 `.post-figure figcaption` 的题跋式两侧引线。`--lb-mat` 一变，`.lightbox-img` 的 max-width/height 里的 `calc` 会跟着走，别再写死 22px 之类的常数
 - 首页 = 诗笺 + 红框封卡片两段：诗笺由 `home.html` 构建期 `resources.GetRemote` 预取绝句（`try` + 内置《鹿柴》兜底）、`site.js` 每次到访随机刷新（`lang=zh-Hant` 繁体）；**取到的诗要过校验**（标题 ≤12 字、每句 ≤16 字、至少两句，两处同口径）——诗泉偶尔返回带考据注释的条目，竖排诗笺会被撑爆，不合格就静默保留当前这首。卡片 = `partials/post-card.html`（结构：素纸 + 一道朱丝框 + 右上邮戳 + 右下角淡印 + 落款行）+ `partials/post-card-cover.html`（印记：front matter `cover` 自定义图，否则按标题哈希生成八式水墨小品——远山晓日/竹影/空亭听雨/汀洲孤雁/孤舟远影/红杏出墙/云岫/杨柳岸，定妆预览稿在 `static/images/covers/`）；印记由 CSS 压成 124×83、约 34% 不透明度 + 模糊 0.5px + 径向羽化，**因此不再套 feTurbulence 毛边滤镜**（那个浓度下看不出来，只白付每张卡的栅格化）；卡片颜色一律走 token（摘要/标签用 `--color-text-note`，题字字体栈 `--font-title` 宋体优先、无则落文楷）
 - 朱饰系 token（`--color-zhu` / `--color-zhu-strong` / `--color-zhu-soft` / `--color-seal`）随 `data-accent` 换色：terracotta = 朱砂，indigo = 黛青（青印）；新增朱饰必须同步补 token 四象限（亮暗 × 双点缀色），别在组件里写死红值；`--tex-*` 纹理 token（`--tex-seal` / `--tex-bamboo` / `--tex-birds` 等 data-uri）的颜色烤在 URI 里，同样必须补齐亮暗 × 双点缀色四象限；无色遮罩类（`--tex-mask-paste` 印泥飞白 mask）单份即可
 - 章界横线统一用 `--color-rule`（点缀色 28% 与 `--color-frame` 调和），随点缀色橘/青自动切换；正文「纸」系元素（纸底/格纹/折痕浅线）刻意不跟点缀色
@@ -63,6 +64,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 - CSS 动画/过渡的时钟从**样式计算**就开跑，不等首帧绘制：首屏要几百毫秒的页面，450ms 的动画在画面出来时已跑掉大半（实测动画 313ms 起步、763ms 结束，而 FCP 908ms）。跨页动画必须等第一帧画出来再放开（双 `requestAnimationFrame`），放开前用 `xz-page-hold` 把正文按住（并加 setTimeout 兜底，免得 rAF 没跑到就把正文永久扣住）
 - 淡印类元素的浓度要按**最终叠乘**估：印记整体 34% × 元素自带 0.4–0.5 的不透明度，有效浓度只剩一成多，横向色带一淡就没了形状——所以八式里横向实色带全改成了笔线，且淡印里别再叠最淡一档的墨（`--color-text-secondary`）
 - backdrop-filter 毛玻璃叠宽度动画：模糊区随每帧尺寸重算重绘，是动画卡顿最大来源——框架动画期间挂 `xz-frame-anim` 暂停毛玻璃，`transitionend` 后恢复（另加 setTimeout 兜底，transitionend 偶发不触发）
+- 全屏遮罩层用 `position:absolute`、被遮的内容用 `static` 时，**遮罩会盖在内容之上**：定位元素绘在流内元素之上。图窗第一版就是这样——图片被遮罩挡掉，滚轮/拖动/滑动全部失灵，图还被洗淡（看着像"渲染正常"）。遮罩里的内容必须自己进定位层（`.lightbox-figure` 给 `position:relative`），或在 DOM 里排在遮罩之后且同样定位
 
 ## 相关文档
 

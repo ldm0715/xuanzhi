@@ -24,7 +24,8 @@
 - 书函折叠块：木函底折痕双线、起首墨线（墨线吊在函体左缘，题名与展开正文左对齐）、「展/阖」楷体批注、抽出的宣纸内阴影做旧，开合双向动画（`::details-content`，旧浏览器瞬时回退）
 - 物理细节：图片相片贴纸质感（白边细框柔影）与题跋式图注、列表墨点三级递进 + 引导虚线 + 顿号序号 + 盖章式任务框、引用块淡赭石底、表格泛黄虚线格、三竿竹影与雁阵淡墨水印
 - 800px 单栏；代码高亮明暗两套（CSS 变量驱动）；代码复制按钮
-- 图片管线：page bundle 图片自动 WebP + 三档 srcset + lazy + 宽高防抖动
+- 图片管线：page bundle 图片自动 WebP + 三档 srcset + lazy + 宽高防抖动；每张图再包一层指向最大档的链接，供图窗使用
+- **图窗（点开看大图）**：点正文图，照片在同一张纸上放大——「同纸虚化」遮罩（当前纸色 90% + 高斯模糊，明暗自动跟随，照片仍像贴在同一张宣纸上）+「画框立轴」裱装（18px 宽裱边、`--color-frame` 细框、一道朱砂内细边、深柔影），图注沿用题跋式两侧引线。支持 ←→ 翻页（篇数是汉字）、滚轮/双击缩放、拖动平移、双指捏合、窄屏左右滑动翻页、Esc 与点遮罩关闭。**无 JS 时退化为「点开看原图」的普通链接**
 - 内置：归档按年/月分组、分类、标签、目录（TOC）、分页、RSS、404
 
 ## 引入你的博客
@@ -85,6 +86,8 @@ content/posts/my-post/
 
 正文中直接 `![说明](photo.jpg)`，构建时自动压缩转 WebP 并生成响应式 srcset。**不要把图片放到外部图床**——图片和文章在同一个 Git 仓库里，是本主题和整个博客架构的根基约定。
 
+点图可以放大查看（图窗）。图窗里的题跋图注按这个优先级取：`![说明](photo.jpg "图注")` 的 `title`，没有则退回 `![说明]` 的 `alt`。
+
 ### 首页卡片的印记
 
 每张卡右下角有一枚淡印。默认按文章标题哈希自动生成八式水墨小品（远山晓日 / 竹影 / 空亭听雨 / 汀洲孤雁 / 孤舟远影 / 红杏出墙 / 云岫 / 杨柳岸），同一篇文章永远同一幅；各式的定妆预览稿在主题 `static/images/covers/`。想换成自己的图，在 front matter 里给 `cover`：
@@ -113,13 +116,13 @@ layouts/
 │                        # / seal-count / pagination / taxonomy-shelf / taxonomy-sealwall
 │                        # / term-category / term-tag
 └── _markup/
-    ├── render-image.html   # 图片渲染钩子（WebP/srcset 管线）
+    ├── render-image.html   # 图片渲染钩子（WebP/srcset 管线 + 图窗触发链接）
     └── render-heading.html # 标题毛笔圈点 + 锚点
 assets/
 ├── css/token.css        # 设计 token（全部颜色/字体/版式变量在这里）
 ├── css/chroma.css       # 代码高亮（变量驱动，明暗自动跟随）
 ├── css/main.css         # 版式
-└── js/site.js           # 明暗切换 + 外观面板 + 复制按钮 + scrollspy + 长目录折叠 + 诗笺刷新
+└── js/site.js           # 明暗切换 + 外观面板 + 复制按钮 + scrollspy + 长目录折叠 + 诗笺刷新 + 图片灯箱
 static/fonts/       # 霞鹜文楷 GB（regular/medium）+ 思源宋体 700 切片 + JetBrains Mono
 static/images/covers/    # 八式水墨小品定妆预览稿（页面按题哈希内联渲染）
 scripts/                 # 开发辅助脚本
@@ -128,6 +131,8 @@ scripts/                 # 开发辅助脚本
 ## 想改颜色？
 
 全部在 `assets/css/token.css`：亮色一套、暗色一套、点缀色两版、背景纹理变量（`--bg-image` / `--bg-size` / `--tex-noise` / `--vignette`）。改完 `hugo server` 即时预览。
+
+图窗的裱边宽度是 `main.css`「图片灯箱」段的 `--lb-mat`，遮罩模糊半径是同一段的 `blur(10px)`——两个都在那一处调，别散落到别处。
 
 ## 外观面板的取舍
 

@@ -979,6 +979,208 @@ details[open]::details-content {
   background: var(--color-frame);
 }
 
+/* ============ 图片灯箱（点开看大图） ============
+ * 正文图由 render-image.html 包进 <a class="img-zoom">，site.js「图片灯箱」段接管点击；
+ * 无 JS 时它就是「点开看原图」的朴素链接。
+ * 放大后仍是「贴在纸上的相片」，裱成画框立轴：宽裱边（--lb-mat）+ --color-frame 细框
+ * + 一道朱砂内细边 + 柔影；图注复刻 .post-figure figcaption 的题跋式两侧引线。
+ * 遮罩取「同纸虚化」——当前纸色 + 高斯模糊，照片仍像贴在同一张纸上。
+ */
+
+/* ---- 触发链接：压掉全局 a 的朱色下划线，图片外观仍由 .post-content img 负责 ---- */
+.post-content .img-zoom {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin: 1.6em auto;
+  color: inherit;
+  text-decoration: none;
+  cursor: zoom-in;
+}
+.post-content .img-zoom img { margin: 0; }   /* 间距交给链接，图片自身不再撑开 */
+.post-figure .img-zoom { margin: 0 auto; }   /* figure 内部贴紧题跋 */
+
+/* ---- 骨架 ---- */
+.lightbox {
+  --lb-mat: 18px;       /* 画框立轴：宽裱边 */
+  --lb-gap-x: 4vw;
+  --lb-gap-y: 5vh;
+  position: fixed;
+  inset: 0;
+  z-index: var(--lb-z);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--lb-gap-y) var(--lb-gap-x);
+  opacity: 0;
+  /* 开合同外观面板：hidden 属性 + allow-discrete，不必改 JS */
+  transition: opacity 0.2s ease, display 0.2s allow-discrete;
+}
+.lightbox[hidden] { display: none; }        /* 压掉上面的 display:flex */
+.lightbox:not([hidden]) { opacity: 1; }
+@starting-style { .lightbox:not([hidden]) { opacity: 0; } }
+
+/* ---- 遮罩：同纸虚化（取当前纸色 + 高斯模糊，照片仍像贴在同一张纸上） ---- */
+.lightbox-veil {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--color-bg) 90%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+/* ---- 图体 ---- */
+.lightbox-figure {
+  /* 必须定位：遮罩是 absolute、图体是 static 时，定位元素绘在流内元素之上——
+     遮罩会盖住图片本身（挡住滚轮/拖动/滑动，还把图洗淡）。
+     position:relative 让图体进入定位层并排在遮罩之后 */
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+  max-width: 100%;
+  max-height: 100%;
+  min-height: 0;
+  opacity: 0;
+  transform: translateY(4px) scale(0.98);
+  transition: opacity 0.28s cubic-bezier(0.22, 0.61, 0.36, 1),
+              transform 0.28s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.lightbox:not([hidden]) .lightbox-figure { opacity: 1; transform: none; }
+@starting-style {
+  .lightbox:not([hidden]) .lightbox-figure { opacity: 0; transform: translateY(4px) scale(0.98); }
+}
+
+/* 画框立轴：宽裱边 + 一道朱砂内细边，像裱好的立轴 */
+.lightbox-mount {
+  padding: var(--lb-mat);
+  background: var(--color-mat);
+  border: 1px solid var(--color-frame);
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px var(--color-zhu-soft), var(--lb-shadow);
+  max-width: 100%;
+}
+/* 视口：与图片同尺寸，放大后超出部分裁掉——缩放/平移都在这一层内完成，
+   白边与柔影留在外层，所以放大时相纸不跟着变大 */
+.lightbox-view {
+  overflow: hidden;
+  width: fit-content;
+  max-width: 100%;
+  line-height: 0;
+}
+.lightbox-img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: calc(100vw - 2 * var(--lb-gap-x) - 2 * var(--lb-mat) - 2px);
+  max-height: calc(100vh - 2 * var(--lb-gap-y) - 2 * var(--lb-mat) - 2px - 3.5rem);
+  max-height: calc(100dvh - 2 * var(--lb-gap-y) - 2 * var(--lb-mat) - 2px - 3.5rem);
+  cursor: zoom-in;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  transform-origin: center center;
+  transition: transform 0.18s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.lightbox.is-zoomed .lightbox-img { cursor: grab; }
+.lightbox-img.is-dragging { cursor: grabbing; transition: none; }
+
+/* ---- 题跋式图注 ---- */
+.lightbox-cap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 0;
+  max-width: 100%;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+.lightbox-cap:empty { display: none; }
+.lightbox-cap::before,
+.lightbox-cap::after {
+  content: "";
+  flex: 0 0 2em;
+  height: 1px;
+  background: var(--color-frame);
+}
+
+/* ---- 关闭 / 翻页 / 篇数 ---- */
+.lightbox-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--color-text);
+  cursor: pointer;
+  opacity: 0.72;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.lightbox-close:hover { opacity: 1; transform: scale(1.08); }
+
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 64px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.2s ease;
+}
+.lightbox-nav:hover { opacity: 1; }
+.lightbox-nav[hidden] { display: none; }
+.lightbox-prev { left: 6px; }
+.lightbox-next { right: 6px; }
+
+.lightbox-count {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  color: var(--color-text-secondary);
+}
+.lightbox-count[hidden] { display: none; }
+
+@media (max-width: 640px) {
+  .lightbox { --lb-gap-x: 3vw; --lb-gap-y: 3vh; }
+  .lightbox-nav { display: none; }   /* 窄屏用滑动翻页 */
+  .lightbox-cap { font-size: 0.78rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lightbox,
+  .lightbox-figure,
+  .lightbox-img,
+  .lightbox-close,
+  .lightbox-nav { transition: none; }
+}
+
 .post-content blockquote {
   margin: 1.4em 0;
   padding: 8px 1.4em;

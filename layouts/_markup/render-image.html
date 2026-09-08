@@ -1,13 +1,16 @@
 {{- /*
   图片渲染钩子：page bundle 内图片走 Hugo image processing（WebP + srcset + 防抖动尺寸），
   外链图片原样输出。全部 lazy 加载。
+  每张图再包一层 <a class="img-zoom">：href 指向最大档（1600px WebP），
+  图窗（site.js「图片灯箱」段）接管点击；无 JS 时就是「点开看原图」的朴素降级。
   注意：$ 是 hook 上下文；with 块内 . 是 page resource。
 */ -}}
 {{- $u := urls.Parse .Destination -}}
 {{- $alt := .PlainText -}}
 {{- $title := .Title -}}
+{{- $cap := or $title $alt -}}
 {{- if $u.IsAbs -}}
-  <img src="{{ $u.String }}" alt="{{ $alt }}" loading="lazy" decoding="async">
+  <a class="img-zoom" href="{{ $u.String }}" data-caption="{{ $cap | htmlEscape }}"><img src="{{ $u.String }}" alt="{{ $alt }}" loading="lazy" decoding="async"></a>
 {{- else -}}
   {{- with .Page.Resources.GetMatch $u.Path -}}
     {{- if eq .ResourceType "image" -}}
@@ -20,15 +23,17 @@
           $s2.RelPermalink $s2.Width
           $main.RelPermalink $main.Width
           $main.Width $main.Height ($alt | htmlEscape) -}}
+      {{- $link := printf `<a class="img-zoom" href="%s" data-caption="%s">%s</a>`
+          $main.RelPermalink ($cap | htmlEscape) $img -}}
       {{- with $title -}}
-      <figure class="post-figure">{{ $img | safeHTML }}<figcaption>{{ $title }}</figcaption></figure>
+      <figure class="post-figure">{{ $link | safeHTML }}<figcaption>{{ $title }}</figcaption></figure>
       {{- else -}}
-      {{ $img | safeHTML }}
+      {{ $link | safeHTML }}
       {{- end -}}
     {{- else -}}
-      <img src="{{ .RelPermalink }}" alt="{{ $alt }}" loading="lazy" decoding="async">
+      <a class="img-zoom" href="{{ .RelPermalink }}" data-caption="{{ $cap | htmlEscape }}"><img src="{{ .RelPermalink }}" alt="{{ $alt }}" loading="lazy" decoding="async"></a>
     {{- end -}}
   {{- else -}}
-    <img src="{{ $u.String }}" alt="{{ $alt }}" loading="lazy" decoding="async">
+    <a class="img-zoom" href="{{ $u.String }}" data-caption="{{ $cap | htmlEscape }}"><img src="{{ $u.String }}" alt="{{ $alt }}" loading="lazy" decoding="async"></a>
   {{- end -}}
 {{- end -}}
