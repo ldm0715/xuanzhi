@@ -28,6 +28,7 @@
 - **图窗（点开看大图）**：点正文图，照片在同一张纸上放大——「同纸虚化」遮罩（当前纸色 90% + 高斯模糊，明暗自动跟随，照片仍像贴在同一张宣纸上）+「画框立轴」裱装（18px 宽裱边、`--color-frame` 细框、一道朱砂内细边、深柔影），图注沿用题跋式两侧引线。支持 ←→ 翻页（篇数是汉字）、滚轮/双击缩放、拖动平移、双指捏合、窄屏左右滑动翻页、Esc 与点遮罩关闭。**无 JS 时退化为「点开看原图」的普通链接**
 - **分发与 SEO**：`robots.txt`（声明 sitemap）、Open Graph 全套（含 `og:image`——取 front matter `cover` 裁成 1200×630，没有就用主题默认图）、`BlogPosting` / `WebSite` JSON-LD、自定义 RSS（摘要是纯文本、完整正文进 `<content:encoded>`、去掉阅读器里会变成乱码的锚点 SVG）
 - **渲染与排版**：公式**构建期**渲染（`transform.ToMath`，禁 JS / 爬虫 / RSS 阅读器都能拿到排好版的公式，客户端不再加载 300KB JS）、外链在服务端标记并开新标签、`@media print` 打印样式（隐藏界面元素、黑白还原、外链印出地址）、`:target` 落点朱砂短竖、滚动条随点缀色、语义元素（`abbr`/`cite`/`q`/`var`…）与定义列表、`<em>` 用中文着重号代替假斜体
+- **站内搜索**：头栏放大镜 → 素纸面板；索引在构建期由 `layouts/home.json` 生成（`/index.json`），**打开面板才 fetch**，纯前端子串匹配、标题命中优先、正文命中给片段并高亮。**没有中文分词**——搜「排版设计」命中不了「排版与设计」；要真正的分词得换 Pagefind（选型对比见 `docs/structure.md`）
 - 内置：归档按年/月分组、分类、标签、目录（TOC）、分页、RSS、404
 
 ## 引入你的博客
@@ -68,6 +69,7 @@ git submodule add <你的主题仓库地址> themes/xuanzhi
 | 公式**构建期**渲染 | `markup.goldmark.extensions.passthrough.enable = true` + delimiters | 公式不被识别，页面上是原始 LaTeX（客户端渲染已移除，没有回落） |
 | 正文手写 HTML | `markup.goldmark.renderer.unsafe = true` | `<mark>` / `<kbd>` / `<figure>` / 语义标签被转义成文本 |
 | 头栏菜单 | `[[menus.main]]` | **退回自动导航**（主内容段 + 分类法页）——不是坏，但加页面就得改模板 |
+| 站内搜索 | `[outputs] home = ['html', 'rss', 'json']` | `/index.json` 不生成，面板打开后提示「索引加载失败」 |
 | 绝对地址正确 | `baseURL`（末尾带 `/`） | sitemap / canonical / og:url / og:image / JSON-LD / RSS 全指向 `example.org` |
 | 首页欢迎语 | `params.hero.greeting` | 用主题默认（i18n 的 `greeting`） |
 | 默认点缀色 | `params.accent` | `terracotta`（访客仍可在外观面板自行切换） |
@@ -83,6 +85,10 @@ theme = 'xuanzhi'
 
 enableRobotsTXT = true
 enableEmoji = true
+
+# 站内搜索：首页多输出一份 json（主题的 layouts/home.json 生成 /index.json）
+[outputs]
+  home = ['html', 'rss', 'json']
 
 [markup]
   [markup.highlight]

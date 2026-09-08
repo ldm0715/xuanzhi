@@ -177,7 +177,8 @@ html.xz-page-in main {
 .site-nav a:hover { color: var(--color-accent); }
 
 #theme-toggle,
-#appearance-toggle {
+#appearance-toggle,
+#search-toggle {
   display: inline-grid;
   place-items: center;
   width: 30px;
@@ -190,7 +191,8 @@ html.xz-page-in main {
   cursor: pointer;
 }
 #theme-toggle:hover,
-#appearance-toggle:hover { color: var(--color-accent); }
+#appearance-toggle:hover,
+#search-toggle:hover { color: var(--color-accent); }
 
 /* 两个 Material 图标叠放同一格，随主题淡入淡出切换 */
 #theme-toggle .icon-sun,
@@ -242,6 +244,118 @@ html[data-theme="light"]::view-transition-new(root) {
 /* flex 而非块级：否则里面的 inline-grid 按钮会落进行框、按基线对齐，
    盒子被行高撑到 40px 上下，按钮贴在顶部，和右侧主题按钮差出半格 */
 .appearance { position: relative; display: flex; }
+
+/* ============ 搜索面板 ============
+ * 索引在构建期由 layouts/home.json 生成（/index.json），打开面板时才 fetch。
+ * 定位算术同外观面板：搜索按钮右缘距头栏右缘 96px
+ * （主题按钮 30 + 间距 18 + 外观按钮 30 + 间距 18），所以右贴边写 -96px
+ */
+.search { position: relative; display: flex; }
+
+.search-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: -96px;
+  z-index: 30;
+  width: min(420px, calc(100vw - 40px));
+  max-height: min(70vh, 520px);
+  display: flex;
+  flex-direction: column;
+  padding: 14px 16px 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-light);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(40, 34, 22, 0.10);
+  /* 开合同外观面板：hidden 属性 + allow-discrete */
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.18s ease, transform 0.18s ease, display 0.18s ease allow-discrete;
+}
+/* 必须显式压掉：面板自己写了 display:flex，会盖过 hidden 属性的 UA display:none
+   （外观面板没写 display 才不需要这一条） */
+.search-panel[hidden] { display: none; }
+.search-panel:not([hidden]) { opacity: 1; transform: none; }
+@starting-style {
+  .search-panel:not([hidden]) { opacity: 0; transform: translateY(-4px); }
+}
+html[data-theme="dark"] .search-panel { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35); }
+
+/* 输入框：无边框，底线随点缀色 */
+.search-input {
+  width: 100%;
+  padding: 6px 2px 9px;
+  border: 0;
+  border-bottom: 1px solid var(--color-rule);
+  background: none;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  color: var(--color-text);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+.search-input::placeholder { color: var(--color-text-secondary); }
+.search-input:focus { border-bottom-color: var(--color-zhu); }
+
+.search-hint {
+  margin: 10px 0 0;
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+}
+.search-hint[hidden] { display: none; }
+
+.search-results {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  overflow-y: auto;
+  min-height: 0;   /* 让结果列表在面板里滚动，而不是把面板撑出屏幕 */
+}
+.search-results:empty { display: none; }
+
+/* 结果行：沿用归档页的目录式——日期居左、题名贴右 */
+.search-results li { border-top: 1px solid var(--color-border-light); }
+.search-results li:first-child { border-top: 0; }
+.search-results a {
+  display: block;
+  padding: 9px 2px;
+  color: var(--color-text);
+  text-decoration: none;
+}
+.search-result-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+/* 正文片段：只在正文命中时出现，让人知道凭什么命中 */
+.search-result-snippet {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+.search-results a:hover,
+.search-results a:focus-visible { color: var(--color-accent); }
+.search-results time {
+  flex-shrink: 0;
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.search-result-title { flex: 1; text-align: right; }
+/* 命中的字：用已有的 mark 语言（淡朱底） */
+.search-results mark {
+  background: var(--color-accent-soft);
+  color: inherit;
+  padding: 0 0.1em;
+  border-radius: 3px;
+}
+
+@media (max-width: 640px) {
+  /* 窄屏没有改导航间距，按钮右缘距头栏右缘仍是 96px，所以面板宽度要相应收窄，
+     否则左缘会被推出视口（left = 100vw − 96 − (100vw − 116) = 20px） */
+  .search-panel { width: calc(100vw - 116px); }
+}
 
 .appearance-panel {
   position: absolute;

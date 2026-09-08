@@ -3,7 +3,10 @@
       data-theme="light"
       data-accent="{{ or site.Params.accent "terracotta" }}"
       data-copy="{{ i18n "copy" }}"
-      data-copied="{{ i18n "copied" }}">
+      data-copied="{{ i18n "copied" }}"
+      data-search-empty="{{ i18n "searchEmpty" }}"
+      data-search-loading="{{ i18n "searchLoading" }}"
+      data-search-error="{{ i18n "searchError" }}">
 <head>
   {{ partial "head.html" . }}
 </head>

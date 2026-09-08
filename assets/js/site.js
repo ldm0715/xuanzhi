@@ -105,6 +105,164 @@
     syncPressed();
   })();
 
+  /* 站内搜索：索引在构建期由 layouts/home.json 生成（/index.json），
+     打开面板时才 fetch。中文不分词，走子串匹配——标题命中权重最高，标签次之，正文最低。
+     这是「能用」版：没有分词、没有相关度模型，搜「排版设计」命中不了「排版与设计」。
+     要真正的中文分词得换 Pagefind 之类（见 docs/structure.md 的选型对比）。 */
+  (function () {
+    var btn = document.getElementById('search-toggle');
+    var panel = document.getElementById('search-panel');
+    var input = document.getElementById('search-input');
+    var hint = document.getElementById('search-hint');
+    var list = document.getElementById('search-results');
+    if (!btn || !panel || !input || !list) return;
+
+    var INDEX_URL = '/index.json';
+    var MAX_HITS = 12;
+    var root = document.documentElement;
+    var initialHint = hint ? hint.textContent : '';
+    var T = {
+      empty: root.dataset.searchEmpty || '没有找到相关文章',
+      loading: root.dataset.searchLoading || '正在载入索引…',
+      error: root.dataset.searchError || '索引加载失败，刷新页面再试'
+    };
+    var docs = null, loading = false, failed = false;
+
+    function setHint(text) {
+      if (!hint) return;
+      if (text) { hint.textContent = text; hint.removeAttribute('hidden'); }
+      else { hint.setAttribute('hidden', ''); }
+    }
+
+    function close() {
+      panel.setAttribute('hidden', '');
+      btn.setAttribute('aria-expanded', 'false');
+    }
+
+    function open() {
+      panel.removeAttribute('hidden');
+      btn.setAttribute('aria-expanded', 'true');
+      input.focus();
+      if (!docs && !loading && !failed) load();
+    }
+
+    function load() {
+      if (typeof fetch !== 'function') { failed = true; setHint(T.error); return; }
+      loading = true;
+      setHint(T.loading);
+      fetch(INDEX_URL)
+        .then(function (res) {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.json();
+        })
+        .then(function (json) {
+          docs = json || [];
+          loading = false;
+          setHint(initialHint);
+          render(input.value);
+        })
+        .catch(function () {
+          loading = false;
+          failed = true;
+          setHint(T.error);
+        });
+    }
+
+    function esc(s) {
+      return String(s).replace(/[&<>"]/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+      });
+    }
+
+    /* 命中处包 <mark>：先转义再插标记，正文里的尖括号不会变成 HTML */
+    function mark(text, q) {
+      var i = String(text).toLowerCase().indexOf(q);
+      if (i < 0) return esc(text);
+      return esc(text.slice(0, i)) + '<mark>' + esc(text.slice(i, i + q.length)) + '</mark>' + esc(text.slice(i + q.length));
+    }
+
+    function search(q) {
+      var hits = [];
+      for (var i = 0; i < docs.length; i++) {
+        var d = docs[i];
+        var inTitle = String(d.title).toLowerCase().indexOf(q) >= 0;
+        var inTag = (d.tags || []).concat(d.categories || []).join(' ').toLowerCase().indexOf(q) >= 0;
+        var inBody = String(d.content || '').toLowerCase().indexOf(q) >= 0;
+        if (inTitle || inTag || inBody) {
+          hits.push({ d: d, w: (inTitle ? 3 : 0) + (inTag ? 2 : 0) + (inBody ? 1 : 0) });
+        }
+      }
+      hits.sort(function (a, b) { return b.w - a.w || (a.d.date < b.d.date ? 1 : -1); });
+      return hits.slice(0, MAX_HITS).map(function (h) { return h.d; });
+    }
+
+    /* 正文片段：截命中处前后一小段，让人知道凭什么命中 */
+    function snippet(text, q) {
+      var s = String(text || '');
+      var i = s.toLowerCase().indexOf(q);
+      if (i < 0) return '';
+      var start = i > 20 ? i - 20 : 0;
+      var end = i + q.length + 30 < s.length ? i + q.length + 30 : s.length;
+      return (start > 0 ? '…' : '') + mark(s.slice(start, end), q) + (end < s.length ? '…' : '');
+    }
+
+    function render(q) {
+      if (!docs) return;
+      var needle = String(q || '').trim().toLowerCase();
+      list.textContent = '';
+      if (!needle) { setHint(initialHint); return; }
+      var hits = search(needle);
+      if (!hits.length) { setHint(T.empty); return; }
+      setHint('');
+      var frag = document.createDocumentFragment();
+      hits.forEach(function (d) {
+        var li = document.createElement('li');
+        var a = document.createElement('a');
+        a.href = d.url;
+
+        var head = document.createElement('span');
+        head.className = 'search-result-head';
+        var t = document.createElement('time');
+        t.textContent = d.date;
+        var title = document.createElement('span');
+        title.className = 'search-result-title';
+        title.innerHTML = mark(d.title, needle);   /* mark() 内部已转义 */
+        head.appendChild(t);
+        head.appendChild(title);
+        a.appendChild(head);
+
+        var snip = snippet(d.content, needle);
+        if (snip) {
+          var sn = document.createElement('span');
+          sn.className = 'search-result-snippet';
+          sn.innerHTML = snip;                     /* snippet() 内部已转义 */
+          a.appendChild(sn);
+        }
+
+        li.appendChild(a);
+        frag.appendChild(li);
+      });
+      list.appendChild(frag);
+    }
+
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (panel.hasAttribute('hidden')) open(); else close();
+    });
+    document.addEventListener('click', function (e) {
+      if (!panel.hasAttribute('hidden') && !e.target.closest('.search')) close();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !panel.hasAttribute('hidden')) close();
+    });
+    input.addEventListener('input', function () { render(input.value); });
+    input.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter') return;
+      var first = list.querySelector('a');
+      if (first) { e.preventDefault(); window.location.href = first.getAttribute('href'); }
+    });
+  })();
+
   /* 复制按钮文案由 baseof.html 写在 <html data-copy/data-copied> 上——
      JS 拿不到 Hugo 的 i18n，只能由模板传进来；没传时退回中文默认值 */
   var COPY = document.documentElement.dataset.copy || '复制';

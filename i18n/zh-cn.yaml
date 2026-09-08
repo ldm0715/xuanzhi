@@ -49,6 +49,15 @@ anonymous: 佚名
 scrollHint: 向下翻阅
 recentPosts: 近期文章
 
+# ---- 搜索 ----
+search: 搜索
+searchPlaceholder: 搜索文章…
+searchHint: 输入关键词，从标题和正文里找
+searchEmpty: 没有找到相关文章
+searchLoading: 正在载入索引…
+searchError: 索引加载失败，刷新页面再试
+searchOpen: 打开搜索
+
 # ---- 文章页 ----
 postedAt: 撰于
 jumpToSection: 跳转到此节

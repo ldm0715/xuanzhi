@@ -43,8 +43,7 @@
 
 ### P2 · 结构性 —— [`structure.md`](structure.md)
 
-**已完成**：菜单系统 ✅ · i18n 补齐 ✅（实现约定见 `CLAUDE.md`）
-**待评估**：搜索索引（2026-09-08 调研后搁置，结论与选型对比已写入 `structure.md`）
+**已完成**：菜单系统 ✅ · i18n 补齐 ✅ · 搜索索引 ✅（「能用」版，无中文分词；升级选型见 `structure.md`）
 **备查**：相关文章 · `lastmod` / `enableGitInfo` · 面包屑 · series 分类法 · 作者页
 
 ### 其他 —— [`uncovered-paths.md`](uncovered-paths.md)
