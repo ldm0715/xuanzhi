@@ -62,6 +62,11 @@
 <link rel="stylesheet" href="/fonts/jbm/700.css">
 {{- end -}}
 
+{{- /* 题字宋体：思源宋体 700（自托管切片，unicode-range 按需加载） */ -}}
+{{- if fileExists "themes/xuanzhi/static/fonts/noto-serif-sc/700.css" -}}
+<link rel="stylesheet" href="/fonts/noto-serif-sc/700.css">
+{{- end -}}
+
 {{- $js := resources.Get "js/site.js" | minify | fingerprint -}}
 <script defer src="{{ $js.RelPermalink }}"></script>
 

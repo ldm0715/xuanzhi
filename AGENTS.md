@@ -26,11 +26,12 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 - 外观系统全走 `html` 的 `data-*` 属性 + CSS 变量：`data-theme`(light/dark)、`data-accent`(terracotta/indigo)、`data-bg`(5 种纸面纹理)、`data-hr`(4 种分隔线)；选择持久化在 localStorage（键前缀 `xuanzhi-`），`head.html` 内联脚本负责防闪烁恢复
 - `layouts/` 是 0.146+ 顶层模板结构；`_markup/render-image.html`（page bundle 图片 → WebP/srcset）和 `_markup/render-heading.html`（标题毛笔圈点 + 锚点）是渲染钩子
 - 首页 = 诗笺 + 山水画框卡片两段：诗笺由 `home.html` 构建期 `resources.GetRemote` 预取绝句（`try` + 内置《鹿柴》兜底）、`site.js` 每次到访随机刷新（`lang=zh-Hant` 繁体）；画框卡片 = `partials/post-card.html`（结构）+ `partials/post-card-cover.html`（封面：front matter `cover` 自定义图，否则按标题哈希生成八式水墨小品——远山晓日/竹影/空亭听雨/汀洲孤雁/孤舟远影/红杏出墙/云岫/杨柳岸，定妆预览稿在 `static/images/covers/`）；卡片颜色一律走 token（摘要/标签用 `--color-text-note`，题字字体栈 `--font-title` 宋体优先、无则落文楷）
-- 朱饰系 token（`--color-zhu` / `--color-zhu-strong` / `--color-zhu-soft`）随 `data-accent` 换色：terracotta = 朱砂，indigo = 黛青（青印）；新增装饰色一律进 token.css 并补齐亮暗 + 双点缀色四象限
+- 朱饰系 token（`--color-zhu` / `--color-zhu-strong` / `--color-zhu-soft`）随 `data-accent` 换色：terracotta = 朱砂，indigo = 黛青（青印）；`--tex-*` 纹理 token（`--tex-seal` / `--tex-bamboo` / `--tex-birds` 等 data-uri）的颜色烤在 URI 里，同样必须补齐亮暗 × 双点缀色四象限；无色遮罩类（`--tex-mask-paste` 印泥飞白 mask）单份即可
+- 章界横线统一用 `--color-rule`（点缀色 28% 与 `--color-frame` 调和），随点缀色橘/青自动切换；正文「纸」系元素（纸底/格纹/折痕浅线）刻意不跟点缀色
 - 头栏是半透明宣纸毛玻璃（`--color-header-bg` + backdrop-filter）；头栏宽度随页面类型过渡：窄 `--content-width` / 文章页 1150px，CSS 基础值与 `site.js`「头栏宽度过渡」段的 NARROW/WIDE 常量必须同步改
 - 明暗切换圆形揭示：`site.js`「明暗切换」段写 `--theme-x/y/r`（**百分比**，理由见已知坑），`main.css`「明暗切换圆形揭示」段定义方向与 keyframes；方向靠「动画运行时 `data-theme` 已是新值」判定（dark 收缩旧快照、light 扩张新快照），改时长/曲线只动 main.css 两条 `animation`
 - KaTeX 按需加载：`head.html` 用 `findRE` 检测 `.RawContent` 里的公式定界符，只有含公式的页面引入
-- `static/` 下 27MB 是自托管资产（霞鹜文楷切片、JetBrains Mono、KaTeX），属正常入库内容
+- `static/` 下约 30MB 是自托管资产（霞鹜文楷切片、思源宋体 700 切片、JetBrains Mono、KaTeX），属正常入库内容
 
 ## 已知坑（都踩过）
 
@@ -44,6 +45,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 - 画区容器 21:10 且 SVG 居中裁切（slice）：可见窗口约 viewBox y 37~222，145 以下开始渐隐淡出——新水墨小品的关键元素必须落在这窗口内（杨柳的水岸带曾整个掉出窗口，已踩）
 - 水墨小品的语言约定：疏笔淡墨、大面积留白，单式元素 ≤6，线条/晕带为主、忌实心大色块与机械直线（空亭听雨曾因实心亭子+满幅雨丝显得格格不入，返工过）；同一式的形状在 `post-card-cover.html` 与 `static/images/covers/` 预览稿两处同步
 - View Transitions 的快照盒在**浏览器缩放≠100% 时不按 CSS 像素取尺寸**（Edge 页面缩放 125% 实测圆心大幅偏移）：圆形揭示的圆心/半径必须写**百分比**（对 `root.clientWidth/clientHeight` 取比例，半径对 `sqrt(w²+h²)/√2` 解析基准取比例），绝对 px 只在 100% 缩放下正确（已踩过）
+- `<details>` 收起瞬间内容即被移出渲染树，CSS 做不了退出动画——收合动画必须挂在 `::details-content` 伪元素上并配合 `interpolate-size: allow-keywords`（Chrome 131+/Safari 18.2+，Firefox 回退瞬时收合，可接受）
+- Git Bash 里 grep 生成的文件清单带 CRLF，直接拼进 curl URL 会报 `(3) Malformed input to a URL function`——先 `tr -d '\r'`（思源宋体 97 个切片批量下载时已踩）；另外批量下载 jsdelivr 切片逐个串行即可，并发 xargs 全军覆没过
+- 写死的行高/字号推导（如落款章 `height` 撑竖排换列）会随配置漂移——文末落款章已改为 `split` 逐字入 grid 格、模板按字数算行列，别再回退到文本流换行
 
 ## 相关文档
 

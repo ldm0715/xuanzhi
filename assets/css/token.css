@@ -9,16 +9,40 @@
   /* 纸 */
   --color-bg: #F7F4EC;
   --color-surface: #FCFAF4;
-  --color-code-bg: #EFEAE0;
+  --color-code-bg: #ECE6D8;
   --color-header-bg: rgba(247, 244, 236, 0.86);
   --color-border: #DDD6C8;
   --color-border-light: #E8E3D6;
 
   /* 墨 */
   --color-title: #26241F;
-  --color-text: #3A3833;
-  --color-text-secondary: #8C877B;
+  --color-text: #34302A;
+  --color-text-secondary: #8A7F70;
   --color-text-note: #5E5848;   /* 画框卡摘要/批注标签：比次档墨深半档的灰褐 */
+
+  /* 批注笺：引用块淡赭石底 / 表头极浅褐底纹 */
+  --color-quote-bg: #F2ECDC;
+  --color-quote-line: rgba(148, 88, 62, 0.55);
+  --color-table-head: #F1EADA;
+  --color-case: #F0EAD6;   /* 书函折叠块：旧木函/锦缎盒底 */
+
+  /* 章界横线：点缀色与浅褐调和，橘/青随点缀色自动切换 */
+  --color-rule: color-mix(in srgb, var(--color-accent) 28%, var(--color-frame));
+
+  /* 相纸与淡墨：图片画框 / 列表稀释墨记 / 任务小框 */
+  --color-frame: #D6C8B8;
+  --color-mat: #FDFCF8;
+  --color-ink-weak: #B3A58F;
+  --pic-shadow: 0 1px 2px rgba(96, 82, 58, 0.06), 0 10px 30px rgba(96, 82, 58, 0.12);
+
+  /* 竹影：灰褐简笔墨竹（暗色换纸灰墨）——三竿式：前竿浓、中竿次之、背竿最淡 */
+  --tex-bamboo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 200' fill='none'%3E%3Cpath d='M192 8 C 166 36 134 76 106 130' stroke='%23AFA593' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M138 72 C 152 76 164 84 174 96' stroke='%23AFA593' stroke-width='1.5' stroke-linecap='round' stroke-opacity='.8'/%3E%3Cpath d='M150 40 C 158 28 170 20 186 18 C 174 30 162 38 150 40 Z' fill='%23AFA593' fill-opacity='.9'/%3E%3Cpath d='M152 44 C 164 40 178 42 190 50 C 176 52 162 50 152 44 Z' fill='%23AFA593' fill-opacity='.8'/%3E%3Cpath d='M148 36 C 152 24 160 14 172 8 C 166 20 158 30 148 36 Z' fill='%23AFA593' fill-opacity='.85'/%3E%3Cpath d='M158 50 C 168 48 178 50 186 56 C 176 58 166 56 158 50 Z' fill='%23AFA593' fill-opacity='.7'/%3E%3Cpath d='M110 124 C 120 120 134 122 146 130 C 132 132 118 130 110 124 Z' fill='%23AFA593' fill-opacity='.9'/%3E%3Cpath d='M108 128 C 116 138 124 148 134 154 C 122 150 112 140 108 128 Z' fill='%23AFA593' fill-opacity='.85'/%3E%3Cpath d='M104 126 C 94 134 86 146 82 160 C 92 152 100 140 104 126 Z' fill='%23AFA593' fill-opacity='.8'/%3E%3Cpath d='M114 118 C 122 112 132 110 142 112 C 132 118 122 120 114 118 Z' fill='%23AFA593' fill-opacity='.7'/%3E%3Cpath d='M120 2 C 116 40 108 92 92 142' stroke='%23AFA593' stroke-width='1.8' stroke-linecap='round' stroke-opacity='.75'/%3E%3Cpath d='M110 64 C 118 56 130 52 144 52 C 132 60 120 63 110 64 Z' fill='%23AFA593' fill-opacity='.8'/%3E%3Cpath d='M108 68 C 118 66 130 68 142 74 C 129 76 116 73 108 68 Z' fill='%23AFA593' fill-opacity='.7'/%3E%3Cpath d='M112 60 C 116 50 124 42 136 38 C 128 48 120 56 112 60 Z' fill='%23AFA593' fill-opacity='.75'/%3E%3Cpath d='M92 140 C 100 132 112 128 126 128 C 114 136 102 140 92 140 Z' fill='%23AFA593' fill-opacity='.8'/%3E%3Cpath d='M90 144 C 98 154 108 161 120 164 C 108 162 97 154 90 144 Z' fill='%23AFA593' fill-opacity='.7'/%3E%3Cpath d='M58 4 C 60 40 64 92 72 148' stroke='%23AFA593' stroke-width='1.3' stroke-linecap='round' stroke-opacity='.55'/%3E%3Cpath d='M64 76 C 72 68 84 63 98 62 C 86 70 74 75 64 76 Z' fill='%23AFA593' fill-opacity='.65'/%3E%3Cpath d='M62 80 C 72 79 84 82 96 89 C 83 89 70 86 62 80 Z' fill='%23AFA593' fill-opacity='.55'/%3E%3Cpath d='M66 72 C 70 62 78 54 90 50 C 82 60 74 68 66 72 Z' fill='%23AFA593' fill-opacity='.6'/%3E%3Cpath d='M72 148 C 82 144 94 144 106 148 C 94 152 82 152 72 148 Z' fill='%23AFA593' fill-opacity='.65'/%3E%3Cpath d='M74 152 C 80 160 88 166 98 169 C 88 168 78 162 74 152 Z' fill='%23AFA593' fill-opacity='.6'/%3E%3C/svg%3E");
+
+  /* 残印：毛边 + 镂空 + 斑驳的小方印 */
+  --tex-seal: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cdefs%3E%3Cfilter id='s' x='-30%25' y='-30%25' width='160%25' height='160%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.22' numOctaves='2' seed='9' result='n'/%3E%3CfeDisplacementMap in='SourceGraphic' in2='n' scale='2.4'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23s)'%3E%3Cpath fill-rule='evenodd' fill='%23A6493B' d='M2.5 2.5 H13.5 V13.5 H2.5 Z M6 6 H10 V10 H6 Z'/%3E%3Crect x='4' y='3.4' width='3' height='1' fill='%23F7F4EC' opacity='.3'/%3E%3Crect x='11' y='11.6' width='2.4' height='.9' fill='%23F7F4EC' opacity='.25'/%3E%3C/g%3E%3C/svg%3E");
+
+  /* 印泥镂空 mask：低频噪声阈值化——大块留墨、随机露纸、边缘自然残缺 */
+  --tex-mask-paste: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='120'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.5 0.45' numOctaves='2' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 6 -2'/%3E%3C/filter%3E%3Crect width='140' height='120' filter='url(%23m)'/%3E%3C/svg%3E");
 
   /* 稿纸格纹（墨调，极淡） */
   --grid-line: rgba(116, 104, 82, 0.07);
@@ -32,6 +56,9 @@
   /* 微噪点：feTurbulence 随机颗粒（淡墨色，tile 平铺） */
   --tex-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.30 0 0 0 0 0.27 0 0 0 0 0.21 0 0 0 0.055 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
   --vignette: rgba(56, 46, 28, 0.06);
+
+  /* 飞鸟淡墨：页面顶缘的一行雁阵水印（亮色墨 / 暗色纸墨） */
+  --tex-birds: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 260 140' fill='none' stroke='%234A4438' stroke-linecap='round'%3E%3Cpath d='M26 44 q 10 -13 20 0 q 10 -13 20 0' stroke-width='2.4' stroke-opacity='.16'/%3E%3Cpath d='M120 22 q 8 -10 16 0 q 8 -10 16 0' stroke-width='2' stroke-opacity='.13'/%3E%3Cpath d='M196 60 q 6 -8 12 0 q 6 -8 12 0' stroke-width='1.7' stroke-opacity='.11'/%3E%3Cpath d='M84 84 q 5 -6 10 0 q 5 -6 10 0' stroke-width='1.4' stroke-opacity='.08'/%3E%3C/svg%3E");
 
   /* 分隔线四式用色（面板 html[data-hr] 切换） */
   --hr-ink-strong: rgba(90, 75, 50, 0.8);
@@ -56,14 +83,14 @@
   --color-accent-hover: #C4684A;
   --color-accent-soft: rgba(218, 119, 86, 0.14);
 
-  /* 代码高亮（亮色，宣纸暖化） */
+  /* 代码高亮（亮色，宣纸暖化；函数/类型走深藏青与黛紫，求水墨沉稳） */
   --code-comment: #9B9490;
   --code-keyword: #A0522D;
   --code-string: #4E7A3E;
   --code-number: #2E7D6F;
-  --code-function: #7B4B2A;
-  --code-type: #7F5061;
-  --code-attr: #B5651D;
+  --code-function: #3E5C76;
+  --code-type: #5C5470;
+  --code-attr: #96602C;
   --code-operator: #6B6560;
   --code-deleted: #A34A3C;
   --code-added: #4E7A3E;
@@ -86,10 +113,12 @@ html[data-accent="indigo"] {
   --color-accent-hover: #333F52;
   --color-accent-soft: rgba(66, 80, 102, 0.14);
 
-  /* 朱饰随点缀色转青：印泥、信封朱框、邮戳（青印） */
+  /* 朱饰随点缀色转青：印泥、信封朱框、邮戳、批注笺朱线（青批） */
   --color-zhu: #425066;
   --color-zhu-strong: #333F52;
-  --color-zhu-soft: rgba(66, 80, 102, 0.34);
+  --color-zhu-soft: rgba(66, 80, 102, 0.5);
+  --color-quote-line: rgba(66, 80, 102, 0.5);
+  --tex-seal: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cdefs%3E%3Cfilter id='s' x='-30%25' y='-30%25' width='160%25' height='160%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.22' numOctaves='2' seed='9' result='n'/%3E%3CfeDisplacementMap in='SourceGraphic' in2='n' scale='2.4'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23s)'%3E%3Cpath fill-rule='evenodd' fill='%23425066' d='M2.5 2.5 H13.5 V13.5 H2.5 Z M6 6 H10 V10 H6 Z'/%3E%3Crect x='4' y='3.4' width='3' height='1' fill='%23F7F4EC' opacity='.3'/%3E%3Crect x='11' y='11.6' width='2.4' height='.9' fill='%23F7F4EC' opacity='.25'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 /* ============ 夜墨 ============ */
@@ -103,14 +132,32 @@ html[data-theme="dark"] {
 
   --color-title: #F4EEDF;
   --color-text: #E7E1D2;
-  --color-text-secondary: #AEA79A;
+  --color-text-secondary: #A89F90;
   --color-text-note: #B0A896;
+
+  /* 批注笺（暗色：夜纸上的暗赭） */
+  --color-quote-bg: #352D21;
+  --color-quote-line: rgba(205, 120, 95, 0.5);
+  --color-table-head: #383025;
+
+  /* 相纸与淡墨（暗色：影更深，纸面微亮以保持贴纸感） */
+  --color-case: #352D23;
+  --color-frame: #4A4234;
+  --color-mat: #3A3227;
+  --color-ink-weak: #83796A;
+  --pic-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 10px 30px rgba(0, 0, 0, 0.38);
+
+  --tex-bamboo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 200' fill='none'%3E%3Cpath d='M192 8 C 166 36 134 76 106 130' stroke='%23A79E8C' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M138 72 C 152 76 164 84 174 96' stroke='%23A79E8C' stroke-width='1.5' stroke-linecap='round' stroke-opacity='.8'/%3E%3Cpath d='M150 40 C 158 28 170 20 186 18 C 174 30 162 38 150 40 Z' fill='%23A79E8C' fill-opacity='.9'/%3E%3Cpath d='M152 44 C 164 40 178 42 190 50 C 176 52 162 50 152 44 Z' fill='%23A79E8C' fill-opacity='.8'/%3E%3Cpath d='M148 36 C 152 24 160 14 172 8 C 166 20 158 30 148 36 Z' fill='%23A79E8C' fill-opacity='.85'/%3E%3Cpath d='M158 50 C 168 48 178 50 186 56 C 176 58 166 56 158 50 Z' fill='%23A79E8C' fill-opacity='.7'/%3E%3Cpath d='M110 124 C 120 120 134 122 146 130 C 132 132 118 130 110 124 Z' fill='%23A79E8C' fill-opacity='.9'/%3E%3Cpath d='M108 128 C 116 138 124 148 134 154 C 122 150 112 140 108 128 Z' fill='%23A79E8C' fill-opacity='.85'/%3E%3Cpath d='M104 126 C 94 134 86 146 82 160 C 92 152 100 140 104 126 Z' fill='%23A79E8C' fill-opacity='.8'/%3E%3Cpath d='M114 118 C 122 112 132 110 142 112 C 132 118 122 120 114 118 Z' fill='%23A79E8C' fill-opacity='.7'/%3E%3Cpath d='M120 2 C 116 40 108 92 92 142' stroke='%23A79E8C' stroke-width='1.8' stroke-linecap='round' stroke-opacity='.75'/%3E%3Cpath d='M110 64 C 118 56 130 52 144 52 C 132 60 120 63 110 64 Z' fill='%23A79E8C' fill-opacity='.8'/%3E%3Cpath d='M108 68 C 118 66 130 68 142 74 C 129 76 116 73 108 68 Z' fill='%23A79E8C' fill-opacity='.7'/%3E%3Cpath d='M112 60 C 116 50 124 42 136 38 C 128 48 120 56 112 60 Z' fill='%23A79E8C' fill-opacity='.75'/%3E%3Cpath d='M92 140 C 100 132 112 128 126 128 C 114 136 102 140 92 140 Z' fill='%23A79E8C' fill-opacity='.8'/%3E%3Cpath d='M90 144 C 98 154 108 161 120 164 C 108 162 97 154 90 144 Z' fill='%23A79E8C' fill-opacity='.7'/%3E%3Cpath d='M58 4 C 60 40 64 92 72 148' stroke='%23A79E8C' stroke-width='1.3' stroke-linecap='round' stroke-opacity='.55'/%3E%3Cpath d='M64 76 C 72 68 84 63 98 62 C 86 70 74 75 64 76 Z' fill='%23A79E8C' fill-opacity='.65'/%3E%3Cpath d='M62 80 C 72 79 84 82 96 89 C 83 89 70 86 62 80 Z' fill='%23A79E8C' fill-opacity='.55'/%3E%3Cpath d='M66 72 C 70 62 78 54 90 50 C 82 60 74 68 66 72 Z' fill='%23A79E8C' fill-opacity='.6'/%3E%3Cpath d='M72 148 C 82 144 94 144 106 148 C 94 152 82 152 72 148 Z' fill='%23A79E8C' fill-opacity='.65'/%3E%3Cpath d='M74 152 C 80 160 88 166 98 169 C 88 168 78 162 74 152 Z' fill='%23A79E8C' fill-opacity='.6'/%3E%3C/svg%3E");
+
+  --tex-seal: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cdefs%3E%3Cfilter id='s' x='-30%25' y='-30%25' width='160%25' height='160%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.22' numOctaves='2' seed='9' result='n'/%3E%3CfeDisplacementMap in='SourceGraphic' in2='n' scale='2.4'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23s)'%3E%3Cpath fill-rule='evenodd' fill='%23D08A75' d='M2.5 2.5 H13.5 V13.5 H2.5 Z M6 6 H10 V10 H6 Z'/%3E%3Crect x='4' y='3.4' width='3' height='1' fill='%23282219' opacity='.35'/%3E%3Crect x='11' y='11.6' width='2.4' height='.9' fill='%23282219' opacity='.3'/%3E%3C/g%3E%3C/svg%3E");
 
   --grid-line: rgba(228, 221, 205, 0.06);
 
   /* 暗色噪点颗粒（纸色）与更深的暗角 */
   --tex-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.88 0 0 0 0 0.85 0 0 0 0 0.78 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
   --vignette: rgba(0, 0, 0, 0.16);
+
+  --tex-birds: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 260 140' fill='none' stroke='%23E7E1D2' stroke-linecap='round'%3E%3Cpath d='M26 44 q 10 -13 20 0 q 10 -13 20 0' stroke-width='2.4' stroke-opacity='.13'/%3E%3Cpath d='M120 22 q 8 -10 16 0 q 8 -10 16 0' stroke-width='2' stroke-opacity='.10'/%3E%3Cpath d='M196 60 q 6 -8 12 0 q 6 -8 12 0' stroke-width='1.7' stroke-opacity='.08'/%3E%3Cpath d='M84 84 q 5 -6 10 0 q 5 -6 10 0' stroke-width='1.4' stroke-opacity='.06'/%3E%3C/svg%3E");
 
   /* 暗色分隔线用色（纸色墨） */
   --hr-ink-strong: rgba(220, 210, 188, 0.7);
@@ -135,8 +182,8 @@ html[data-theme="dark"] {
   --code-keyword: #D49060;
   --code-string: #8FB87A;
   --code-number: #6FB3A3;
-  --code-function: #C98D68;
-  --code-type: #C08497;
+  --code-function: #8FA8C0;
+  --code-type: #A79BC0;
   --code-attr: #D69A55;
   --code-operator: #A39C8E;
   --code-deleted: #D98A7C;
@@ -151,4 +198,6 @@ html[data-theme="dark"][data-accent="indigo"] {
   --color-zhu: #8FA1C0;
   --color-zhu-strong: #A9B9D3;
   --color-zhu-soft: rgba(143, 161, 192, 0.32);
+  --color-quote-line: rgba(143, 161, 192, 0.5);
+  --tex-seal: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cdefs%3E%3Cfilter id='s' x='-30%25' y='-30%25' width='160%25' height='160%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.22' numOctaves='2' seed='9' result='n'/%3E%3CfeDisplacementMap in='SourceGraphic' in2='n' scale='2.4'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23s)'%3E%3Cpath fill-rule='evenodd' fill='%238FA1C0' d='M2.5 2.5 H13.5 V13.5 H2.5 Z M6 6 H10 V10 H6 Z'/%3E%3Crect x='4' y='3.4' width='3' height='1' fill='%23282219' opacity='.35'/%3E%3Crect x='11' y='11.6' width='2.4' height='.9' fill='%23282219' opacity='.3'/%3E%3C/g%3E%3C/svg%3E");
 }

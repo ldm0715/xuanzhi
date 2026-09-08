@@ -4,11 +4,14 @@
   <header class="post-header">
     <h1 class="post-title">{{ .Title }}</h1>
     <div class="post-meta">
-      <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006-01-02" }}</time>
-      <span aria-hidden="true"> · </span>{{ .WordCount }} {{ i18n "words" }}
-      <span aria-hidden="true"> · </span>≈ {{ math.Ceil (div (float .WordCount) 400.0) }} {{ i18n "minutes" }}
+      <span class="meta-item"><span class="meta-prefix">撰于</span><time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006-01-02" }}</time></span>
+      <span class="meta-sep" aria-hidden="true"></span>
+      <span class="meta-item">{{ .WordCount }} {{ i18n "words" }}</span>
+      <span class="meta-sep" aria-hidden="true"></span>
+      <span class="meta-item">≈ {{ math.Ceil (div (float .WordCount) 400.0) }} {{ i18n "minutes" }}</span>
       {{- with .GetTerms "tags" }}
-      <span aria-hidden="true"> · </span>{{- range . }}<a class="tag" href="{{ .RelPermalink }}">#{{ .Title }}</a> {{ end -}}
+      <span class="meta-sep" aria-hidden="true"></span>
+      <span class="meta-item meta-tags">{{- range . }}<a class="tag" href="{{ .RelPermalink }}">{{ .Title }}</a>{{ end -}}</span>
       {{- end }}
     </div>
   </header>
@@ -23,14 +26,22 @@
 
   <div class="post-content">
     {{ .Content }}
+    {{- with site.Title }}
+    {{- $chars := split . "" -}}
+    {{- $n := len $chars -}}
+    {{- $cols := 2 -}}
+    {{- $rows := math.Ceil (div (float $n) 2.0) -}}
+    {{- if le $n 2 -}}{{- $cols = 1 -}}{{- $rows = float $n -}}{{- end }}
+    <div class="post-sign-seal" aria-hidden="true"><span style="grid-template-columns: repeat({{ $cols }}, 18px); grid-template-rows: repeat({{ $rows }}, 18px);">{{ range $chars }}<i>{{ . }}</i>{{ end }}</span></div>
+    {{- end }}
   </div>
 
   <footer class="post-footer">
     {{- with .PrevInSection }}
-    <a class="post-nav" href="{{ .RelPermalink }}">← {{ .Title }}</a>
+    <a class="post-nav" href="{{ .RelPermalink }}"><span class="nav-label">上一篇</span><span class="nav-title">{{ .Title }}</span></a>
     {{- end }}
     {{- with .NextInSection }}
-    <a class="post-nav post-nav-next" href="{{ .RelPermalink }}">{{ .Title }} →</a>
+    <a class="post-nav post-nav-next" href="{{ .RelPermalink }}"><span class="nav-label">下一篇</span><span class="nav-title">{{ .Title }}</span></a>
     {{- end }}
   </footer>
 </article>
