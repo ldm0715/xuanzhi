@@ -11,9 +11,17 @@
           {{ if and .title (gt (len .content) 0) }}
             {{ $lines := .content }}
             {{ if gt (len $lines) 6 }}{{ $lines = first 6 $lines }}{{ end }}
-            {{ $dyn := "" }}{{ with .dynasty }}{{ $dyn = .name | default "" }}{{ end }}
-            {{ $auth := "" }}{{ with .author }}{{ $auth = .name | default "" }}{{ end }}
-            {{ $poem = dict "title" (.title | string) "dynasty" $dyn "author" $auth "content" $lines }}
+            {{ $title := .title | string }}
+            {{/* 只收干净的绝句：标题 ≤12 字、每句 ≤16 字，否则退回兜底《鹿柴》。
+                 诗泉偶尔返回带考据注释的条目（如「果州百姓爲史謙恕歌（題從《古謠諺》卷五三）」），
+                 竖排诗笺会被撑爆 */}}
+            {{ $ok := le (countrunes $title) 12 }}
+            {{ range $lines }}{{ if gt (countrunes (string .)) 16 }}{{ $ok = false }}{{ end }}{{ end }}
+            {{ if $ok }}
+              {{ $dyn := "" }}{{ with .dynasty }}{{ $dyn = .name | default "" }}{{ end }}
+              {{ $auth := "" }}{{ with .author }}{{ $auth = .name | default "" }}{{ end }}
+              {{ $poem = dict "title" $title "dynasty" $dyn "author" $auth "content" $lines }}
+            {{ end }}
           {{ end }}
         {{ end }}
       {{ end }}

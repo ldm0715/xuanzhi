@@ -185,10 +185,22 @@
       .then(function (json) {
         var d = json && json.data;
         if (!d || !d.title || !d.content || !d.content.length) throw new Error('empty poem');
+        if (!isClean(d)) throw new Error('标题或诗句过长');
         render(d);
       })
       .catch(function () { /* 保留构建期烘入的诗 */ })
       .then(function () { window.clearTimeout(timer); });
+
+    /* 与构建期同口径的校验：标题 ≤12 字、每句 ≤16 字、至少两句。
+       诗泉偶尔返回带考据注释的条目（标题如「果州百姓爲史謙恕歌（題從《古謠諺》卷五三）」，
+       或句尾缀《海錄碎事》卷十二…），竖排诗笺会被撑爆——这时静默保留当前这首 */
+    function isClean(d) {
+      var runes = function (s) { return Array.from(String(s)).length; };
+      if (runes(d.title) > 12) return false;
+      var lines = Array.prototype.slice.call(d.content, 0, 6);
+      if (lines.length < 2) return false;
+      return lines.every(function (l) { return runes(l) <= 16; });
+    }
 
     function el(cls, text) {
       var n = document.createElement('span');
