@@ -1,0 +1,33 @@
+{{- /*
+  链接渲染钩子：内链沿用 Hugo 内置的解析逻辑，外链补 target/rel 与视觉标记。
+
+  为什么要自己判断外链，而不是用 CSS 的 a[href^="http"]：
+  站点自己用绝对 URL 写的内链也会命中那个选择器，会被误标成外链。
+  只有服务端能拿到 .Destination，判断才准。
+
+  注意 mailto:/tel: 的 scheme 也是「绝对」的，但它们不该开新标签页，
+  所以只把 http/https 当外链。
+*/ -}}
+{{- $u := urls.Parse .Destination -}}
+{{- $href := $u.String -}}
+{{- $external := and $u.IsAbs (in (slice "http" "https") $u.Scheme) -}}
+{{- if strings.HasPrefix $u.String "#" -}}
+	{{- $href = printf "%s#%s" .PageInner.RelPermalink $u.Fragment -}}
+{{- else if and $href (not $u.IsAbs) -}}
+	{{- $path := strings.TrimPrefix "./" $u.Path -}}
+	{{- with or
+		($.PageInner.GetPage $path)
+		($.PageInner.Resources.Get $path)
+		(resources.Get $path)
+	-}}
+		{{- $href = .RelPermalink -}}
+		{{- with $u.RawQuery -}}
+			{{- $href = printf "%s?%s" $href . -}}
+		{{- end -}}
+		{{- with $u.Fragment -}}
+			{{- $href = printf "%s#%s" $href . -}}
+		{{- end -}}
+	{{- end -}}
+{{- end -}}
+<a href="{{ $href }}"{{ if $external }} class="link-external" target="_blank" rel="noopener noreferrer"{{ end }}{{ with .Title }} title="{{ . }}"{{ end }}>{{ .Text }}</a>
+{{- /**/ -}}

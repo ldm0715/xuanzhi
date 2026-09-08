@@ -83,6 +83,22 @@ a {
 }
 a:hover { color: var(--color-accent-hover); text-decoration-color: currentColor; }
 
+/* 正文里访问过的链接褪一档，方便回头找。
+   注意 :visited 出于隐私只允许改 color 等少数属性，改背景/边框会被浏览器忽略 */
+.post-content a:visited { color: var(--color-text-secondary); }
+/* 外链标记：一个极小的 ↗。类名由 render-link.html 在服务端加——
+   CSS 的 a[href^="http"] 会把站内绝对链接也误判成外链 */
+.post-content .link-external::after {
+  content: "↗";
+  margin-left: 0.12em;
+  font-size: 0.78em;
+  vertical-align: 0.15em;
+  /* 朱饰系：默认软色（只是个提示），悬停转实色 */
+  color: var(--color-zhu-soft);
+  transition: color 0.2s ease;
+}
+.post-content .link-external:hover::after { color: var(--color-zhu); }
+
 :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
 
 /* ============ 页头 ============ */
@@ -960,12 +976,15 @@ details[open]::details-content {
   box-shadow: var(--pic-shadow);
 }
 
-.post-figure { margin: 1.6em 0; text-align: center; }
+/* figure 用裸元素选择器：手写的 <figure>（unsafe = true 允许）也走这套题跋图注语言，
+   .post-figure 是渲染钩子加的类，两者是同一个元素。
+   注意 .lightbox-figure 挂在 body 上、不在 .post-content 内，不会被卷进来 */
+.post-content figure { margin: 1.6em 0; text-align: center; }
 /* 图内图片贴紧题跋，节奏交给 figure */
-.post-figure img { margin: 0 auto; }
+.post-content figure img { margin: 0 auto; }
 
 /* 图注：古籍题跋式——细楷居中，两侧各一段短引线 */
-.post-figure figcaption {
+.post-content figcaption {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -975,8 +994,8 @@ details[open]::details-content {
   letter-spacing: 0.08em;
   color: var(--color-text-secondary);
 }
-.post-figure figcaption::before,
-.post-figure figcaption::after {
+.post-content figcaption::before,
+.post-content figcaption::after {
   content: "";
   flex: 0 0 2em;
   height: 1px;
@@ -1002,7 +1021,7 @@ details[open]::details-content {
   cursor: zoom-in;
 }
 .post-content .img-zoom img { margin: 0; }   /* 间距交给链接，图片自身不再撑开 */
-.post-figure .img-zoom { margin: 0 auto; }   /* figure 内部贴紧题跋 */
+.post-content figure .img-zoom { margin: 0 auto; }   /* figure 内部贴紧题跋 */
 
 /* ---- 骨架 ---- */
 .lightbox {
@@ -1185,6 +1204,17 @@ details[open]::details-content {
   .lightbox-nav { transition: none; }
 }
 
+/* 嵌套引用分级：外层是主题的淡赭石底 + 朱线，往内逐级减到只剩细线——
+   原来的后代选择器会让每层复制整套（三道粗边框 + 三层底色），层级反而看不清 */
+.post-content blockquote blockquote {
+  margin: 0.9em 0;
+  border-left-color: var(--color-ink-weak);
+  background: none;
+}
+.post-content blockquote blockquote blockquote {
+  border-left-style: dotted;
+  padding-left: 1em;
+}
 .post-content blockquote {
   margin: 1.4em 0;
   padding: 8px 1.4em;
@@ -1367,7 +1397,7 @@ html[data-hr="feibai"] .post-content hr {
 .post-content .footnote-ref {
   padding: 0 0.12em;
   font-family: var(--font-title);
-  font-size: 0.78em;
+  /* 字号交给外层 sup 的 0.75em，这里再缩一档就太小了 */
   text-decoration: none;
   color: var(--color-zhu);
 }
@@ -1406,6 +1436,79 @@ html[data-hr="feibai"] .post-content hr {
   font-family: var(--font-mono);
   font-size: 0.85em;
   color: var(--color-title);
+}
+
+/* ---- 行内语义元素 ----
+ * 这些 Markdown 原生写不出来（要手写 HTML，unsafe = true 允许），但技术文里常见。
+ * 不写样式就全掉回浏览器默认，和墨阶排版脱节。
+ */
+
+/* 强调：文楷没有真斜体字面，浏览器只能几何倾斜去伪造，汉字被斜切后笔画歪、重心散。
+   改用中文传统的着重号（字下圆点）——不假斜，也更贴合宣纸气质 */
+.post-content em,
+.post-content i {
+  font-style: normal;
+  text-emphasis: filled dot;
+  text-emphasis-position: under right;
+  /* 着重号是装饰，走朱饰系——随 data-accent 在朱砂/黛青之间切换 */
+  text-emphasis-color: var(--color-zhu);
+}
+/* 加粗：让"强调"体现为墨色加深，而不是只有字重变化（文楷粗体切片未必加载） */
+.post-content strong,
+.post-content b {
+  font-weight: 700;
+  color: var(--color-title);
+}
+/* 删除线：靠褪色表达"已作废"，线也要比文字淡，否则和下划线分不清 */
+.post-content del,
+.post-content s {
+  color: var(--color-text-secondary);
+  text-decoration-color: var(--color-ink-weak);
+}
+/* 上下标：默认的 vertical-align: super 会把行高撑开——中文正文靠 1.9 行高撑着，
+   一个上标能让那一行明显跳一下。用相对定位替代，行高不动 */
+.post-content sup,
+.post-content sub {
+  font-size: 0.75em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+.post-content sup { top: -0.5em; }
+.post-content sub { bottom: -0.25em; }
+
+/* 缩写：默认只有点状下划线且提示只在悬停出现，移动端完全看不出来——补上 cursor */
+.post-content abbr[title] {
+  /* 点线走朱饰系的软色：既跟随点缀色，又不会和「实线下划线的链接」混淆 */
+  text-decoration: underline dotted var(--color-zhu-soft);
+  text-underline-offset: 2px;
+  cursor: help;
+}
+.post-content small { font-size: 0.85em; color: var(--color-text-secondary); }
+/* cite / q / var 默认是斜体，同样要关掉假斜 */
+.post-content cite,
+.post-content q,
+.post-content var { font-style: normal; }
+.post-content cite { color: var(--color-text-note); }
+.post-content q { quotes: "「" "」" "『" "』"; }   /* 中文引号，别用默认的弯引号 */
+.post-content var,
+.post-content samp { font-family: var(--font-mono); font-size: 0.9em; }
+.post-content var { color: var(--code-type); }
+.post-content samp { color: var(--color-text-note); }
+.post-content time { font-variant-numeric: tabular-nums; }
+
+/* 定义列表：Goldmark 的 definitionList 扩展默认开着，但主题一直没写样式 */
+.post-content dl { margin: 1.4em 0; }
+.post-content dt {
+  margin-top: 1em;
+  font-family: var(--font-title);
+  font-weight: 700;
+  color: var(--color-title);
+}
+.post-content dd {
+  margin: 0.3em 0 0 1.2em;
+  padding-left: 0.9em;
+  border-left: 1px dashed var(--color-ink-weak);   /* 与 ul ul 的虚线引导同源 */
 }
 
 /* 嵌入媒体：iframe 视频统一 16:9 响应式，audio/video 全宽 */
@@ -2797,6 +2900,18 @@ html[data-theme="dark"] .inkcard:hover {
   padding-top: 10px;
   border-top: 1px solid var(--color-border-light);
 }
+/* 「续读」：整张卡是链接，这里只是个视觉提示（不能是 a，a 套 a 非法） */
+.inkcard-more {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-family: var(--font-title);
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  color: var(--color-zhu);
+  transition: color 0.2s ease;
+}
+.inkcard-more::after { content: " →"; }
+.inkcard:hover .inkcard-more { color: var(--color-zhu-strong); }
 .inkcard-tags {
   display: flex;
   flex-wrap: wrap;
@@ -2853,4 +2968,105 @@ html[data-theme="dark"] .inkcard:hover {
 
   .inkcard-grid { grid-template-columns: minmax(0, 1fr); gap: 20px; }
   .inkcard-print { width: 104px; height: 70px; right: 8px; bottom: 6px; }
+}
+
+/* ============ 锚点落点与滚动条 ============ */
+
+/* 从目录或外链跳到某个标题时给个落点标记——朱砂短竖（与归档页悬停的朱砂短竖同源），
+   并留出吸顶头栏的高度，别让标题被头栏盖住 */
+.post-content :is(h1, h2, h3, h4, h5, h6):target {
+  position: relative;
+  scroll-margin-top: 72px;   /* 头栏 56px + 余量 */
+}
+.post-content :is(h1, h2, h3, h4, h5, h6):target::before {
+  content: "";
+  position: absolute;
+  left: -1.1em;
+  top: 0.15em;
+  bottom: 0.15em;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--color-zhu);
+}
+
+/* 滚动条：滑块走朱饰系（`--scrollbar-thumb` 派生自 `--color-zhu`），
+   随点缀色在朱砂/黛青之间切换；亮暗也自动跟随。
+   - 窗口那根竖向滚动条在 `html` 上
+   - 内容里四个横向滚动容器都要列进来，漏掉哪个哪里的滚动条就还是系统默认：
+     pre（普通代码块）、.lntable（chroma 带行号的代码块，定义在 chroma.css）、
+     .table-wrap（宽表格）、.katex-display（长公式）
+   标准属性 Firefox 认，WebKit 前缀作补充——别只写 ::-webkit-scrollbar */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+html::-webkit-scrollbar { width: 10px; height: 10px; }
+html::-webkit-scrollbar-track { background: transparent; }
+html::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 5px; }
+
+.post-content pre,
+.post-content .lntable,
+.post-content .table-wrap,
+.post-content .katex-display {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+.post-content pre::-webkit-scrollbar,
+.post-content .lntable::-webkit-scrollbar,
+.post-content .table-wrap::-webkit-scrollbar,
+.post-content .katex-display::-webkit-scrollbar { width: 10px; height: 10px; }
+.post-content pre::-webkit-scrollbar-track,
+.post-content .lntable::-webkit-scrollbar-track,
+.post-content .table-wrap::-webkit-scrollbar-track,
+.post-content .katex-display::-webkit-scrollbar-track { background: transparent; }
+.post-content pre::-webkit-scrollbar-thumb,
+.post-content .lntable::-webkit-scrollbar-thumb,
+.post-content .table-wrap::-webkit-scrollbar-thumb,
+.post-content .katex-display::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 5px;
+}
+
+/* ============ 打印 ============
+ * 全站唯一刻意不用 token 的地方：打印必须是黑白，宣纸底和夜墨底都要还原成纸。
+ * 目标只有一个——打印出来是一篇能读的文章：去掉所有界面元素，图/表/代码别跨页断。
+ */
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 11pt;
+  }
+  .site-header,
+  .site-footer,
+  .post-footer,
+  .toc,
+  .toc-memo,
+  .appearance,
+  .copy-code-btn,
+  .lightbox,
+  .hero,
+  .pagination,
+  .post-sign-seal { display: none !important; }
+
+  .post-content a { color: #000; }
+  /* 外链把地址印出来——纸上点不了 */
+  .post-content a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; }
+
+  .post-content img,
+  .post-content figure,
+  .post-content table,
+  .post-content pre,
+  .post-content blockquote { break-inside: avoid; }
+  .post-content h2,
+  .post-content h3,
+  .post-content h4 { break-after: avoid; }
+
+  .post-content pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+    border: 1px solid #999;
+    background: #f5f5f5;
+  }
 }

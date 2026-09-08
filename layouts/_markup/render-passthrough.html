@@ -1,0 +1,22 @@
+{{- /*
+  数学渲染钩子：构建期用 transform.ToMath 把 LaTeX 渲染成静态 HTML。
+
+  为什么换掉客户端渲染：原来只有浏览器里跑 KaTeX，静态 HTML 里是原始 LaTeX——
+  爬虫索引不到公式、禁用 JS 的读者看到的是一串反斜杠和美元号、RSS 阅读器不执行 JS
+  只能显示源码；而且首屏会先闪一下 LaTeX 再变成公式，还要多加载约 300KB 的 JS。
+
+  output 用 htmlAndMathml：同时产出 MathML，读屏软件才能读公式。
+  throwOnError=false：一条公式写错不该让整站构建失败（错误会以红字渲染在页面上）。
+*/ -}}
+{{- $opts := dict
+  "output" "htmlAndMathml"
+  "displayMode" (eq .Type "block")
+  "throwOnError" false
+-}}
+{{- with try (transform.ToMath .Inner $opts) -}}
+  {{- with .Err -}}
+    {{- warnf "公式渲染失败（%s）：%s" $.Position . -}}
+  {{- else -}}
+    {{- .Value -}}
+  {{- end -}}
+{{- end -}}

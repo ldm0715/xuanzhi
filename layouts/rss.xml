@@ -1,0 +1,39 @@
+{{- /*
+  自定义 RSS：Hugo 内置模板把整篇 .Summary 原样塞进 <description>，而自动摘要里
+  带着各级标题和标题上的内联 SVG（毛笔圈点），阅读器里渲染成一片乱码般的图形，
+  体积也大。这里：
+  - <description> 用 plainify 后的纯文本（摘要，可扫读）
+  - <content:encoded> 放完整正文，并去掉标题锚点那串 SVG
+  - 保留内置模板的 atom:link / lastBuildDate 等字段
+*/ -}}
+{{- $pages := .Pages -}}
+{{- if .IsHome -}}{{- $pages = .Site.RegularPages -}}{{- end -}}
+{{- $limit := site.Config.Services.RSS.Limit -}}
+{{- if ge $limit 1 -}}{{- $pages = $pages | first $limit -}}{{- end -}}
+{{- printf "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"yes\"?>" | safeHTML }}
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>{{ if eq .Title site.Title }}{{ site.Title }}{{ else }}{{ with .Title }}{{ . }} · {{ end }}{{ site.Title }}{{ end }}</title>
+    <link>{{ .Permalink }}</link>
+    <description>Recent content {{ if ne .Title site.Title }}{{ with .Title }}in {{ . }} {{ end }}{{ end }}on {{ site.Title }}</description>
+    <generator>Hugo</generator>
+    <language>{{ site.Language.Lang }}</language>
+    {{- with site.Copyright }}<copyright>{{ . }}</copyright>{{ end }}
+    {{- if not .Date.IsZero }}<lastBuildDate>{{ .Date.Format "Mon, 02 Jan 2006 15:04:05 -0700" | safeHTML }}</lastBuildDate>{{ end }}
+    {{- with .OutputFormats.Get "RSS" }}
+    {{ printf "<atom:link href=%q rel=\"self\" type=%q />" .Permalink .MediaType | safeHTML }}
+    {{- end }}
+    {{- range $pages }}
+    <item>
+      <title>{{ .Title }}</title>
+      <link>{{ .Permalink }}</link>
+      <pubDate>{{ .Date.Format "Mon, 02 Jan 2006 15:04:05 -0700" | safeHTML }}</pubDate>
+      <guid>{{ .Permalink }}</guid>
+      {{- /* 摘要：plainify 去掉 HTML，压掉换行 */}}
+      <description>{{ .Summary | plainify | chomp | replaceRE `\s+` " " | transform.XMLEscape | safeHTML }}</description>
+      {{- /* 正文：先摘掉标题上的锚点 SVG（阅读器里没有 CSS 会变成乱码图形） */}}
+      <content:encoded>{{ .Content | replaceRE `<a class="heading-anchor[^>]*>.*?</a>` "" | transform.XMLEscape | safeHTML }}</content:encoded>
+    </item>
+    {{- end }}
+  </channel>
+</rss>

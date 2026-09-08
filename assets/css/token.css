@@ -77,6 +77,10 @@
   --color-zhu-strong: #96432F;
   --color-zhu-soft: rgba(178, 90, 70, 0.34);
 
+  /* 滚动条滑块：从 --color-zhu 派生，随 data-accent 在朱砂/黛青之间切换。
+     派生式写法只需这一份，不用补四象限（color-mix 在使用处解析 --color-zhu） */
+  --scrollbar-thumb: color-mix(in srgb, var(--color-zhu) 55%, transparent);
+
   /* 归档纪年印：正朱砂（印泥原色，暗色提亮一档；黛青下随青批转色） */
   --color-seal: #C3272B;
 

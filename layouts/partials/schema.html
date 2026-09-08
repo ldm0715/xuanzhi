@@ -1,0 +1,44 @@
+{{- /*
+  JSON-LD 结构化数据：文章页出 BlogPosting，首页出 WebSite。
+
+  用 dict + jsonify 生成，不手工拼字符串——手拼很容易在引号、换行、转义上出错，
+  而 JSON-LD 必须是合法 JSON，出错就是静默失效（爬虫直接忽略）。
+
+  参数：
+    page  —— 页面上下文
+    desc  —— head.html 已裁剪好的摘要
+    image —— 社交卡片图 URL
+*/ -}}
+{{- $p := .page -}}
+{{- $desc := .desc -}}
+{{- $image := .image -}}
+{{- $author := or site.Params.author site.Title -}}
+{{- $schema := dict -}}
+{{- if $p.IsPage -}}
+  {{- $schema = dict
+    "@context" "https://schema.org"
+    "@type" "BlogPosting"
+    "headline" ($p.Title | plainify)
+    "datePublished" ($p.Date.Format "2006-01-02T15:04:05Z07:00")
+    "dateModified" ($p.Lastmod.Format "2006-01-02T15:04:05Z07:00")
+    "author" (dict "@type" "Person" "name" $author)
+    "publisher" (dict "@type" "Organization" "name" site.Title)
+    "mainEntityOfPage" (dict "@type" "WebPage" "@id" $p.Permalink)
+    "url" $p.Permalink
+    "image" $image
+    "description" $desc
+  -}}
+{{- else if $p.IsHome -}}
+  {{- $schema = dict
+    "@context" "https://schema.org"
+    "@type" "WebSite"
+    "name" site.Title
+    "url" site.Home.Permalink
+    "description" $desc
+  -}}
+{{- end -}}
+{{- with $schema -}}
+{{- /* 必须 safeJS：<script> 里是 JS 上下文，直接 {{ . | jsonify }} 会被 html/template
+   转义成一个带引号的字符串字面量，爬虫拿到的就不是 JSON 了 */ -}}
+<script type="application/ld+json">{{ . | jsonify | safeJS }}</script>
+{{- end -}}

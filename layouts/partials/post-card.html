@@ -9,12 +9,15 @@
       <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006.01.02" }}</time>
     </span>
     <h3 class="inkcard-title">{{ .Title }}</h3>
-    <p class="inkcard-summary">{{ .Summary | plainify | chomp | truncate 52 }}</p>
+    <p class="inkcard-summary">{{ .Summary | plainify | chomp | replaceRE `\s+` " " | truncate 52 }}</p>
     <span class="inkcard-foot">
       <span class="inkcard-tags">
         {{- range $cats }}<span class="inkcard-cat">{{ .LinkTitle }}</span>{{ end -}}
         {{- range $tags }}<span class="inkcard-tag">{{ .LinkTitle }}</span>{{ end -}}
       </span>
+      {{- /* 整张卡就是链接，所以这里只能是 span 不能是 a（a 套 a 是非法 HTML），
+           样式上做成"可点的样子"即可 */ -}}
+      <span class="inkcard-more" aria-hidden="true">续读</span>
     </span>
   </a>
 </article>

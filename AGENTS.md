@@ -39,7 +39,16 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 - 归档页是**平贴纸面**的：年份下压一道折痕双细线（同文章页题跋），月份作**行内小朱印 + 汉字篇数**、月份之间只靠留白分开——**不要退回实色笺纸卡片**（全站唯一实色块，读起来像 UI 卡片，已返工）
 - 长目录折叠：目录条目 >10 时 `site.js` 给 `.toc-memo` 加 `toc-fold`，CSS 以 `li:hover > ul` 划入展开、`li:has(> ul a.toc-active) > ul` 让阅读分支常开；缩进阶梯 = 每级一个 15px 墨签位，可展开条目的墨签锚在行盒 `a` 上
 - 明暗切换圆形揭示：`site.js`「明暗切换」段写 `--theme-x/y/r`（**百分比**，理由见已知坑），`main.css`「明暗切换圆形揭示」段定义方向与 keyframes；方向靠「动画运行时 `data-theme` 已是新值」判定（dark 收缩旧快照、light 扩张新快照），改时长/曲线只动 main.css 两条 `animation`
-- KaTeX 按需加载：`head.html` 用 `findRE` 检测 `.RawContent` 里的公式定界符，只有含公式的页面引入
+- **公式构建期渲染**：`_markup/render-passthrough.html` 用 `transform.ToMath`（`output: htmlAndMathml`）在构建期把 LaTeX 变成静态 HTML，`head.html` 只按需引入 `katex.min.css`——客户端 `katex.min.js` / `auto-render.min.js` 已去掉（爬虫、禁 JS、RSS 阅读器现在都能拿到排好版的公式）
+- **链接渲染钩子**：`_markup/render-link.html` 在**服务端**判断外链（`http`/`https` scheme 才算，`mailto:`/`tel:` 不开新标签），加 `class="link-external"` + `target`/`rel`；**别用 CSS 的 `a[href^="http"]` 判断**——站内绝对链接会被误伤
+- **JSON-LD**：`partials/schema.html` 用 `dict` + `jsonify` 生成（文章页 `BlogPosting`、首页 `WebSite`），**必须 `| jsonify | safeJS`**，否则 `<script>` 的 JS 上下文会把它转义成一个带引号的字符串字面量
+- **社交卡片**：`head.html` 里 `og:image` 优先取 front matter `cover`（裁 `1200x630`），无 cover 回落主题默认图 `static/images/og-default.png`（站点放同名文件即可覆盖）；`twitter:card` 随之用 `summary_large_image`；单页的 RSS 发现链接查 `site.Home.OutputFormats`（普通页的 `.OutputFormats.Get "rss"` 是 nil）
+- **自定义 RSS**：`layouts/rss.xml`——`<description>` 走 `plainify`，完整正文放 `<content:encoded>` 并摘掉标题锚点那串内联 SVG（阅读器里没有 CSS 会变成乱码图形）
+- **归档/分类页刻意不放摘要**：`.post-item` 是传统目录式（日期居左、点线引导、题名贴右），加一行摘要会破坏这个语言——试过又撤了，别再往上加。只有首页卡片带摘要：`.Summary | plainify | chomp | replaceRE \s+ " " | truncate`（`.Summary` 是 `template.HTML`，不 plainify 会带出各级标题文字）
+- **打印样式**：`main.css` 末尾 `@media print` 是全站**唯一刻意不用 token 的地方**（打印必须黑白，宣纸底/夜墨底都要还原成纸），隐藏头栏/页脚/目录/外观面板，外链把地址印出来
+- 正文 `<em>` 用**着重号**（`text-emphasis: filled dot` + `text-emphasis-color: var(--color-zhu)`）而不是斜体：`--font-sans` 是文楷，没有真斜体字面，浏览器合成假斜在汉字上很脏
+- **滚动条**：滑块走 `--scrollbar-thumb`（token.css 里由 `color-mix(in srgb, var(--color-zhu) 55%, transparent)` 派生，随点缀色换朱砂/黛青，派生式写法不必补四象限）。作用域是 `html`（窗口那根竖向滚动条）+ 内容里**四个**横向滚动容器：`pre`、`.lntable`（chroma 带行号代码块，定义在 chroma.css，最容易漏）、`.table-wrap`、`.katex-display`
+- **新增标记先问它是「装饰」还是「语义」**：装饰性的一律走朱饰系（`--color-zhu` / `--color-zhu-soft`），随 `data-accent` 换色——着重号、缩写点线、外链 ↗、锚点落点朱砂短竖、「续读」都是这一类；语义性的留墨阶——`strong` 浓墨、`del` 褪色、`dd`/`ul ul` 引导虚线（引导线要和墨阶一致，染色会喧宾夺主）
 - `static/` 下约 30MB 是自托管资产（霞鹜文楷切片、思源宋体 700 切片、JetBrains Mono、KaTeX），属正常入库内容
 
 ## 已知坑（都踩过）
@@ -65,6 +74,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 - 淡印类元素的浓度要按**最终叠乘**估：印记整体 34% × 元素自带 0.4–0.5 的不透明度，有效浓度只剩一成多，横向色带一淡就没了形状——所以八式里横向实色带全改成了笔线，且淡印里别再叠最淡一档的墨（`--color-text-secondary`）
 - backdrop-filter 毛玻璃叠宽度动画：模糊区随每帧尺寸重算重绘，是动画卡顿最大来源——框架动画期间挂 `xz-frame-anim` 暂停毛玻璃，`transitionend` 后恢复（另加 setTimeout 兜底，transitionend 偶发不触发）
 - 全屏遮罩层用 `position:absolute`、被遮的内容用 `static` 时，**遮罩会盖在内容之上**：定位元素绘在流内元素之上。图窗第一版就是这样——图片被遮罩挡掉，滚轮/拖动/滑动全部失灵，图还被洗淡（看着像"渲染正常"）。遮罩里的内容必须自己进定位层（`.lightbox-figure` 给 `position:relative`），或在 DOM 里排在遮罩之后且同样定位
+- `<script>` 里输出 JSON 必须 `jsonify | safeJS`：html/template 把 `<script>` 当 JS 上下文，只写 `{{ . | jsonify }}` 会被转义成一个**带引号的字符串字面量**，页面看着正常、`JSON.parse` 却拿到字符串（JSON-LD 踩过，表现为 `Object.keys` 全是数字下标）
+- `:target` 的 `:is(...)` 白名单要**含 h1**：给标题加落点标记时只写了 h2–h6，正文 h1 永远匹配不到——而 h1 恰恰是"最少见、最容易漏测"的那一档
+- PowerShell 5.1 把**无 BOM 的 UTF-8 `.ps1` 按 GBK 读**：脚本里写中文字面量（连注释也算）会让解析器报 `MissingEndParenthesisInMethodCall`。生成 OG 图的脚本踩过，改成全 ASCII + `[char]0x5BA3` 取字形才通
 
 ## 相关文档
 
