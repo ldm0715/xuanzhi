@@ -1,0 +1,30 @@
+{{- /* 外观样张三组：背景 / 点缀色 / 分隔线。
+       桌面浮层面板（header.html）与移动端下拉面板共用同一份 markup，
+       选中态由 site.js 在文档级同步（aria-pressed），两处一起更新。
+       按钮的 data-* 是 site.js 的取值键，改键名要同步改 JS。 */ -}}
+<div class="panel-group">
+  <span class="panel-label">{{ i18n "panelBackground" }}</span>
+  <div class="panel-tiles">
+    <button type="button" class="panel-tile" data-bg="grid" aria-pressed="true"><span class="swatch swatch-grid"></span><span class="panel-tile-label">{{ i18n "bgGrid" }}</span></button>
+    <button type="button" class="panel-tile" data-bg="plain" aria-pressed="false"><span class="swatch swatch-plain"></span><span class="panel-tile-label">{{ i18n "bgPlain" }}</span></button>
+    <button type="button" class="panel-tile" data-bg="noise" aria-pressed="false"><span class="swatch swatch-noise"></span><span class="panel-tile-label">{{ i18n "bgNoise" }}</span></button>
+    <button type="button" class="panel-tile" data-bg="noise-vignette" aria-pressed="false"><span class="swatch swatch-noise swatch-vignette"></span><span class="panel-tile-label">{{ i18n "bgVignette" }}</span></button>
+    <button type="button" class="panel-tile" data-bg="ruled" aria-pressed="false"><span class="swatch swatch-ruled"></span><span class="panel-tile-label">{{ i18n "bgRuled" }}</span></button>
+  </div>
+</div>
+<div class="panel-group">
+  <span class="panel-label">{{ i18n "panelAccent" }}</span>
+  <div class="panel-tiles">
+    <button type="button" class="panel-tile" data-accent="terracotta" aria-pressed="true"><span class="swatch swatch-terracotta"></span><span class="panel-tile-label">{{ i18n "accentTerracotta" }}</span></button>
+    <button type="button" class="panel-tile" data-accent="indigo" aria-pressed="false"><span class="swatch swatch-indigo"></span><span class="panel-tile-label">{{ i18n "accentIndigo" }}</span></button>
+  </div>
+</div>
+<div class="panel-group">
+  <span class="panel-label">{{ i18n "panelDivider" }}</span>
+  <div class="panel-tiles">
+    <button type="button" class="panel-tile" data-hr="ink" aria-pressed="true"><span class="swatch swatch-hr-ink"></span><span class="panel-tile-label">{{ i18n "hrInk" }}</span></button>
+    <button type="button" class="panel-tile" data-hr="zhu" aria-pressed="false"><span class="swatch swatch-hr-zhu"></span><span class="panel-tile-label">{{ i18n "hrZhu" }}</span></button>
+    <button type="button" class="panel-tile" data-hr="dots" aria-pressed="false"><span class="swatch swatch-hr-dots"></span><span class="panel-tile-label">{{ i18n "hrDots" }}</span></button>
+    <button type="button" class="panel-tile" data-hr="feibai" aria-pressed="false"><span class="swatch swatch-hr-feibai"></span><span class="panel-tile-label">{{ i18n "hrFeibai" }}</span></button>
+  </div>
+</div>

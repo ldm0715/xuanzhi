@@ -1,0 +1,22 @@
+{{- /* 头栏导航链接。走 Hugo 的 [menus.main]（站点在 hugo.toml 配 name/pageRef/weight），
+       加页面只改配置；站点没配菜单时兜底成「主内容段 + 分类法页」的旧算法，
+       所以主题单独拿去也能用。桌面 .site-nav 与移动端下拉面板共用这一份。
+       传进来的上下文是页面（partial 里的 $ 即该页面），$.IsMenuCurrent 才有意义。 */ -}}
+{{- $menu := site.Menus.main -}}
+{{- if $menu -}}
+{{- range $menu -}}
+<a href="{{ .URL }}"{{ if $.IsMenuCurrent "main" . }} aria-current="page"{{ end }}>{{ .Name }}</a>
+{{- end -}}
+{{- else -}}
+{{- with site.MainSections -}}
+{{- with site.GetPage (index . 0) -}}
+<a href="{{ .RelPermalink }}">{{ i18n "archive" }}</a>
+{{- end -}}
+{{- end -}}
+{{ with site.GetPage "categories" -}}
+<a href="{{ .RelPermalink }}">{{ .Title }}</a>
+{{- end }}
+{{ with site.GetPage "tags" -}}
+<a href="{{ .RelPermalink }}">{{ i18n "tags" }}</a>
+{{- end }}
+{{- end }}

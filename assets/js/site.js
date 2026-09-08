@@ -72,19 +72,22 @@
       if (e.key === 'Escape' && !panel.hasAttribute('hidden')) close();
     });
 
+    /* 选中态扫全文档：样张有两组（桌面浮层面板 + 移动端下拉面板），
+       只查自己那个 panel 的话，另一组的高亮不会跟着变 */
     function syncPressed() {
-      panel.querySelectorAll('button[data-bg]').forEach(function (b) {
+      document.querySelectorAll('button[data-bg]').forEach(function (b) {
         b.setAttribute('aria-pressed', String((root.dataset.bg || 'grid') === b.dataset.bg));
       });
-      panel.querySelectorAll('button[data-accent]').forEach(function (b) {
+      document.querySelectorAll('button[data-accent]').forEach(function (b) {
         b.setAttribute('aria-pressed', String((root.dataset.accent || 'terracotta') === b.dataset.accent));
       });
-      panel.querySelectorAll('button[data-hr]').forEach(function (b) {
+      document.querySelectorAll('button[data-hr]').forEach(function (b) {
         b.setAttribute('aria-pressed', String((root.dataset.hr || 'ink') === b.dataset.hr));
       });
     }
 
-    panel.addEventListener('click', function (e) {
+    /* 委托挂在 document 上，两处样张都管 */
+    document.addEventListener('click', function (e) {
       var b = e.target.closest('button[data-bg], button[data-accent], button[data-hr]');
       if (!b) return;
       if (b.dataset.bg) {
@@ -105,51 +108,30 @@
     syncPressed();
   })();
 
-  /* 站内搜索：索引在构建期由 layouts/home.json 生成（/index.json），
-     打开面板时才 fetch。中文不分词，走子串匹配——标题命中权重最高，标签次之，正文最低。
+  /* 站内搜索：索引在构建期由 layouts/home.json 生成（/index.json），首次打开/输入时才 fetch。
+     索引与加载状态是模块级共享的——桌面浮层面板与移动端下拉面板各有一个搜索框，只 fetch 一次。
+     中文不分词，走子串匹配——标题命中权重最高，标签次之，正文最低。
      这是「能用」版：没有分词、没有相关度模型，搜「排版设计」命中不了「排版与设计」。
      要真正的中文分词得换 Pagefind 之类（见 docs/structure.md 的选型对比）。 */
   (function () {
-    var btn = document.getElementById('search-toggle');
-    var panel = document.getElementById('search-panel');
-    var input = document.getElementById('search-input');
-    var hint = document.getElementById('search-hint');
-    var list = document.getElementById('search-results');
-    if (!btn || !panel || !input || !list) return;
-
     var INDEX_URL = '/index.json';
     var MAX_HITS = 12;
     var root = document.documentElement;
-    var initialHint = hint ? hint.textContent : '';
     var T = {
       empty: root.dataset.searchEmpty || '没有找到相关文章',
       loading: root.dataset.searchLoading || '正在载入索引…',
       error: root.dataset.searchError || '索引加载失败，刷新页面再试'
     };
+
     var docs = null, loading = false, failed = false;
+    var waiters = [];   /* 各实例的「索引状态变了」回调 */
 
-    function setHint(text) {
-      if (!hint) return;
-      if (text) { hint.textContent = text; hint.removeAttribute('hidden'); }
-      else { hint.setAttribute('hidden', ''); }
-    }
-
-    function close() {
-      panel.setAttribute('hidden', '');
-      btn.setAttribute('aria-expanded', 'false');
-    }
-
-    function open() {
-      panel.removeAttribute('hidden');
-      btn.setAttribute('aria-expanded', 'true');
-      input.focus();
-      if (!docs && !loading && !failed) load();
-    }
+    function notify() { waiters.forEach(function (fn) { fn(); }); }
 
     function load() {
-      if (typeof fetch !== 'function') { failed = true; setHint(T.error); return; }
+      if (typeof fetch !== 'function') { failed = true; notify(); return; }
       loading = true;
-      setHint(T.loading);
+      notify();
       fetch(INDEX_URL)
         .then(function (res) {
           if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -158,14 +140,17 @@
         .then(function (json) {
           docs = json || [];
           loading = false;
-          setHint(initialHint);
-          render(input.value);
+          notify();
         })
         .catch(function () {
           loading = false;
           failed = true;
-          setHint(T.error);
+          notify();
         });
+    }
+
+    function ensureLoaded() {
+      if (!docs && !loading && !failed) load();
     }
 
     function esc(s) {
@@ -206,60 +191,165 @@
       return (start > 0 ? '…' : '') + mark(s.slice(start, end), q) + (end < s.length ? '…' : '');
     }
 
-    function render(q) {
-      if (!docs) return;
-      var needle = String(q || '').trim().toLowerCase();
-      list.textContent = '';
-      if (!needle) { setHint(initialHint); return; }
-      var hits = search(needle);
-      if (!hits.length) { setHint(T.empty); return; }
-      setHint('');
-      var frag = document.createDocumentFragment();
-      hits.forEach(function (d) {
-        var li = document.createElement('li');
-        var a = document.createElement('a');
-        a.href = d.url;
+    /* 一个搜索框实例：绑自己的输入框 / 结果列表 / 提示行，共用上面的索引缓存。
+       实例可以有两个（桌面浮层 + 移动下拉面板），互不干扰 */
+    function makeSearch(input, list, hint) {
+      var initialHint = hint ? hint.textContent : '';
 
-        var head = document.createElement('span');
-        head.className = 'search-result-head';
-        var t = document.createElement('time');
-        t.textContent = d.date;
-        var title = document.createElement('span');
-        title.className = 'search-result-title';
-        title.innerHTML = mark(d.title, needle);   /* mark() 内部已转义 */
-        head.appendChild(t);
-        head.appendChild(title);
-        a.appendChild(head);
+      function setHint(text) {
+        if (!hint) return;
+        if (text) { hint.textContent = text; hint.removeAttribute('hidden'); }
+        else { hint.setAttribute('hidden', ''); }
+      }
 
-        var snip = snippet(d.content, needle);
-        if (snip) {
-          var sn = document.createElement('span');
-          sn.className = 'search-result-snippet';
-          sn.innerHTML = snip;                     /* snippet() 内部已转义 */
-          a.appendChild(sn);
-        }
+      function render(q) {
+        if (!docs) return;
+        var needle = String(q || '').trim().toLowerCase();
+        list.textContent = '';
+        if (!needle) { setHint(initialHint); return; }
+        var hits = search(needle);
+        if (!hits.length) { setHint(T.empty); return; }
+        setHint('');
+        var frag = document.createDocumentFragment();
+        hits.forEach(function (d) {
+          var li = document.createElement('li');
+          var a = document.createElement('a');
+          a.href = d.url;
 
-        li.appendChild(a);
-        frag.appendChild(li);
+          var head = document.createElement('span');
+          head.className = 'search-result-head';
+          var t = document.createElement('time');
+          t.textContent = d.date;
+          var title = document.createElement('span');
+          title.className = 'search-result-title';
+          title.innerHTML = mark(d.title, needle);   /* mark() 内部已转义 */
+          head.appendChild(t);
+          head.appendChild(title);
+          a.appendChild(head);
+
+          var snip = snippet(d.content, needle);
+          if (snip) {
+            var sn = document.createElement('span');
+            sn.className = 'search-result-snippet';
+            sn.innerHTML = snip;                     /* snippet() 内部已转义 */
+            a.appendChild(sn);
+          }
+
+          li.appendChild(a);
+          frag.appendChild(li);
+        });
+        list.appendChild(frag);
+      }
+
+      /* 索引加载状态变化时，刷新本实例的提示与结果 */
+      waiters.push(function () {
+        if (failed) { setHint(T.error); return; }
+        if (loading) { setHint(T.loading); return; }
+        render(input.value);
       });
-      list.appendChild(frag);
+
+      input.addEventListener('input', function () { ensureLoaded(); render(input.value); });
+      input.addEventListener('focus', ensureLoaded);
+      input.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter') return;
+        var first = list.querySelector('a');
+        if (first) { e.preventDefault(); window.location.href = first.getAttribute('href'); }
+      });
+
+      setHint(initialHint);
+    }
+
+    /* 桌面浮层面板：按钮开合 + 打开时聚焦输入框（原有行为） */
+    (function () {
+      var btn = document.getElementById('search-toggle');
+      var panel = document.getElementById('search-panel');
+      var input = document.getElementById('search-input');
+      var hint = document.getElementById('search-hint');
+      var list = document.getElementById('search-results');
+      if (!btn || !panel || !input || !list) return;
+
+      function close() {
+        panel.setAttribute('hidden', '');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+
+      function open() {
+        panel.removeAttribute('hidden');
+        btn.setAttribute('aria-expanded', 'true');
+        input.focus();
+        ensureLoaded();
+      }
+
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (panel.hasAttribute('hidden')) open(); else close();
+      });
+      document.addEventListener('click', function (e) {
+        if (!panel.hasAttribute('hidden') && !e.target.closest('.search')) close();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !panel.hasAttribute('hidden')) close();
+      });
+
+      makeSearch(input, list, hint);
+    })();
+
+    /* 移动端下拉面板里的搜索框：没有开合按钮，聚焦或输入即触发加载 */
+    (function () {
+      var panel = document.getElementById('nav-panel');
+      if (!panel) return;
+      var input = panel.querySelector('[data-search-input]');
+      var list = panel.querySelector('[data-search-results]');
+      var hint = panel.querySelector('[data-search-hint]');
+      if (!input || !list) return;
+      makeSearch(input, list, hint);
+    })();
+  })();
+
+  /* 移动端下拉导航面板：≤640px 由 ☰ 开合（桌面端 CSS 恒 display:none）。
+     面板里的搜索框与外观样张由上面两段逻辑各自接管，这里只管开合与关闭 */
+  (function () {
+    var btn = document.getElementById('nav-toggle');
+    var panel = document.getElementById('nav-panel');
+    if (!btn || !panel) return;
+
+    var root = document.documentElement;
+    var labelOpen = root.dataset.menuOpen || '打开菜单';
+    var labelClose = root.dataset.menuClose || '关闭菜单';
+
+    function isOpen() { return !panel.hasAttribute('hidden'); }
+
+    function setLabel(text) {
+      btn.setAttribute('aria-label', text);
+      btn.setAttribute('title', text);
+    }
+
+    /* 刻意不把焦点送进面板：头栏吸顶，页面滚到很深处时给面板内元素
+       focus() 会把视口拽回头部。关闭时若焦点还在面板里才收回来 */
+    function close(restoreFocus) {
+      panel.setAttribute('hidden', '');
+      btn.setAttribute('aria-expanded', 'false');
+      setLabel(labelOpen);
+      if (restoreFocus && panel.contains(document.activeElement)) btn.focus();
+    }
+
+    function open() {
+      panel.removeAttribute('hidden');
+      btn.setAttribute('aria-expanded', 'true');
+      setLabel(labelClose);
     }
 
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
-      if (panel.hasAttribute('hidden')) open(); else close();
+      if (isOpen()) close(false); else open();
     });
+
     document.addEventListener('click', function (e) {
-      if (!panel.hasAttribute('hidden') && !e.target.closest('.search')) close();
+      if (isOpen() && !e.target.closest('#nav-panel') && !e.target.closest('#nav-toggle')) close(true);
     });
+
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && !panel.hasAttribute('hidden')) close();
-    });
-    input.addEventListener('input', function () { render(input.value); });
-    input.addEventListener('keydown', function (e) {
-      if (e.key !== 'Enter') return;
-      var first = list.querySelector('a');
-      if (first) { e.preventDefault(); window.location.href = first.getAttribute('href'); }
+      if (e.key === 'Escape' && isOpen()) close(true);
     });
   })();
 

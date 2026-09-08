@@ -27,6 +27,9 @@ copied: 已复制
 appearance: 外观设置
 appearanceTitle: 外观
 toggleTheme: 切换明暗模式
+menuOpen: 打开菜单
+menuClose: 关闭菜单
+rssSubscribe: RSS 订阅
 panelBackground: 背景
 panelAccent: 点缀色
 panelDivider: 分隔线

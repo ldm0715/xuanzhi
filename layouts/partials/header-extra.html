@@ -1,0 +1,23 @@
+{{- /* 头栏扩展插槽 —— 主题里是空的，站点可以覆盖它。
+
+       想往头栏加自己的入口（RSS 按钮、GitHub 图标、语言切换…）：
+       在**站点仓库**新建 layouts/partials/header-extra.html 写自己的 markup。
+       Hugo 的模板查找顺序是「站点先于主题」，同名 partial 会顶掉这份空的。
+
+       同一份 markup 会出现在两处，主题按上下文分别样式化：
+         · 桌面 .site-nav 里   → 30×30 圆形图标按钮（.header-extra-label 隐藏）
+         · 移动端 .nav-panel 里 → 整宽一行（图标 + .header-extra-label 文字）
+
+       所以写成这样，两处都好看：
+
+         <a class="header-extra" href="https://example.com" aria-label="RSS">
+           <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true">
+             <path d="…"/>
+           </svg>
+           <span class="header-extra-label">RSS 订阅</span>
+         </a>
+
+       两点说明：
+       1. ≤640px 时 .site-nav 里除 #theme-toggle 外一律隐藏，所以插槽内容不会挤进手机头栏，
+          只会出现在 ☰ 面板里——这正是想要的。
+       2. 纯链接（跳页面或外链）不必走这里，直接加 [[menus.main]] 就会两处都出现。 */ -}}

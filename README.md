@@ -15,6 +15,7 @@
   - 无记录时回落到 `hugo.toml` 的 `params.accent` 与默认格纹
 - 首页两段式：诗笺欢迎区（诗泉 API 随机绝句、繁体竖排，构建期预取兜底；标题 ≤12 字、每句 ≤16 字才收，否则保留兜底）+ 双栏**红框封卡片**：素纸底 + 一道朱丝框，右上朱砂日期邮戳（悬停轻微「盖章」），右下角一枚**淡印**——八式水墨小品缩成 124×83、约 34% 不透明度 + 轻微模糊 + 径向羽化，如渗进纸里；下方题字式标题、灰褐摘要与落款行（分类 + 标签，细竖线分隔）；悬停整卡飘起带暖灰柔影
 - 头栏宽度随页面类型过渡（窄 800px / 文章页 1150px），页面入场淡入，时长同曲线；**等首帧绘制完再起步**（动画时钟从样式计算就开跑、不等绘制，直接放开的话首屏那几百毫秒里动画已跑掉大半）
+- **手机端头栏收起**（≤640px）：头栏只留 ☰ · 站名 · 明暗按钮，导航链接 / 搜索 / 外观收进 ☰ 下拉面板——面板从栏下缘整宽展开，导航三格横排，下面依次是搜索框与外观样张，矮屏时面板内可滚动。桌面端布局与两个浮层面板不受影响；想往头栏加自己的东西见「头栏自定义入口」
 - 霞鹜文楷 GB 自托管切片字体（cn-font-split，按 unicode-range 按需加载，首屏只拉几十 KB）；标题走自托管**思源宋体 700** 切片（`--font-title` 宋体优先、无则落文楷）
 - 文章页书卷排版：题跋折痕双线分割、落款式元数据（「撰于」引首章 + 朱砂界栏 + **分类的毛笔记号**——一撇，取传统评点的「抹」，粗起笔 + 细收锋 + 湍流毛边，配宋体墨色名 + 印章式标签）、文末**落款章**（站名四字印，逐字入格、按字数自动成阵，印泥飞白 mask）、线装书式上下篇翻页（悬停轻移 + 淡朱暖洇）
 - 归档页「毛笔纪年·朱印领月」：细宋年份压淡朱小印、左侧垂竖排干支闲章（模板按年份推算，任何年份都对）；年份下压一道**折痕双细线**（与文章页题跋同款）；月份不再是浮在笺纸卡上的引首章，改成**行内一枚小朱印 + 汉字篇数**，月份之间全靠留白分开；文章行是传统目录式：日期居左、点线引导、题名贴右，悬停引导线染朱、题名右侧洇出朱砂短竖
@@ -75,7 +76,8 @@ git submodule add <你的主题仓库地址> themes/xuanzhi
 | 首页欢迎语 | `params.hero.greeting` | 用主题默认（i18n 的 `greeting`） |
 | 默认点缀色 | `params.accent` | `terracotta`（访客仍可在外观面板自行切换） |
 | JSON-LD 作者 | `params.author` | 回落成站点 `title` |
-| 界面文案 | 站点 `i18n/zh-cn.yaml` 覆盖 | 用主题自带的中文 |
+
+> 不走 `hugo.toml` 的自定义还有两处——**界面文案**和**头栏图标按钮**，改的是站点仓库里的文件，见下面「站点的其他自定义」一节。
 
 ### 复制粘贴
 
@@ -127,6 +129,19 @@ enableEmoji = true
 
 > `passthrough` 的键是 **`enable`**，写成 `enabled` 不报错但静默失效。
 
+### 不用配（Hugo 默认已开，主题直接吃）
+
+`definitionList`（定义列表）、`footnote`（脚注）、`table`、`taskList`、`strikethrough`、`linkify` —— 这些不写进 `hugo.toml` 也生效。`tableOfContents` 的 `startLevel` / `endLevel` 可按需调（示例用 2–4）。
+
+### 两条容易踩的
+
+- **主题目录必须叫 `xuanzhi`**。`head.html` 用 `fileExists "themes/xuanzhi/static/fonts/..."` 探测自托管字体，改名（或挂到别的路径）会**静默不加载字体**，页面掉回系统字体。
+- **`public/` 里看到的 URL 依赖 `baseURL`**。开发服务器运行时 Hugo 会把 baseURL 覆盖成 `http://localhost:1314/`，所以别在 `hugo server` 开着的时候去 `public/` 检查绝对地址——那会儿看什么都是 localhost。跑一次 `hugo` 再看。
+
+## 站点的其他自定义
+
+下面两项**不写在 `hugo.toml` 里**，改的是站点仓库中的文件——和上面那批配置项分开看。
+
 ### 改界面文案
 
 界面上的字（外观面板、归档的「岁在」「N 篇」、上下篇、复制按钮…）全在主题的 `i18n/zh-cn.yaml`。**站点想改哪个词，就在自己的 `i18n/zh-cn.yaml` 里写同名 key 覆盖**——Hugo 会合并主题与站点的 i18n 目录，站点优先：
@@ -140,17 +155,98 @@ unitPosts: 则
 
 > 主题的 i18n key 一律**扁平**，别写成嵌套 map 再用点号取（`i18n "posts.other"` 会静默返回空串）。
 
-### 不用配（Hugo 默认已开，主题直接吃）
+### 头栏自定义入口
 
-`definitionList`（定义列表）、`footnote`（脚注）、`table`、`taskList`、`strikethrough`、`linkify` —— 这些不写进 `hugo.toml` 也生效。`tableOfContents` 的 `startLevel` / `endLevel` 可按需调（示例用 2–4）。
+**先看你想让它长什么样：**
 
-### 两条容易踩的
+| 想要的样子 | 怎么加 |
+|---|---|
+| 跟「归档 / 分类 / 标签」排在一起的**文字链接** | 加 `[[menus.main]]`，不用碰模板——桌面头栏和手机 ☰ 面板都会自动出现 |
+| 跟搜索 / 外观 / 明暗排在一起的**图标按钮**（GitHub、RSS、邮件、友链…） | 用下面的**插槽** |
 
-- **主题目录必须叫 `xuanzhi`**。`head.html` 用 `fileExists "themes/xuanzhi/static/fonts/..."` 探测自托管字体，改名（或挂到别的路径）会**静默不加载字体**，页面掉回系统字体。
-- **`public/` 里看到的 URL 依赖 `baseURL`**。开发服务器运行时 Hugo 会把 baseURL 覆盖成 `http://localhost:1314/`，所以别在 `hugo server` 开着的时候去 `public/` 检查绝对地址——那会儿看什么都是 localhost。跑一次 `hugo` 再看。
+文字链接走菜单：
 
-### 行为说明
+```toml
+[[menus.main]]
+  name = '关于'
+  pageRef = '/about'                     # 站内页面
+  weight = 40
+[[menus.main]]
+  name = 'GitHub'
+  url = 'https://github.com/你的账号'     # 外链
+  weight = 50
+```
 
+图标按钮走插槽——在**站点仓库**新建 `layouts/partials/header-extra.html`，写自己的 markup 即可。Hugo 的模板查找顺序是「站点先于主题」，同名 partial 会顶掉主题里那份空的（主题那份只有一段注释，不用改它）。
+
+#### 例一：加一个链接（最普通的情况）
+
+`href` 写死，图标和文字自己换：
+
+```html
+{{/* 站点 layouts/partials/header-extra.html */}}
+<a class="header-extra" href="mailto:you@example.com" aria-label="邮件联系">
+  <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true">
+    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/>
+  </svg>
+  <span class="header-extra-label">邮件</span>
+</a>
+```
+
+跳站外（GitHub 之类）建议加 `target="_blank" rel="noopener"`。
+
+#### 例二：href 用模板表达式
+
+站内地址别写死路径，用 Hugo 变量取。比如 RSS：
+
+```html
+<a class="header-extra"
+   href="{{ with site.Home.OutputFormats.Get "rss" }}{{ .RelPermalink }}{{ end }}"
+   aria-label="RSS 订阅">
+  <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true">
+    <circle cx="6.18" cy="17.82" r="2.18"/>
+    <path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/>
+  </svg>
+  <span class="header-extra-label">RSS 订阅</span>
+</a>
+```
+
+#### 例三：放多个
+
+插槽就是一段 markup，想放几个写几个，顺序即显示顺序：
+
+```html
+<a class="header-extra" href="https://github.com/你的账号" target="_blank" rel="noopener" aria-label="GitHub">
+  <svg …>…</svg><span class="header-extra-label">GitHub</span>
+</a>
+<a class="header-extra" href="{{ with site.Home.OutputFormats.Get "rss" }}{{ .RelPermalink }}{{ end }}" aria-label="RSS 订阅">
+  <svg …>…</svg><span class="header-extra-label">RSS 订阅</span>
+</a>
+```
+
+#### 渲染成什么样
+
+**同一份 markup 会渲染到两处**，主题按上下文分别样式化：
+
+| 渲染位置 | 长什么样 |
+|---|---|
+| 桌面头栏 `.site-nav` | 30×30 圆形图标按钮，和搜索 / 外观 / 明暗那组同排；`.header-extra-label` 自动隐藏 |
+| 手机 ☰ 面板 | 整宽一行，图标 + `.header-extra-label` 文字 |
+
+两条约定：
+
+- 根元素挂 **`class="header-extra"`**，文字包在 **`<span class="header-extra-label">`** 里——主题靠这两个 class 做两套样式。只想显示图标就省略那个 span。
+- ≤640px 时 `.site-nav` 里除明暗按钮外一律隐藏，所以插槽内容**不会挤进手机头栏**，只出现在 ☰ 面板里。这正是想要的，不用额外处理。
+
+> **图标从哪来**：通用图标（邮件 / 链接 / RSS…）取 `@material-design-icons/svg` 官方包；品牌图标（GitHub / Bilibili / 微博）Material 包里没有，用 Simple Icons 之类的包取 `<path>`。**一律别凭记忆手写**——主题所有图标都是这么来的。
+
+> 新建 / 删除 partial 文件后如果页面没变化，**重启 `hugo server`**：Hugo 的 watcher 对文件增删的响应不可靠（实测删掉插槽文件后页面还是旧的），改已有文件才一定热重建。
+
+## 行为说明
+
+- 手机端（≤640px）头栏只留 **☰ · 站名 · 明暗按钮**：导航链接、搜索、外观都收进 ☰ 下拉面板（面板里可滚动，矮屏也不会被截断）。桌面端不受影响，两个浮层面板照旧
+- 页脚的 RSS 入口是一枚图标（带 `aria-label`，不是文字链接），只在站点启用了 RSS 输出时出现
+- 站内搜索的索引**两个搜索框共用一份**：桌面浮层面板里一个、手机 ☰ 面板里一个，先打开哪个就由谁触发 `/index.json` 的加载，之后两处都能用，不会重复请求
 - 明暗模式：访客首次进入跟随系统偏好，点页头按钮手动切换后记忆在 localStorage（键 `xuanzhi-theme`）
 - 站名首字会渲染成页脚的印章，改 `title` 即生效
 - 滚动条滑块、着重号、缩写点线、外链 ↗、锚点落点的朱砂短竖、文章工具栏的朱印、首页「续读」——这些**装饰性标记**都走朱饰系，随 `accent` 在朱砂/黛青之间切换；`strong` 的浓墨、`del` 的褪色、定义列表的引导虚线属于**语义性**标记，留墨阶不动
@@ -194,9 +290,9 @@ layouts/
 ├── taxonomy.html        # 分类法索引页分发器 → 书架 / 印谱
 ├── term.html            # 单词页分发器 → 开函 / 钤印
 ├── 404.html
-├── partials/            # head / header / footer / post-item / post-card / post-card-cover
-│                        # / seal-count / pagination / taxonomy-shelf / taxonomy-sealwall
-│                        # / term-category / term-tag
+├── partials/            # head / header / footer / nav-links / appearance-tiles / header-extra
+│                        # / post-item / post-card / post-card-cover / seal-count / pagination
+│                        # / taxonomy-shelf / taxonomy-sealwall / term-category / term-tag
 └── _markup/
     ├── render-image.html   # 图片渲染钩子（WebP/srcset 管线 + 图窗触发链接）
     └── render-heading.html # 标题毛笔圈点 + 锚点
@@ -204,7 +300,8 @@ assets/
 ├── css/token.css        # 设计 token（全部颜色/字体/版式变量在这里）
 ├── css/chroma.css       # 代码高亮（变量驱动，明暗自动跟随）
 ├── css/main.css         # 版式
-└── js/site.js           # 明暗切换 + 外观面板 + 复制按钮 + scrollspy + 长目录折叠 + 诗笺刷新 + 图片灯箱
+└── js/site.js           # 明暗切换 + 外观面板 + 站内搜索 + 移动端下拉面板 + 复制按钮
+                         # + scrollspy + 长目录折叠 + 诗笺刷新 + 图片灯箱
 static/fonts/       # 霞鹜文楷 GB（regular/medium）+ 思源宋体 700 切片 + JetBrains Mono
 static/images/covers/    # 八式水墨小品定妆预览稿（页面按题哈希内联渲染）
 scripts/                 # 开发辅助脚本
@@ -220,9 +317,9 @@ scripts/                 # 开发辅助脚本
 
 面板由三部分组成，调试完想精简时按需移除：
 
-- 面板 HTML：`layouts/partials/header.html` 中 `class="appearance"` 的整块
+- 面板 HTML：`layouts/partials/header.html` 中 `class="appearance"` 的整块（里面的样张是 `partials/appearance-tiles.html`，**移动端下拉面板共用同一份**，要删就两处一起删）
 - 面板样式与背景切换规则：`assets/css/main.css` 中「外观面板」「背景方案」两段注释之间
-- 面板交互：`assets/js/site.js` 中「外观面板」一段；另删除 `head.html` 内联脚本里 `xuanzhi-bg` / `xuanzhi-accent` 两行恢复逻辑
+- 面板交互：`assets/js/site.js` 中「外观面板」一段——注意样张的点击委托和 `syncPressed()` 是**文档级**的（为了让移动端那组样张也能用），删面板后它们仍会命中别处样张，一并删；另删除 `head.html` 内联脚本里 `xuanzhi-bg` / `xuanzhi-accent` 两行恢复逻辑
 
 背景与点缀色本身的 CSS 变量建议保留——那是主题的配色系统，删面板不影响它们。
 

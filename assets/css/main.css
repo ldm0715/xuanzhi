@@ -178,7 +178,8 @@ html.xz-page-in main {
 
 #theme-toggle,
 #appearance-toggle,
-#search-toggle {
+#search-toggle,
+.nav-burger {
   display: inline-grid;
   place-items: center;
   width: 30px;
@@ -391,6 +392,119 @@ html[data-theme="dark"] .appearance-panel { box-shadow: 0 8px 24px rgba(0, 0, 0,
 @media (prefers-reduced-motion: reduce) {
   .appearance-panel { transition: none; }
 }
+
+/* ---- 移动端下拉导航面板 ----
+   ≤640px 时头栏只留 ☰ · 站名 · 明暗按钮，导航链接 / 搜索 / 外观收进这里。
+   ☰ 的尺寸、颜色、hover 走上面 #theme-toggle 那组，这里只管显隐。 */
+.nav-burger { display: none; }
+
+/* 面板挂在 .site-header 内，sticky 的 header 天然是它的定位基准。
+   开合沿用搜索/外观面板那套：hidden 属性 + @starting-style + allow-discrete，
+   所以 JS 只要继续用 hidden 就能白拿过渡 */
+.nav-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  display: none;                 /* 桌面端不参与布局，也不进键盘 Tab 序列 */
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border-light);
+  /* 矮屏（横屏、小屏手机）上面板比视口还高——它是绝对定位在吸顶头栏上的，
+     页面滚动不会把它的下缘带出来，必须自己能滚。100dvh 兼容地址栏收放 */
+  max-height: calc(100vh - 56px);
+  max-height: calc(100dvh - 56px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-shadow: 0 8px 24px rgba(40, 34, 22, 0.10);
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.18s ease, transform 0.18s ease, display 0.18s allow-discrete;
+}
+html[data-theme="dark"] .nav-panel { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35); }
+.nav-panel:not([hidden]) { opacity: 1; transform: none; }
+@starting-style {
+  .nav-panel:not([hidden]) { opacity: 0; transform: translateY(-8px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-panel { transition: none; }
+}
+
+/* 导航链接横排：三格等分，比竖排省一半高度 */
+.nav-panel-links { display: flex; }
+.nav-panel-links a {
+  flex: 1;
+  padding: 14px 8px;
+  text-align: center;
+  color: var(--color-text);
+  text-decoration: none;
+  font-size: 0.95rem;
+  border-right: 1px solid var(--color-border-light);
+}
+.nav-panel-links a:last-child { border-right: 0; }
+.nav-panel-links a:hover { color: var(--color-accent); }
+.nav-panel-links a[aria-current="page"] { color: var(--color-zhu-strong); }
+
+.nav-panel-sec {
+  padding: 14px 16px;
+  border-top: 1px solid var(--color-border-light);
+}
+.nav-panel-label {
+  display: block;
+  margin-bottom: 9px;
+  font-size: 0.74rem;
+  letter-spacing: 0.14em;
+  color: var(--color-text-secondary);
+}
+/* 面板比浮层窄：样张格收小一档，让背景那 5 格在 375px 上仍能排满一行 */
+.nav-panel .panel-tiles { grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); }
+
+/* ---- 头栏扩展插槽 ----
+   站点在 layouts/partials/header-extra.html 里写自己的入口（RSS 按钮、外链图标…），
+   同一份 markup 会出现在桌面 .site-nav 与移动端 .nav-panel 两处，
+   这里按上下文分别样式化：桌面 = 圆形图标按钮，面板 = 整宽一行（图标 + 文字） */
+.header-extra {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.header-extra:hover { color: var(--color-accent); }
+.header-extra-label { display: none; }   /* 桌面只显图标 */
+
+.nav-panel .header-extra {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: auto;
+  height: auto;
+  padding: 13px 16px;
+  border-top: 1px solid var(--color-border-light);
+  border-radius: 0;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+.nav-panel .header-extra-label { display: inline; }
+
+@media (max-width: 640px) {
+  /* 头栏降级：只留 ☰ · 站名 · 明暗按钮。
+     隐藏 .search / .appearance 时它们的浮层面板是子节点，一并消失——
+     桌面那组按按钮间距硬算的 right:-96px / -48px 因此完全不用动 */
+  .nav-burger { display: inline-grid; }
+  /* 黑名单而非白名单：除明暗按钮外一律隐藏。站点往 .site-nav 里加任何东西
+     （扩展插槽、自定义按钮）都不会重新把窄屏挤爆——要么进下拉面板，要么不显示 */
+  .site-nav > *:not(#theme-toggle) { display: none; }
+  .site-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .nav-panel { display: block; }
+}
+
+/* 必须放在媒体查询之后：面板自己写了 display，会盖过 UA 的 [hidden]{display:none}。
+   (0,2,0) 的 .nav-panel[hidden] 稳赢 (0,1,0) 的 .nav-panel */
+.nav-panel[hidden] { display: none; }
 
 .panel-title {
   margin: 0 0 12px;
@@ -2757,8 +2871,15 @@ html[data-theme="dark"] .post-seal::after {
 }
 .footer-line p { margin: 0; }
 .footer-links { margin-left: auto; }
-.footer-links a { color: var(--color-text-secondary); text-decoration: none; }
+/* RSS 入口是枚图标：行内 flex 让 svg 与文字基线对齐，svg 转块级消掉行内基线空隙 */
+.footer-links a {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
 .footer-links a:hover { color: var(--color-accent); }
+.footer-links a svg { display: block; }
 
 /* 印章：站名首字，朱底纸字 */
 .seal {

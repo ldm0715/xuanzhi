@@ -22,8 +22,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 ## 结构与规则
 
 - `assets/css/token.css`：**全部设计 token**（色彩、字体、纹理 data-uri、分隔线用色，亮暗各一套）。改样式从这里进，禁止在别处硬编码颜色
-- `assets/js/site.js`：全站唯一 JS（明暗切换、外观面板、代码复制、目录 scrollspy、长目录折叠）。新增交互必须并进这个文件
-- 外观系统全走 `html` 的 `data-*` 属性 + CSS 变量：`data-theme`(light/dark)、`data-accent`(terracotta/indigo)、`data-bg`(5 种纸面纹理)、`data-hr`(4 种分隔线)；选择持久化在 localStorage（键前缀 `xuanzhi-`），`head.html` 内联脚本负责防闪烁恢复
+- `assets/js/site.js`：全站唯一 JS（明暗切换、外观面板、站内搜索、移动端下拉面板、代码复制、目录 scrollspy、长目录折叠、诗笺刷新、图片灯箱）。新增交互必须并进这个文件
+- 外观系统全走 `html` 的 `data-*` 属性 + CSS 变量：`data-theme`(light/dark)、`data-accent`(terracotta/indigo)、`data-bg`(5 种纸面纹理)、`data-hr`(4 种分隔线)；选择持久化在 localStorage（键前缀 `xuanzhi-`），`head.html` 内联脚本负责防闪烁恢复。**样张 markup 抽在 `partials/appearance-tiles.html`**，桌面浮层面板与移动端下拉面板共用；`site.js` 的样张点击委托和 `syncPressed()` 都挂在 **document** 上——只查自己那个面板的话，另一组样张的高亮不会跟着变
 - `layouts/` 是 0.146+ 顶层模板结构；`_markup/render-image.html`（page bundle 图片 → WebP/srcset）和 `_markup/render-heading.html`（标题毛笔圈点 + 锚点）是渲染钩子
 - 图窗（点开看大图）：`render-image.html` 把每张正文图包进 `<a class="img-zoom" href="{最大档 WebP}">`——**这是渐进增强，不是唯一入口**，无 JS 时它就是「点开看原图」的链接，所以别把 href 换成 `#`。`site.js`「图片灯箱」段接管点击：开合 + ←→ 翻页 + 滚轮/双击缩放 + 拖动平移 + 双指捏合 + 窄屏滑动翻页 + Esc + 焦点锁/回焦。样式在 `main.css`「图片灯箱」段，遮罩取**同纸虚化**（当前纸色 90% + blur 10px，照片仍像贴在同一张纸上）、大图裱成**画框立轴**（`--lb-mat: 18px` 宽裱边 + `--color-frame` 细框 + 一道 `--color-zhu-soft` 内细边 + `--lb-shadow`），图注复刻 `.post-figure figcaption` 的题跋式两侧引线。`--lb-mat` 一变，`.lightbox-img` 的 max-width/height 里的 `calc` 会跟着走，别再写死 22px 之类的常数
 - 首页 = 诗笺 + 红框封卡片两段：诗笺由 `home.html` 构建期 `resources.GetRemote` 预取绝句（`try` + 内置《鹿柴》兜底）、`site.js` 每次到访随机刷新（`lang=zh-Hant` 繁体）；**取到的诗要过校验**（标题 ≤12 字、每句 ≤16 字、至少两句，两处同口径）——诗泉偶尔返回带考据注释的条目，竖排诗笺会被撑爆，不合格就静默保留当前这首。卡片 = `partials/post-card.html`（结构：素纸 + 一道朱丝框 + 右上邮戳 + 右下角淡印 + 落款行）+ `partials/post-card-cover.html`（印记：front matter `cover` 自定义图，否则按标题哈希生成八式水墨小品——远山晓日/竹影/空亭听雨/汀洲孤雁/孤舟远影/红杏出墙/云岫/杨柳岸，定妆预览稿在 `static/images/covers/`）；印记由 CSS 压成 124×83、约 34% 不透明度 + 模糊 0.5px + 径向羽化，**因此不再套 feTurbulence 毛边滤镜**（那个浓度下看不出来，只白付每张卡的栅格化）；卡片颜色一律走 token（摘要/标签用 `--color-text-note`，题字字体栈 `--font-title` 宋体优先、无则落文楷）
@@ -47,9 +47,11 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 - **归档/分类页刻意不放摘要**：`.post-item` 是传统目录式（日期居左、点线引导、题名贴右），加一行摘要会破坏这个语言——试过又撤了，别再往上加。只有首页卡片带摘要：`.Summary | plainify | chomp | replaceRE \s+ " " | truncate`（`.Summary` 是 `template.HTML`，不 plainify 会带出各级标题文字）
 - **打印样式**：`main.css` 末尾 `@media print` 是全站**唯一刻意不用 token 的地方**（打印必须黑白，宣纸底/夜墨底都要还原成纸），隐藏头栏/页脚/目录/外观面板，外链把地址印出来
 - 正文 `<em>` 用**着重号**（`text-emphasis: filled dot` + `text-emphasis-color: var(--color-zhu)`）而不是斜体：`--font-sans` 是文楷，没有真斜体字面，浏览器合成假斜在汉字上很脏
-- **站内搜索**：索引由 `layouts/home.json` 构建期生成（站点需在 `[outputs]` 给 home 加 `json`），`site.js`「站内搜索」段在**打开面板时**才 fetch；纯子串匹配，标题权重 3 / 标签 2 / 正文 1，正文命中给片段。**没有中文分词**——这是"能用"版，要真分词得换 Pagefind（选型对比在 `docs/structure.md`）
+- **站内搜索**：索引由 `layouts/home.json` 构建期生成（站点需在 `[outputs]` 给 home 加 `json`），**两个搜索框共用一份索引**——桌面浮层面板 `#search-input` 与移动端下拉面板里的 `[data-search-input]`，谁先被打开/聚焦谁触发 fetch，之后两处都能用、不会重复请求。`site.js` 已把这段拆成「模块级加载器 + `makeSearch(input, list, hint)` 工厂」，要再加搜索框只需再 `makeSearch()` 一次。纯子串匹配，标题权重 3 / 标签 2 / 正文 1，正文命中给片段。**没有中文分词**——这是"能用"版，要真分词得换 Pagefind（选型对比在 `docs/structure.md`）
 - **文章工具栏**（`single.html` 末尾）：收成一枚朱印（站名首字），点开展开「回到顶部 / 分享 / 目录」。整枚可拖动，位置存 `localStorage` 的 `xuanzhi-toolbar`，**以「左缘 + 下边缘」为锚**（锚上边缘的话展开时按钮会往下挤），越界坐标会被夹回视口，**上边界必须让开吸顶头栏**（头栏 z10 > 工具栏 z5，不夹的话会藏进头栏后面抓不回来）；拖到屏幕左三分之一时加 `.tip-right`，悬停标签与分享卡片改贴右侧。**层级 5**（压正文、在头栏 10 之下、远在图窗 100 之下），且**必须 `position: fixed`**——`.post-layout > .post` 是 `display: contents`，在流内的新元素会变成第三个网格项打乱 `grid-template-areas`。分享卡片写剪贴板的内容由 `data-share-text` 提供（`站名 - 标题 - 地址`）。悬停提示走 `data-tip` + `::after`，**不用原生 `title`**（系统提示要悬停一两秒，样式也不搭）。打印隐藏清单里已含 `.post-toolbar`
-- **导航走 Hugo 菜单**：`header.html` 读 `site.Menus.main`（站点在 `hugo.toml` 配 `[[menus.main]] name/pageRef/weight`），加页面只改配置；站点没配菜单时兜底成「`site.MainSections` + 分类法页」的旧算法，所以主题单独拿去也能用
+- **导航走 Hugo 菜单**：`partials/nav-links.html` 读 `site.Menus.main`（站点在 `hugo.toml` 配 `[[menus.main]] name/pageRef/weight`），加页面只改配置；站点没配菜单时兜底成「`site.MainSections` + 分类法页」的旧算法，所以主题单独拿去也能用。**桌面 `.site-nav` 与移动端 `.nav-panel-links` 共用这一份 partial**，改一处两处都变
+- **移动端头栏收起**（≤640px）：头栏只留 `☰ · 站名 · #theme-toggle`，导航链接 / 搜索 / 外观收进 `#nav-panel`（挂在 `.site-header` 内、`position:absolute; top:100%`，所以打印隐藏 `.site-header` 时它跟着消失，不必单独加进 `@media print` 清单）。三条硬约束：① 隐藏规则是**黑名单** `.site-nav > *:not(#theme-toggle){display:none}`——退回点名式白名单的话，站点往 `.site-nav` 加任何东西都会重新把窄屏挤爆；② 面板自己写了 `display`，必须显式补 `.nav-panel[hidden]{display:none}` 压过 UA 规则；③ 面板比矮屏视口高，它是绝对定位在吸顶头栏上的、页面滚动带不出下缘，必须 `max-height: calc(100dvh - 56px)` + `overflow-y:auto`
+- **头栏扩展插槽**：`partials/header-extra.html` 主题里是空的（只有一段注释），站点在**自己仓库**建同名 partial 即可覆盖（Hugo 查找顺序站点先于主题）。同一份 markup 在 `.site-nav` 渲染成 30×30 圆形图标按钮（`.header-extra-label` 隐藏）、在 `.nav-panel` 渲染成整宽一行。**纯文字链接不必走这里**——加 `[[menus.main]]` 就会两处都出现；插槽是给图标按钮用的
 - **界面文案全在 `i18n/zh-cn.yaml`**：模板里禁止硬编码中文界面词。**key 必须扁平**——`i18n "posts.other"` 这种点号访问嵌套 key 会**静默返回空串**（踩过，归档页的「篇」消失）。JS 拿不到 i18n，复制按钮文案由 `baseof.html` 写到 `<html data-copy/data-copied>`，`site.js` 读 dataset 并留中文兜底
 - **滚动条**：滑块走 `--scrollbar-thumb`（token.css 里由 `color-mix(in srgb, var(--color-zhu) 55%, transparent)` 派生，随点缀色换朱砂/黛青，派生式写法不必补四象限）。作用域是 `html`（窗口那根竖向滚动条）+ 内容里**四个**横向滚动容器：`pre`、`.lntable`（chroma 带行号代码块，定义在 chroma.css，最容易漏）、`.table-wrap`、`.katex-display`
 - **新增标记先问它是「装饰」还是「语义」**：装饰性的一律走朱饰系（`--color-zhu` / `--color-zhu-soft`），随 `data-accent` 换色——着重号、缩写点线、外链 ↗、锚点落点朱砂短竖、「续读」都是这一类；语义性的留墨阶——`strong` 浓墨、`del` 褪色、`dd`/`ul ul` 引导虚线（引导线要和墨阶一致，染色会喧宾夺主）
@@ -86,6 +88,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 - **元素自己写了 `display` 时，`hidden` 属性会失效**：UA 的 `[hidden]{display:none}` 特异性低于作者样式里任何 `display:flex`，面板会一直显形。必须显式补 `[hidden]{display:none}`（搜索面板踩过；图窗的 `.lightbox` 同源）
 - **`i18n` 不认嵌套 key 的点号写法**：`i18n/zh-cn.yaml` 里写 `posts:\n  other: 篇`，模板里 `{{ i18n "posts.other" }}` 不报错、**返回空串**，页面上的字直接消失（归档页的「七篇」变成「七」）。一律用扁平 key（`unitPosts: 篇`）
 - PowerShell 5.1 把**无 BOM 的 UTF-8 `.ps1` 按 GBK 读**：脚本里写中文字面量（连注释也算）会让解析器报 `MissingEndParenthesisInMethodCall`。生成 OG 图的脚本踩过，改成全 ASCII + `[char]0x5BA3` 取字形才通
+- **新建 / 删除 partial 文件后 Hugo 的 watcher 不一定重建**：实测删掉站点侧 `layouts/partials/header-extra.html` 后页面仍是旧的（插槽还在、footer 还是老 markup），改已有文件才一定热重建。加删模板文件后没生效就重启 `hugo server`
 
 ## 相关文档
 
