@@ -26,7 +26,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 - 外观系统全走 `html` 的 `data-*` 属性 + CSS 变量：`data-theme`(light/dark)、`data-accent`(terracotta/indigo)、`data-bg`(5 种纸面纹理)、`data-hr`(4 种分隔线)；选择持久化在 localStorage（键前缀 `xuanzhi-`），`head.html` 内联脚本负责防闪烁恢复
 - `layouts/` 是 0.146+ 顶层模板结构；`_markup/render-image.html`（page bundle 图片 → WebP/srcset）和 `_markup/render-heading.html`（标题毛笔圈点 + 锚点）是渲染钩子
 - 首页 = 诗笺 + 山水画框卡片两段：诗笺由 `home.html` 构建期 `resources.GetRemote` 预取绝句（`try` + 内置《鹿柴》兜底）、`site.js` 每次到访随机刷新（`lang=zh-Hant` 繁体）；画框卡片 = `partials/post-card.html`（结构）+ `partials/post-card-cover.html`（封面：front matter `cover` 自定义图，否则按标题哈希生成八式水墨小品——远山晓日/竹影/空亭听雨/汀洲孤雁/孤舟远影/红杏出墙/云岫/杨柳岸，定妆预览稿在 `static/images/covers/`）；卡片颜色一律走 token（摘要/标签用 `--color-text-note`，题字字体栈 `--font-title` 宋体优先、无则落文楷）
-- 朱饰系 token（`--color-zhu` / `--color-zhu-strong` / `--color-zhu-soft`）随 `data-accent` 换色：terracotta = 朱砂，indigo = 黛青（青印）；`--tex-*` 纹理 token（`--tex-seal` / `--tex-bamboo` / `--tex-birds` 等 data-uri）的颜色烤在 URI 里，同样必须补齐亮暗 × 双点缀色四象限；无色遮罩类（`--tex-mask-paste` 印泥飞白 mask）单份即可
+- 朱饰系 token（`--color-zhu` / `--color-zhu-strong` / `--color-zhu-soft` / `--color-seal`）随 `data-accent` 换色：terracotta = 朱砂，indigo = 黛青（青印）；新增朱饰必须同步补 token 四象限（亮暗 × 双点缀色），别在组件里写死红值；`--tex-*` 纹理 token（`--tex-seal` / `--tex-bamboo` / `--tex-birds` 等 data-uri）的颜色烤在 URI 里，同样必须补齐亮暗 × 双点缀色四象限；无色遮罩类（`--tex-mask-paste` 印泥飞白 mask）单份即可
 - 章界横线统一用 `--color-rule`（点缀色 28% 与 `--color-frame` 调和），随点缀色橘/青自动切换；正文「纸」系元素（纸底/格纹/折痕浅线）刻意不跟点缀色
 - 头栏是半透明宣纸毛玻璃（`--color-header-bg` + backdrop-filter）；头栏宽度随页面类型过渡：窄 `--content-width` / 文章页 1150px，CSS 基础值与 `site.js`「头栏宽度过渡」段的 NARROW/WIDE 常量必须同步改
 - 明暗切换圆形揭示：`site.js`「明暗切换」段写 `--theme-x/y/r`（**百分比**，理由见已知坑），`main.css`「明暗切换圆形揭示」段定义方向与 keyframes；方向靠「动画运行时 `data-theme` 已是新值」判定（dark 收缩旧快照、light 扩张新快照），改时长/曲线只动 main.css 两条 `animation`
@@ -36,7 +36,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 ## 已知坑（都踩过）
 
 - goldmark passthrough 的启用键是 **`enable = true`**，写成 `enabled` 不报错但静默失效（行内公式 `\(` 会被当转义吃掉）
-- Hugo 0.146+ 模板在 `layouts/` 顶层（`home.html`/`single.html`…），`site.MainSections` 返回字符串数组不是页面对象，`Pager.PageGroups` 已不可用（归档用 `.Pages.GroupByDate "2006"`）
+- Hugo 0.146+ 模板在 `layouts/` 顶层（`home.html`/`single.html`…），`site.MainSections` 返回字符串数组不是页面对象，`Pager.PageGroups` 已不可用（归档年分组用 `.Pages.GroupByDate "2006"`，月分组在年内嵌套 `GroupByDate "01"`；干支闲章按 `(年份-4) mod 10/12` 查天干地支表推算，别写死某一年）
 - 分页器 Pager 只有 `.URL` / `.PageNumber` 等字段，**没有 `.RelPermalink`**——pagination partial 里写 `.RelPermalink` 只有一页时不炸，出现第二页才炸（已踩过）
 - Hugo `int` 函数不接受进制参数，字符串转整数哈希用 `hash.FNV32a`
 - 测试文章日期写成未来时间会"消失"（默认不渲染 future content）
@@ -48,6 +48,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 - `<details>` 收起瞬间内容即被移出渲染树，CSS 做不了退出动画——收合动画必须挂在 `::details-content` 伪元素上并配合 `interpolate-size: allow-keywords`（Chrome 131+/Safari 18.2+，Firefox 回退瞬时收合，可接受）
 - Git Bash 里 grep 生成的文件清单带 CRLF，直接拼进 curl URL 会报 `(3) Malformed input to a URL function`——先 `tr -d '\r'`（思源宋体 97 个切片批量下载时已踩）；另外批量下载 jsdelivr 切片逐个串行即可，并发 xargs 全军覆没过
 - 写死的行高/字号推导（如落款章 `height` 撑竖排换列）会随配置漂移——文末落款章已改为 `split` 逐字入 grid 格、模板按字数算行列，别再回退到文本流换行
+- 同一容器的内阴影会被自身 `z-index:-1` 的伪元素盖住（容器背景层画在负 z 子元素之前），挂 `filter: blur` 又会把阴影一起糊掉——归档笺纸的分层就是为此：纸面在 `::before`（负 z + blur），起伏阴影单独一层 `::after` 盖在纸面上（`pointer-events: none`），要浮到最上层的元素（月份引首章）给正 `z-index`
 
 ## 相关文档
 

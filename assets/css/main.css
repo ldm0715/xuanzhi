@@ -360,16 +360,167 @@ ul.post-list { list-style: none; padding: 0; margin: 0; }
 }
 .post-item-title:hover { color: var(--color-accent); }
 
-.year-group { margin-top: 2rem; }
-.year-group:first-of-type { margin-top: 1.6rem; }
+/* ---- 归档页：毛笔纪年 · 笺纸分月 ---- */
 
+/* 竹影：极淡一枝从页面右上探入，若有若无，只添纸感不抢戏 */
+.archive-page {
+  position: relative;
+  isolation: isolate;
+}
+.archive-page::before {
+  content: "";
+  position: absolute;
+  top: 14px;
+  right: -26px;
+  width: 240px;
+  height: 220px;
+  background: var(--tex-bamboo) no-repeat center / contain;
+  opacity: 0.04;
+  filter: blur(0.5px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.year-group { margin-top: 3rem; }
+.year-group:first-of-type { margin-top: 2rem; }
+
+/* 毛笔纪年：细宋 2em 落款，右上压一枚印泥淡化的小方印，右侧垂一竖排干支闲章 */
 .year {
-  margin: 0 0 0.6rem;
-  padding-bottom: 6px;
-  border-bottom: 1px solid var(--color-border-light);
-  font-size: 1.12rem;
-  font-weight: 700;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin: 0 0 20px;
+  font-family: var(--font-title);
+  font-size: 2em;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 3px;
   color: var(--color-title);
+}
+.year::after {
+  content: "";
+  width: 10px;
+  height: 10px;
+  margin-top: 4px;
+  background: var(--color-seal);
+  opacity: 0.4;
+  filter: blur(0.5px);
+  transform: rotate(-3deg);
+  clip-path: polygon(6% 14%, 28% 2%, 74% 0, 100% 18%, 96% 62%, 82% 100%, 34% 96%, 4% 82%, 0 40%);
+}
+
+/* 干支闲章：垂在年份左侧的竖排细楷，淡褐若现，如卷边小落款 */
+.year-note {
+  order: -1;
+  margin-right: 8px;
+  writing-mode: vertical-rl;
+  line-height: 1;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  letter-spacing: 5px;
+  color: var(--color-ink-weak);
+  opacity: 0.55;
+}
+
+/* 笺纸分月：整张实色笺纸，唯四周以模糊羽化一圈，不见硬边 */
+.archive-month {
+  position: relative;
+  margin: 0 0 34px;
+  padding: 20px 30px;
+}
+.archive-month::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--color-case);
+}
+/* 纸面起伏：右下淡淡沉一点影、左上微微受光，模拟纸张边缘的自然起伏 */
+.archive-month::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow:
+    inset -4px -4px 12px rgba(0, 0, 0, 0.03),
+    inset 4px 4px 12px rgba(255, 255, 255, 0.35);
+}
+html[data-theme="dark"] .archive-month::after {
+  box-shadow:
+    inset -4px -4px 12px rgba(0, 0, 0, 0.18),
+    inset 4px 4px 12px rgba(228, 221, 205, 0.04);
+}
+
+/* 引首章：月份作实心朱印，压在笺纸虚线左上，白文即纸色（随点缀色朱/青互换） */
+.month {
+  position: absolute;
+  top: -11px;
+  left: 26px;
+  z-index: 1;
+  margin: 0;
+  padding: 2px 7px 2px 9px;
+  background: var(--color-zhu);
+  color: var(--color-bg);
+  border-radius: 2px;
+  font-family: var(--font-title);
+  font-size: 0.78rem;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0.18em;
+  opacity: 0.85;
+  transform: rotate(-2deg);
+}
+
+/* 月内文章：传统目录式两栏——日期居左，点线引导填白，题名紧贴右缘 */
+.archive-month .post-list { margin: 0; }
+.archive-month .post-item {
+  padding: 2px 0;
+  line-height: 2.2;
+}
+.archive-month .post-item-date {
+  font-family: var(--font-title);
+  font-size: 0.85em;
+}
+.archive-month .post-item-title {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-family: var(--font-title);
+  font-size: 1rem;
+  color: var(--color-text);
+  transition: color 0.3s ease;
+}
+/* 引导线：空伪元素撑满日期与题名间的空白，底缘贴基线，如目录连接线 */
+.archive-month .post-item-title::before {
+  content: "";
+  flex: 1;
+  border-bottom: 1px dotted var(--color-frame);
+  transition: border-color 0.3s ease;
+}
+
+/* 悬停：题名墨色加深，引导线染朱砂，如毛笔划过标记 */
+.archive-month .post-item-title:hover { color: var(--color-title); }
+.archive-month .post-item-title:hover::before { border-color: var(--color-seal); }
+
+/* 题名后的朱砂短竖：悬停时于题名右侧洇出，如笔锋收势的一顿 */
+.archive-month .post-item-title-text { position: relative; }
+.archive-month .post-item-title-text::after {
+  content: "";
+  position: absolute;
+  right: -10px;
+  top: 50%;
+  width: 3px;
+  height: 14px;
+  background: var(--color-seal);
+  opacity: 0;
+  transform: translateY(-50%) scaleY(0.4);
+  transition: all 0.3s ease;
+}
+.archive-month .post-item-title:hover .post-item-title-text::after {
+  opacity: 0.9;
+  transform: translateY(-50%) scaleY(1);
 }
 
 /* ============ 文章页 ============ */
@@ -1407,6 +1558,11 @@ html[data-theme="dark"] .toc-memo nav a { color: #CDBB92; }
     gap: 1px;
     padding: 8px 0;
   }
+
+  /* 归档笺纸：窄屏收窄内边距，引导线隐去、题名回归左对齐 */
+  .archive-month { padding: 16px 20px; }
+  .archive-month .post-item-title { display: block; }
+  .archive-month .post-item-title::before { display: none; }
 
   /* 上下篇各占一半，长题名在半栏内自行换行，不再整体堆叠 */
   .post-nav { max-width: 47%; }

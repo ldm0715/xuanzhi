@@ -1,18 +1,26 @@
 {{ define "main" -}}
-<div class="container">
+<div class="container archive-page">
 <header class="page-heading">
   <h1>{{ .Title | default (i18n "archive") }}</h1>
 </header>
 
 {{ $paginator := .Paginate .Pages 30 -}}
+{{- $gan := slice "甲" "乙" "丙" "丁" "戊" "己" "庚" "辛" "壬" "癸" -}}
+{{- $zhi := slice "子" "丑" "寅" "卯" "辰" "巳" "午" "未" "申" "酉" "戌" "亥" -}}
 {{- range $paginator.Pages.GroupByDate "2006" }}
+{{- $y := int .Key }}
 <section class="year-group">
-  <h2 class="year">{{ .Key }}</h2>
-  <ul class="post-list">
-    {{- range .Pages }}
-    <li>{{ partial "post-item.html" . }}</li>
-    {{- end }}
-  </ul>
+  <h2 class="year">{{ .Key }}<span class="year-note" aria-hidden="true">岁在{{ index $gan (mod (sub $y 4) 10) }}{{ index $zhi (mod (sub $y 4) 12) }}</span></h2>
+  {{- range .Pages.GroupByDate "01" }}
+  <div class="archive-month">
+    <h3 class="month">{{ .Key }}月</h3>
+    <ul class="post-list">
+      {{- range .Pages }}
+      <li>{{ partial "post-item.html" . }}</li>
+      {{- end }}
+    </ul>
+  </div>
+  {{- end }}
 </section>
 {{- end }}
 {{ partial "pagination.html" $paginator }}
