@@ -103,17 +103,17 @@ layouts/
 ├── home.html            # 首页（诗笺欢迎区 + 信封卡片，最近 8 篇）
 ├── list.html            # 归档（毛笔纪年 + 笺纸分月）
 ├── single.html          # 文章页
-├── taxonomy.html        # 标签汇总
+├── taxonomy.html        # 标签汇总（印谱·朱印方章）
 ├── term.html            # 单个标签下的文章
 ├── 404.html
-├── partials/            # head / header / footer / post-item / post-card / post-card-cover / pagination
+├── partials/            # head / header / footer / post-item / post-card / post-card-cover / seal-count / pagination
 └── _markup/
     └── render-image.html  # 图片渲染钩子（WebP/srcset 管线）
 assets/
 ├── css/token.css        # 设计 token（全部颜色/字体/版式变量在这里）
 ├── css/chroma.css       # 代码高亮（变量驱动，明暗自动跟随）
 ├── css/main.css         # 版式
-└── js/site.js           # 明暗切换 + 外观面板 + 复制按钮 + scrollspy
+└── js/site.js           # 明暗切换 + 外观面板 + 复制按钮 + scrollspy + 长目录折叠
 static/fonts/       # 霞鹜文楷 GB（regular/medium）+ 思源宋体 700 切片 + JetBrains Mono
 static/images/covers/    # 八式水墨小品定妆预览稿（页面按题哈希内联渲染）
 scripts/                 # 开发辅助脚本

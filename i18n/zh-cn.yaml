@@ -1,6 +1,8 @@
 archive: 归档
 tags: 标签
 tag: 标签
+posts:
+  other: 篇
 toc: 目录
 prevPage: 上一页
 nextPage: 下一页

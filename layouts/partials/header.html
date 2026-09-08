@@ -58,3 +58,38 @@
     </nav>
   </div>
 </header>
+<script>
+  /* 框架宽度档位：仅当上一页与当前页档位不同（窄 800 ↔ 宽 1150）时，
+     首帧前从上一档起步过渡到当前档；同档导航（文章→文章）与刷新一次成型，不重播。
+     上一档记录在 sessionStorage（每标签页独立；新开标签无历史，直接成型不动画）。
+     内联置于 header 末尾：解析到即执行，早于首帧，不会先按最终宽度闪一帧 */
+  (function () {
+    var KEY = 'xuanzhi-frame-wide';
+    var inner = document.querySelector('.header-inner');
+    if (!inner) return;
+    var cur = document.body.getAttribute('data-layout') === 'page' ? '1' : '0';
+    var prev = null;
+    try { prev = sessionStorage.getItem(KEY); } catch (e) { /* 隐私模式忽略 */ }
+    try { sessionStorage.setItem(KEY, cur); } catch (e) { /* 同上 */ }
+    if (prev === null || prev === cur) return;
+
+    var root = document.documentElement;
+    var start = cur === '1' ? '800px' : '1150px'; /* 起步 = 上一档宽度 */
+    /* 毛玻璃 backdrop-filter 随宽度逐帧重算模糊区，是动画卡顿的最大来源：
+       动画期间暂停，transitionend 后恢复（导航后页面在顶部，头栏下无内容，暂停无视觉差） */
+    root.classList.add('xz-frame-anim');
+    inner.style.transition = 'none';
+    inner.style.maxWidth = start;
+    void inner.offsetWidth; /* 强制回流，确保起步值成为过渡起点 */
+    inner.style.transition = '';
+    inner.style.maxWidth = ''; /* 放开，交回 CSS 过渡到当前档 */
+    root.classList.add('xz-page-in'); /* 正文淡入与展开同步播放 */
+
+    var done = function () {
+      root.classList.remove('xz-frame-anim');
+      inner.removeEventListener('transitionend', done);
+    };
+    inner.addEventListener('transitionend', done);
+    setTimeout(done, 700); /* 兜底：个别场景 transitionend 不触发 */
+  })();
+</script>

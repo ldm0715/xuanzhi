@@ -1,0 +1,10 @@
+{{- /* 汉字数字：1-99 转汉字，超出的退回阿拉伯数字，0 为〇 */ -}}
+{{- $n := int . -}}
+{{- $d := dict "1" "一" "2" "二" "3" "三" "4" "四" "5" "五" "6" "六" "7" "七" "8" "八" "9" "九" -}}
+{{- if gt $n 99 -}}{{ $n -}}
+{{- else if ge $n 20 -}}{{ index $d (string (div $n 10)) }}十{{ with mod $n 10 }}{{ index $d (string .) }}{{ end -}}
+{{- else if eq $n 10 -}}十
+{{- else if gt $n 10 -}}十{{ index $d (string (mod $n 10)) -}}
+{{- else if gt $n 0 -}}{{ index $d (string $n) -}}
+{{- else -}}〇
+{{- end -}}

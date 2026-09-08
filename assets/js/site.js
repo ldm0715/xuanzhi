@@ -2,39 +2,6 @@
 (function () {
   'use strict';
 
-  /* 头栏宽度过渡：文章页展开至阅读区等宽，返回其他页收回。
-     MPA 每次导航都是新文档，先强制设为旧宽度再放开到目标宽度，过渡才必然发生；
-     bfcache 恢复（后退/前进）时也重放一次 */
-  (function () {
-    var inner = document.querySelector('.header-inner');
-    var main = document.querySelector('main');
-    if (!inner) return;
-    /* 两档宽度须与 CSS 保持一致：窄 = --content-width(800px)，宽 = 阅读区 1150px */
-    var NARROW = '800px';
-    var WIDE = '1150px';
-
-    function play() {
-      var wide = document.body.getAttribute('data-layout') === 'page';
-      inner.style.transition = 'none';
-      inner.style.maxWidth = wide ? NARROW : WIDE; /* 起步 = 旧状态的宽度 */
-      void inner.offsetWidth;                      /* 强制回流，吞掉起始帧 */
-      inner.style.transition = '';
-      inner.style.maxWidth = wide ? WIDE : NARROW; /* 放开，过渡到当前页目标宽度 */
-    }
-
-    function replayMain() {
-      if (!main) return;
-      main.style.animation = 'none';
-      void main.offsetWidth;
-      main.style.animation = '';
-    }
-
-    play();
-    window.addEventListener('pageshow', function (e) {
-      if (e.persisted) { play(); replayMain(); }
-    });
-  })();
-
   /* 明暗切换：light <-> dark，初值由 head 内联脚本根据系统偏好决定。
      切换以 #theme-toggle 按钮中心为圆心做圆形揭示：
      切暗色旧页面向按钮收缩，切亮色新页面从按钮扩张（动画在 main.css） */
@@ -174,6 +141,9 @@
     var memo = document.querySelector('.toc-memo');
     if (!memo || typeof IntersectionObserver === 'undefined') return;
     var links = memo.querySelectorAll('nav a[href^="#"]');
+    /* 长目录折叠：条目超过十条时切换折叠式——明面只列一级条目，划入展开子目；
+       正在阅读的分支由 CSS :has(a.toc-active) 自动保持展开，高亮不藏进折页 */
+    if (links.length > 10) memo.classList.add('toc-fold');
     var map = {};
     links.forEach(function (l) {
       map[decodeURIComponent(l.hash.slice(1))] = l;

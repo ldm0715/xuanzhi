@@ -22,13 +22,15 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 ## 结构与规则
 
 - `assets/css/token.css`：**全部设计 token**（色彩、字体、纹理 data-uri、分隔线用色，亮暗各一套）。改样式从这里进，禁止在别处硬编码颜色
-- `assets/js/site.js`：全站唯一 JS（明暗切换、外观面板、代码复制、目录 scrollspy）。新增交互必须并进这个文件
+- `assets/js/site.js`：全站唯一 JS（明暗切换、外观面板、代码复制、目录 scrollspy、长目录折叠）。新增交互必须并进这个文件
 - 外观系统全走 `html` 的 `data-*` 属性 + CSS 变量：`data-theme`(light/dark)、`data-accent`(terracotta/indigo)、`data-bg`(5 种纸面纹理)、`data-hr`(4 种分隔线)；选择持久化在 localStorage（键前缀 `xuanzhi-`），`head.html` 内联脚本负责防闪烁恢复
 - `layouts/` 是 0.146+ 顶层模板结构；`_markup/render-image.html`（page bundle 图片 → WebP/srcset）和 `_markup/render-heading.html`（标题毛笔圈点 + 锚点）是渲染钩子
 - 首页 = 诗笺 + 山水画框卡片两段：诗笺由 `home.html` 构建期 `resources.GetRemote` 预取绝句（`try` + 内置《鹿柴》兜底）、`site.js` 每次到访随机刷新（`lang=zh-Hant` 繁体）；画框卡片 = `partials/post-card.html`（结构）+ `partials/post-card-cover.html`（封面：front matter `cover` 自定义图，否则按标题哈希生成八式水墨小品——远山晓日/竹影/空亭听雨/汀洲孤雁/孤舟远影/红杏出墙/云岫/杨柳岸，定妆预览稿在 `static/images/covers/`）；卡片颜色一律走 token（摘要/标签用 `--color-text-note`，题字字体栈 `--font-title` 宋体优先、无则落文楷）
 - 朱饰系 token（`--color-zhu` / `--color-zhu-strong` / `--color-zhu-soft` / `--color-seal`）随 `data-accent` 换色：terracotta = 朱砂，indigo = 黛青（青印）；新增朱饰必须同步补 token 四象限（亮暗 × 双点缀色），别在组件里写死红值；`--tex-*` 纹理 token（`--tex-seal` / `--tex-bamboo` / `--tex-birds` 等 data-uri）的颜色烤在 URI 里，同样必须补齐亮暗 × 双点缀色四象限；无色遮罩类（`--tex-mask-paste` 印泥飞白 mask）单份即可
 - 章界横线统一用 `--color-rule`（点缀色 28% 与 `--color-frame` 调和），随点缀色橘/青自动切换；正文「纸」系元素（纸底/格纹/折痕浅线）刻意不跟点缀色
-- 头栏是半透明宣纸毛玻璃（`--color-header-bg` + backdrop-filter）；头栏宽度随页面类型过渡：窄 `--content-width` / 文章页 1150px，CSS 基础值与 `site.js`「头栏宽度过渡」段的 NARROW/WIDE 常量必须同步改
+- 头栏是半透明宣纸毛玻璃（`--color-header-bg` + backdrop-filter）；框架宽度分两档：窄 `--content-width` / 文章页 1150px（头栏与页脚同步变档）。档位切换动画由 `header.html` 末尾内联脚本驱动：sessionStorage 记上一页档位，仅档位不同才从上一档起步过渡，同档导航（文章→文章）与刷新一次成型不重播；动画期间给 `html` 挂 `xz-frame-anim` 暂停毛玻璃（`transitionend` 后撤），`xz-page-in` 同步正文淡入。两档宽度定义在 main.css「文章页阅读区更宽」段
+- 标签汇总页是「印谱·印章墙」（`taxonomy.html` + `partials/seal-count.html`）：每个标签一方朱印，朱文/白文按奇偶相间，形制同文章页落款章（`--tex-mask-paste` 印泥毛边蒙版）；篇数边款是汉字数字（`seal-count.html` 支持 1–99，超出退回阿拉伯数字）；≤2 字的短标签印文竖排，>4 字收小一号
+- 长目录折叠：目录条目 >10 时 `site.js` 给 `.toc-memo` 加 `toc-fold`，CSS 以 `li:hover > ul` 划入展开、`li:has(> ul a.toc-active) > ul` 让阅读分支常开；缩进阶梯 = 每级一个 15px 墨签位，可展开条目的墨签锚在行盒 `a` 上
 - 明暗切换圆形揭示：`site.js`「明暗切换」段写 `--theme-x/y/r`（**百分比**，理由见已知坑），`main.css`「明暗切换圆形揭示」段定义方向与 keyframes；方向靠「动画运行时 `data-theme` 已是新值」判定（dark 收缩旧快照、light 扩张新快照），改时长/曲线只动 main.css 两条 `animation`
 - KaTeX 按需加载：`head.html` 用 `findRE` 检测 `.RawContent` 里的公式定界符，只有含公式的页面引入
 - `static/` 下约 30MB 是自托管资产（霞鹜文楷切片、思源宋体 700 切片、JetBrains Mono、KaTeX），属正常入库内容
@@ -49,6 +51,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 - Git Bash 里 grep 生成的文件清单带 CRLF，直接拼进 curl URL 会报 `(3) Malformed input to a URL function`——先 `tr -d '\r'`（思源宋体 97 个切片批量下载时已踩）；另外批量下载 jsdelivr 切片逐个串行即可，并发 xargs 全军覆没过
 - 写死的行高/字号推导（如落款章 `height` 撑竖排换列）会随配置漂移——文末落款章已改为 `split` 逐字入 grid 格、模板按字数算行列，别再回退到文本流换行
 - 同一容器的内阴影会被自身 `z-index:-1` 的伪元素盖住（容器背景层画在负 z 子元素之前），挂 `filter: blur` 又会把阴影一起糊掉——归档笺纸的分层就是为此：纸面在 `::before`（负 z + blur），起伏阴影单独一层 `::after` 盖在纸面上（`pointer-events: none`），要浮到最上层的元素（月份引首章）给正 `z-index`
+- MPA 每次导航都是新文档：宽度档位过渡若交给 defer 脚本，会先按最终宽度画一帧再拽回起步宽度，必闪——起步宽度必须在 `header.html` 末尾内联设置（解析到即执行、早于首帧）；且仅当前后档位不同才播（sessionStorage 记上一档），否则文章→文章也闪（旧实现两样都踩过）
+- 行内元素跨行后包围盒不可靠：abs-pos 伪元素锚在跨行 span 上，`top:50%` 会落到整块中间——要贴行定位的伪元素（目录墨签、归档朱砂短竖）改锚块级行盒，或用 `top:0.5em` 锚首行字面
+- backdrop-filter 毛玻璃叠宽度动画：模糊区随每帧尺寸重算重绘，是动画卡顿最大来源——框架动画期间挂 `xz-frame-anim` 暂停毛玻璃，`transitionend` 后恢复（另加 setTimeout 兜底，transitionend 偶发不触发）
 
 ## 相关文档
 
