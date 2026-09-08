@@ -62,6 +62,19 @@ html[data-bg="noise-vignette"] body::after {
 
 ::selection { background: var(--color-accent-soft); }
 
+/* 仅供读屏：视觉隐藏但保留可访问性（如标签 term 页把类名交给印面时的 h1） */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 a {
   color: var(--color-accent);
   text-decoration: underline;
@@ -111,6 +124,11 @@ html.xz-frame-anim .site-header {
 @media (prefers-reduced-motion: reduce) {
   .header-inner { transition: none; }
 }
+
+/* 首屏绘制前先按住正文：配合内联脚本设的头栏起步宽度，
+   让展开/淡入等第一帧画出来再起步（动画时钟否则会从样式计算就开跑，
+   首屏几百毫秒的绘制期间动画已跑掉大半，画面出来只剩尾巴） */
+html.xz-page-hold main { opacity: 0; }
 
 /* 页面入场淡入：与头栏展开/收回同曲线同时长，由内联脚本加 xz-page-in 类，
    仅在档位切换的页面出现；同档导航无此动画 */
@@ -205,75 +223,111 @@ html[data-theme="light"]::view-transition-new(root) {
 
 /* ---- 外观面板 ---- */
 
-.appearance { position: relative; }
+/* flex 而非块级：否则里面的 inline-grid 按钮会落进行框、按基线对齐，
+   盒子被行高撑到 40px 上下，按钮贴在顶部，和右侧主题按钮差出半格 */
+.appearance { position: relative; display: flex; }
 
 .appearance-panel {
   position: absolute;
   top: calc(100% + 10px);
-  right: -8px;
+  /* 右缘与头栏右缘（= 主题按钮右缘）齐平：
+     -48px = 主题按钮宽 30px + 导航间距 18px。面板宽 306px，
+     若改成相对按钮居中，右缘会超出视口约 120px，所以只能右贴边 */
+  right: -48px;
   z-index: 30;
-  width: 200px;
-  padding: 12px 14px;
+  width: min(306px, calc(100vw - 40px));
+  padding: 14px 16px 16px;
   background: var(--color-surface);
   border: 1px solid var(--color-border-light);
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(40, 34, 22, 0.10);
+  /* 开合：淡入 + 自上轻移。配合 hidden 属性用 allow-discrete，不必改 JS */
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.18s ease, transform 0.18s ease, display 0.18s allow-discrete;
+}
+.appearance-panel:not([hidden]) {
+  opacity: 1;
+  transform: none;
+}
+@starting-style {
+  .appearance-panel:not([hidden]) {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
 }
 html[data-theme="dark"] .appearance-panel { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35); }
 
+@media (prefers-reduced-motion: reduce) {
+  .appearance-panel { transition: none; }
+}
+
+.panel-title {
+  margin: 0 0 12px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--color-border-light);
+  font-family: var(--font-title);
+  font-size: 0.92rem;
+  letter-spacing: 0.16em;
+  color: var(--color-title);
+}
+
 .panel-group + .panel-group {
-  margin-top: 10px;
-  padding-top: 10px;
+  margin-top: 13px;
+  padding-top: 12px;
   border-top: 1px solid var(--color-border-light);
 }
 
 .panel-label {
   display: block;
-  margin-bottom: 6px;
-  font-size: 0.78rem;
+  margin-bottom: 9px;
+  font-size: 0.74rem;
+  letter-spacing: 0.14em;
   color: var(--color-text-secondary);
 }
 
-.panel-options { display: flex; flex-wrap: wrap; gap: 6px; }
-
-.panel-options button {
-  display: inline-flex;
+/* 选项：样张格——每格一张大样张，标签在下方，选中压一道朱砂细边 */
+.panel-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(74px, 1fr));
+  gap: 11px 9px;
+}
+.panel-tile {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  padding: 3px 10px 3px 4px;
-  border: 1px solid var(--color-border-light);
-  border-radius: 13px;
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-size: 0.8rem;
-  font-family: inherit;
+  gap: 6px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
   cursor: pointer;
 }
-.panel-options button:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
+.panel-tile-label {
+  font-size: 0.71rem;
+  letter-spacing: 0.08em;
+  color: var(--color-text-secondary);
 }
-.panel-options button[aria-pressed="true"] {
-  border-color: var(--color-accent);
-  background: var(--color-accent-soft);
-  color: var(--color-accent);
+.panel-tile[aria-pressed="true"] .swatch {
+  border-color: var(--color-zhu);
+  box-shadow: 0 0 0 2px var(--color-zhu-soft);
 }
+.panel-tile[aria-pressed="true"] .panel-tile-label { color: var(--color-zhu-strong); }
 
-/* 选项缩略图：与真实纹理同源的缩小版 */
+/* 样张：真纹理、真尺度——稿纸格 24px、信笺 48px 与页面本体同值 */
 .swatch {
-  display: inline-block;
-  width: 26px;
-  height: 18px;
-  margin-right: 6px;
+  display: block;
+  width: 100%;
+  height: 44px;
   border: 1px solid var(--color-border);
   border-radius: 3px;
   background-color: var(--color-bg);
-  flex-shrink: 0;
 }
 .swatch-grid {
   background-image:
     linear-gradient(var(--grid-line) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-  background-size: 6px 6px;
+  background-size: 24px 24px;
 }
 .swatch-noise {
   background-image: var(--tex-noise);
@@ -281,13 +335,13 @@ html[data-theme="dark"] .appearance-panel { box-shadow: 0 8px 24px rgba(0, 0, 0,
 }
 .swatch-vignette {
   background-image:
-    radial-gradient(ellipse at center, transparent 35%, rgba(56, 46, 28, 0.30) 100%),
+    radial-gradient(ellipse at center, transparent 28%, rgba(56, 46, 28, 0.32) 100%),
     var(--tex-noise);
   background-size: 100% 100%, 90px 90px;
 }
 html[data-theme="dark"] .swatch-vignette {
   background-image:
-    radial-gradient(ellipse at center, transparent 35%, rgba(0, 0, 0, 0.5) 100%),
+    radial-gradient(ellipse at center, transparent 28%, rgba(0, 0, 0, 0.5) 100%),
     var(--tex-noise);
 }
 .swatch-ruled {
@@ -296,47 +350,49 @@ html[data-theme="dark"] .swatch-vignette {
     var(--grid-line) 0px,
     var(--grid-line) 1px,
     transparent 1px,
-    transparent 8px
+    transparent 48px
   );
 }
 
-/* 点缀色缩略图：固定真实色值（不随选中态变化，随明暗模式提亮） */
+/* 点缀色样张：固定真实色值（随明暗模式提亮）；边框留给基座，
+   否则选中时那圈朱砂细边会和色块自己的边框糊在一起 */
 .swatch-terracotta { background-color: #DA7756; }
 .swatch-indigo { background-color: #425066; }
 html[data-theme="dark"] .swatch-terracotta { background-color: #E89576; }
 html[data-theme="dark"] .swatch-indigo { background-color: #8FA1C0; }
 
-/* 分隔线缩略图：四种意象的缩小版 */
+/* 分隔线样张：改用 --hr-* token 上色，与真实 hr 同源，
+   因此自动跟随明暗模式与朱砂/黛青（此前是硬编码 rgba，暗色下会发黑） */
 .swatch-hr-ink {
   background-image: linear-gradient(90deg,
-    transparent, rgba(90, 75, 50, 0.8) 40% 60%, transparent);
-  background-size: 100% 2px;
+    transparent, var(--hr-ink-strong) 28% 72%, transparent);
+  background-size: 82% 3px;
   background-position: center;
   background-repeat: no-repeat;
 }
 .swatch-hr-zhu {
   background-image:
-    radial-gradient(circle at 50% 50%, rgba(178, 90, 70, 0.8) 0 1.4px, transparent 1.9px),
-    linear-gradient(rgba(178, 90, 70, 0.35), rgba(178, 90, 70, 0.35)),
-    linear-gradient(rgba(178, 90, 70, 0.35), rgba(178, 90, 70, 0.35));
-  background-size: auto, 8px 1px, 8px 1px;
-  background-position: center, 2px center, right 2px center;
+    radial-gradient(circle at 50% 50%, var(--hr-zhu) 0 3px, transparent 3.6px),
+    linear-gradient(var(--hr-zhu-soft), var(--hr-zhu-soft)),
+    linear-gradient(var(--hr-zhu-soft), var(--hr-zhu-soft));
+  background-size: auto, 22px 1px, 22px 1px;
+  background-position: center, 4px center, right 4px center;
   background-repeat: no-repeat;
 }
 .swatch-hr-dots {
   background-image:
-    radial-gradient(circle at 7px 50%, rgba(90, 75, 50, 0.8) 0 2px, transparent 2.5px),
-    radial-gradient(circle at 13px 50%, rgba(90, 75, 50, 0.55) 0 1.5px, transparent 2px),
-    radial-gradient(circle at 18px 50%, rgba(90, 75, 50, 0.35) 0 1.1px, transparent 1.6px);
+    radial-gradient(circle at 14px 50%, var(--hr-ink-strong) 0 3px, transparent 3.6px),
+    radial-gradient(circle at 28px 50%, var(--hr-ink-mid) 0 2.2px, transparent 2.8px),
+    radial-gradient(circle at 40px 50%, var(--hr-ink-soft) 0 1.6px, transparent 2.1px);
   background-repeat: no-repeat;
 }
 .swatch-hr-feibai {
   background-image: repeating-linear-gradient(90deg,
-    rgba(90, 75, 50, 0.8) 0 2px,
-    transparent 2px 3px,
-    rgba(90, 75, 50, 0.5) 3px 4px,
-    transparent 4px 6px);
-  background-size: 20px 1.6px;
+    var(--hr-ink-strong) 0 3px,
+    transparent 3px 5px,
+    var(--hr-ink-mid) 5px 7px,
+    transparent 7px 10px);
+  background-size: 40px 3px;
   background-position: center;
   background-repeat: no-repeat;
 }
@@ -434,66 +490,67 @@ ul.post-list { list-style: none; padding: 0; margin: 0; }
   opacity: 0.55;
 }
 
-/* 笺纸分月：整张实色笺纸，唯四周以模糊羽化一圈，不见硬边 */
-.archive-month {
-  position: relative;
-  margin: 0 0 34px;
-  padding: 20px 30px;
+/* 年份下的折痕：与文章页题跋区同款——深一档主线，其下 3px 再压一根极浅线 */
+.year-rule {
+  margin: 14px 0 24px;
+  height: 2px;
+  background: var(--color-rule);
 }
-.archive-month::before {
+.year-rule::after {
   content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: var(--color-case);
-}
-/* 纸面起伏：右下淡淡沉一点影、左上微微受光，模拟纸张边缘的自然起伏 */
-.archive-month::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  box-shadow:
-    inset -4px -4px 12px rgba(0, 0, 0, 0.03),
-    inset 4px 4px 12px rgba(255, 255, 255, 0.35);
-}
-html[data-theme="dark"] .archive-month::after {
-  box-shadow:
-    inset -4px -4px 12px rgba(0, 0, 0, 0.18),
-    inset 4px 4px 12px rgba(228, 221, 205, 0.04);
+  display: block;
+  height: 1px;
+  margin-top: 3px;
+  background: var(--color-border-light);
 }
 
-/* 引首章：月份作实心朱印，压在笺纸虚线左上，白文即纸色（随点缀色朱/青互换） */
+/* 分月：不套卡片，直接落在页面纸上；月份以一枚行内朱印领起，后跟篇数 */
+.archive-month { margin: 0 0 30px; }
+
 .month {
-  position: absolute;
-  top: -11px;
-  left: 26px;
-  z-index: 1;
-  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 6px;
+  font-family: var(--font-title);
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  color: var(--color-text-note);
+}
+/* 引首章：实心朱印，白文即纸色（随点缀色朱/青互换） */
+.month-chip {
   padding: 2px 7px 2px 9px;
   background: var(--color-zhu);
   color: var(--color-bg);
   border-radius: 2px;
-  font-family: var(--font-title);
   font-size: 0.78rem;
-  font-weight: 400;
   line-height: 1.4;
   letter-spacing: 0.18em;
   opacity: 0.85;
   transform: rotate(-2deg);
 }
+.month-count {
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--color-text-secondary);
+}
 
-/* 月内文章：传统目录式两栏——日期居左，点线引导填白，题名紧贴右缘 */
-.archive-month .post-list { margin: 0; }
-.archive-month .post-item {
+/* 月内文章 / term 页文章：传统目录式两栏——日期居左，点线引导填白，题名紧贴右缘 */
+.archive-month .post-list,
+.term-page .post-list { margin: 0; }
+.archive-month .post-item,
+.term-page .post-item {
   padding: 2px 0;
   line-height: 2.2;
 }
-.archive-month .post-item-date {
+.archive-month .post-item-date,
+.term-page .post-item-date {
   font-family: var(--font-title);
   font-size: 0.85em;
 }
-.archive-month .post-item-title {
+.archive-month .post-item-title,
+.term-page .post-item-title {
   flex: 1;
   min-width: 0;
   display: flex;
@@ -505,7 +562,8 @@ html[data-theme="dark"] .archive-month::after {
   transition: color 0.3s ease;
 }
 /* 引导线：空伪元素撑满日期与题名间的空白，底缘贴基线，如目录连接线 */
-.archive-month .post-item-title::before {
+.archive-month .post-item-title::before,
+.term-page .post-item-title::before {
   content: "";
   flex: 1;
   border-bottom: 1px dotted var(--color-frame);
@@ -513,17 +571,23 @@ html[data-theme="dark"] .archive-month::after {
 }
 
 /* 悬停：题名墨色加深，引导线染朱砂，如毛笔划过标记 */
-.archive-month .post-item-title:hover { color: var(--color-title); }
-.archive-month .post-item-title:hover::before { border-color: var(--color-seal); }
+.archive-month .post-item-title:hover,
+.term-page .post-item-title:hover { color: var(--color-title); }
+.archive-month .post-item-title:hover::before,
+.term-page .post-item-title:hover::before { border-color: var(--color-seal); }
 
 /* 题名后的朱砂短竖：悬停时于题名右侧洇出，如笔锋收势的一顿。
-   top 取 0.5em 锚在首行字面中点——题名分行后也不坠向整块中间 */
-.archive-month .post-item-title-text { position: relative; }
-.archive-month .post-item-title-text::after {
+   top 取 0.5lh（行高的一半）锚在首行字面中点——题名分行后也不坠向整块中间。
+   不能用 0.5em：这个 span 是 flex 项、被块级化，盒高是整行行高而非字号，
+   0.5em 会跑到文字上方约 10px */
+.archive-month .post-item-title-text,
+.term-page .post-item-title-text { position: relative; }
+.archive-month .post-item-title-text::after,
+.term-page .post-item-title-text::after {
   content: "";
   position: absolute;
   right: -10px;
-  top: 0.5em;
+  top: 0.5lh;
   width: 3px;
   height: 14px;
   background: var(--color-seal);
@@ -531,7 +595,8 @@ html[data-theme="dark"] .archive-month::after {
   transform: translateY(-50%) scaleY(0.4);
   transition: all 0.3s ease;
 }
-.archive-month .post-item-title:hover .post-item-title-text::after {
+.archive-month .post-item-title:hover .post-item-title-text::after,
+.term-page .post-item-title:hover .post-item-title-text::after {
   opacity: 0.9;
   transform: translateY(-50%) scaleY(1);
 }
@@ -633,6 +698,34 @@ html[data-theme="dark"] .archive-month::after {
 .post-meta .tag:hover {
   background: var(--color-zhu);
   color: var(--color-bg);
+}
+/* 分类：宋体墨色名 + 一撇毛笔记号（传统评点的「抹」）。
+   无底无边，靠字体和颜色与「撰于」的朱印、标签的朱框分开 */
+.post-meta .meta-cats {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.post-meta .cat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-title);
+  font-size: 0.98em;
+  letter-spacing: 0.08em;
+  color: var(--color-title);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+.post-meta .cat:hover { color: var(--color-zhu-strong); }
+/* 记号：currentColor 跟随 --color-zhu，明暗两套主题与朱砂/黛青两套点缀色自动生效 */
+.cat-mark {
+  width: 11px;
+  height: 11px;
+  flex: none;
+  color: var(--color-zhu);
+  opacity: 0.9;
 }
 
 /* ============ 书函折叠块：旧木函 + 封条 + 抽出的宣纸 ============ */
@@ -1381,6 +1474,330 @@ html[data-hr="feibai"] .post-content hr {
 }
 .seal-stamp:hover .seal-side { color: var(--color-zhu-strong); }
 
+/* ============ 分类页：通栏长架 · 函套 ============ */
+
+.shelf-note {
+  margin: -0.8rem 0 0;
+  font-size: 0.9rem;
+  letter-spacing: 0.14em;
+  color: var(--color-text-secondary);
+}
+
+/* 长架：搁板不是独立元素，而是用重复背景按行高画出来——
+   每层一条通栏长板，函套折到第几层都自动有板。
+   板的位置由 --h / --gap-y 推出，与函套高度同源，改尺寸不会错位。 */
+.shelf-row {
+  --h: 206px;      /* 函套高 */
+  --gap-y: 34px;   /* 层间距 */
+  --gap-x: 24px;   /* 函套间距 */
+  --w: 112px;      /* 函套宽 */
+  position: relative;
+  margin: 1.8rem 0 3rem;
+  /* 下内边距 5px = 搁板厚度：让最后一层的板不被容器裁掉 */
+  padding: 0 0 5px;
+  /* 搁板画在函套下方（h .. h+5），函套底边正好落在板的上沿；
+     平铺周期 = 行距 h+gap-y，所以每层的板都正好托住该层 */
+  background-image: linear-gradient(
+    to bottom,
+    transparent 0 var(--h),
+    var(--color-frame) var(--h) calc(var(--h) + 5px),
+    transparent calc(var(--h) + 5px)
+  );
+  background-size: 100% calc(var(--h) + var(--gap-y));
+  background-repeat: repeat-y;
+}
+.shelf-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, var(--w));
+  justify-content: center;
+  gap: var(--gap-y) var(--gap-x);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.shelf-grid li {
+  display: flex;
+  align-items: flex-end;
+}
+
+/* 架边清供：胆瓶一枝，淡墨线稿立在板面两端。窄屏没位置，收起 */
+.shelf-prop {
+  display: none;
+  position: absolute;
+  bottom: 5px;
+  color: var(--color-ink-weak);
+  pointer-events: none;
+}
+.shelf-prop svg { display: block; }
+.shelf-prop--l { left: 6px; }
+.shelf-prop--r { right: 6px; transform: scaleX(-1); }
+
+/* 桌面：搁板两端出檐撑满 .container 的 800px，一排钉死 5 只，
+   余下两端各 72px 正好摆清供 */
+@media (min-width: 800px) {
+  .shelf-row {
+    margin-left: -20px;
+    margin-right: -20px;
+  }
+  .shelf-grid { grid-template-columns: repeat(5, var(--w)); }
+  .shelf-prop { display: block; }
+}
+
+/* 函套：旧纸函面 + 素纸签条 + 朱印。平贴纸面，只有悬停才浮起 */
+.shelf-folder {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: var(--w);
+  height: var(--h);
+  padding-top: 16px;
+  background: var(--color-case);
+  border: 1px solid var(--color-border);
+  border-radius: 2px;
+  text-decoration: none;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+/* 函面上缘的折痕：一深一浅两道细线，如纸盒对折压痕 */
+.shelf-folder::before,
+.shelf-folder::after {
+  content: "";
+  position: absolute;
+  left: 9px;
+  right: 9px;
+  height: 1px;
+}
+.shelf-folder::before { top: 9px; background: var(--color-frame); }
+.shelf-folder::after { top: 12px; background: var(--color-border-light); }
+
+/* 悬停如从架上抽出一寸：整体上浮、函面转暖、投影随之落纸 */
+.shelf-folder:hover,
+.shelf-folder:focus-visible {
+  transform: translateY(-3px);
+  background: var(--color-quote-bg);
+  box-shadow: 0 4px 10px rgba(96, 82, 58, 0.14);
+}
+html[data-theme="dark"] .shelf-folder:hover,
+html[data-theme="dark"] .shelf-folder:focus-visible {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.42);
+}
+
+/* 签条：素纸长条贴在函面，类名与篇数竖排其上 */
+.folder-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 38px;
+  padding: 14px 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-light);
+}
+.folder-name {
+  writing-mode: vertical-rl;
+  font-family: var(--font-title);
+  font-size: 1.02rem;
+  letter-spacing: 0.2em;
+  color: var(--color-title);
+}
+.folder-name--sm { font-size: 0.88rem; letter-spacing: 0.08em; }
+.folder-count {
+  writing-mode: vertical-rl;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  color: var(--color-text-secondary);
+  transition: color 0.3s ease;
+}
+.shelf-folder:hover .folder-count,
+.shelf-folder:focus-visible .folder-count { color: var(--color-zhu-strong); }
+
+/* 函底朱印：四只同刻「类」字，如一套藏书共用的藏印；印泥毛边蒙版啃噬边缘 */
+.folder-seal {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: var(--color-zhu);
+  color: var(--color-bg);
+  border-radius: 2px;
+  font-family: var(--font-title);
+  font-size: 13px;
+  line-height: 1;
+  transform: translateX(-50%) rotate(-3deg);
+  -webkit-mask-image: var(--tex-mask-paste);
+  mask-image: var(--tex-mask-paste);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* 窄屏：函套与间距一起收，搁板位置随 --h / --gap-y 自动跟进 */
+@media (max-width: 560px) {
+  .shelf-row {
+    --h: 186px;
+    --gap-y: 28px;
+    --gap-x: 16px;
+    --w: 92px;
+  }
+  .folder-label { width: 32px; gap: 12px; }
+  .folder-name { font-size: 0.92rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shelf-folder { transition: none; }
+  .shelf-folder:hover,
+  .shelf-folder:focus-visible { transform: none; }
+}
+
+/* ============ term 页：分类开函 · 标签钤印 ============ */
+
+/* ---- 分类：打开的函套 ---- */
+
+.term-cat-head { margin: 2.6rem 0 28px; }
+
+/* 开口：从函套顶边露出一排册脊（细竖条），下缘无边框，贴住函套 */
+.term-cat-slot {
+  height: 10px;
+  margin: 0 18px -1px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--color-surface) 0 7px,
+    var(--color-border-light) 7px 8px
+  );
+  border: 1px solid var(--color-border-light);
+  border-bottom: none;
+  border-radius: 1px 1px 0 0;
+}
+
+/* 函面：旧纸底 + 上缘两道折痕（与索引页函套同制） */
+.term-cat-body {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
+  background: var(--color-case);
+  border: 1px solid var(--color-border);
+  border-radius: 2px;
+}
+.term-cat-body::before,
+.term-cat-body::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  height: 1px;
+}
+.term-cat-body::before { top: 7px; background: var(--color-frame); }
+.term-cat-body::after { top: 10px; background: var(--color-border-light); }
+
+/* 签条：素纸横条，类名 + 篇数 */
+.term-cat-label {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 7px 18px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-light);
+}
+.term-cat-name {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--color-title);
+}
+.term-cat-count {
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  color: var(--color-text-secondary);
+}
+/* 函底朱印 */
+.term-cat-seal {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background: var(--color-zhu);
+  color: var(--color-bg);
+  border-radius: 2px;
+  font-family: var(--font-title);
+  font-size: 14px;
+  line-height: 1;
+  transform: rotate(-3deg);
+  -webkit-mask-image: var(--tex-mask-paste);
+  mask-image: var(--tex-mask-paste);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* ---- 标签：钤在纸上 ---- */
+
+.term-tag-head {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  margin: 2.6rem 0 28px;
+}
+.term-tag-seal-wrap { position: relative; flex: none; }
+/* 印泥洇开：印外一圈极淡的朱色晕 */
+.term-tag-seal-wrap::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 5px;
+  background: var(--color-zhu);
+  opacity: 0.13;
+  filter: blur(5px);
+}
+.term-tag-seal {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  padding: 6px;
+  background: var(--color-zhu);
+  color: var(--color-bg);
+  border-radius: 3px;
+  font-family: var(--font-title);
+  font-size: 1.5rem;
+  line-height: 1.25;
+  letter-spacing: 0.2em;
+  text-align: center;
+  transform: rotate(-2deg);
+  -webkit-mask-image: var(--tex-mask-paste);
+  mask-image: var(--tex-mask-paste);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+.term-tag-seal--vert { writing-mode: vertical-rl; }
+.term-tag-seal--sm { font-size: 1.05rem; letter-spacing: 0.06em; }
+.term-tag-meta { display: flex; flex-direction: column; gap: 6px; }
+.term-tag-count {
+  font-family: var(--font-title);
+  font-size: 1.05rem;
+  letter-spacing: 0.1em;
+  color: var(--color-title);
+}
+.term-tag-note {
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  color: var(--color-text-secondary);
+}
+
 /* ============ 分页 ============ */
 
 .pagination {
@@ -1666,16 +2083,19 @@ html[data-theme="dark"] .toc-memo nav a { color: #CDBB92; }
     padding: 8px 0;
   }
 
-  /* 归档笺纸：窄屏收窄内边距，引导线隐去、题名回归左对齐 */
-  .archive-month { padding: 16px 20px; }
-  .archive-month .post-item-title { display: block; }
-  .archive-month .post-item-title::before { display: none; }
+  /* 归档 / term 页：窄屏引导线隐去、题名回归左对齐 */
+  .archive-month .post-item-title,
+  .term-page .post-item-title { display: block; }
+  .archive-month .post-item-title::before,
+  .term-page .post-item-title::before { display: none; }
 
   /* 笔锋朱砂短竖：窄屏题名左对齐，短竖换到行首并纵贯整条题名——
      分行后仍是完整一道。锚在块级题名上（行内 span 的跨行包围盒不可靠），
      桌面端那枚首行右侧的小短竖在此退场 */
-  .archive-month .post-item-title { position: relative; }
-  .archive-month .post-item-title::after {
+  .archive-month .post-item-title,
+  .term-page .post-item-title { position: relative; }
+  .archive-month .post-item-title::after,
+  .term-page .post-item-title::after {
     content: "";
     position: absolute;
     left: -10px;
@@ -1686,8 +2106,10 @@ html[data-theme="dark"] .toc-memo nav a { color: #CDBB92; }
     opacity: 0;
     transition: opacity 0.3s ease;
   }
-  .archive-month .post-item-title:hover::after { opacity: 0.9; }
-  .archive-month .post-item-title-text::after { display: none; }
+  .archive-month .post-item-title:hover::after,
+  .term-page .post-item-title:hover::after { opacity: 0.9; }
+  .archive-month .post-item-title-text::after,
+  .term-page .post-item-title-text::after { display: none; }
 
   /* 上下篇各占一半，长题名在半栏内自行换行，不再整体堆叠 */
   .post-nav { max-width: 47%; }
@@ -1906,22 +2328,21 @@ html[data-theme="dark"] .poem-scroll {
   margin: 0 0 2.2rem;
 }
 
-/* 纸笺本体：无外框，浅褐内发光模拟纸厚，细噪点做旧 */
+/* 红框封：素纸底 + 一道朱丝框，细噪点做旧 */
 .inkcard {
   position: relative;
-  background-color: var(--envelope-paper);
+  background-color: var(--color-surface);
   background-image: var(--tex-noise);
   background-size: 90px 90px;
+  border: 1px solid var(--color-zhu-soft);
   border-radius: 3px;
   box-shadow:
-    inset 0 0 0 1px rgba(139, 122, 92, 0.16),
-    inset 0 1px 3px rgba(139, 122, 92, 0.12),
+    inset 0 1px 3px rgba(139, 122, 92, 0.10),
     0 1px 2px rgba(60, 45, 20, 0.10);
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 html[data-theme="dark"] .inkcard {
   box-shadow:
-    inset 0 0 0 1px rgba(228, 221, 205, 0.10),
     inset 0 1px 3px rgba(0, 0, 0, 0.25),
     0 1px 2px rgba(0, 0, 0, 0.35);
 }
@@ -1930,14 +2351,12 @@ html[data-theme="dark"] .inkcard {
 .inkcard:hover {
   transform: translateY(-6px);
   box-shadow:
-    inset 0 0 0 1px rgba(139, 122, 92, 0.18),
-    inset 0 1px 3px rgba(139, 122, 92, 0.12),
+    inset 0 1px 3px rgba(139, 122, 92, 0.10),
     0 8px 16px rgba(94, 82, 62, 0.12),
     0 24px 48px rgba(94, 82, 62, 0.18);
 }
 html[data-theme="dark"] .inkcard:hover {
   box-shadow:
-    inset 0 0 0 1px rgba(228, 221, 205, 0.12),
     inset 0 1px 3px rgba(0, 0, 0, 0.25),
     0 8px 16px rgba(0, 0, 0, 0.35),
     0 24px 48px rgba(0, 0, 0, 0.45);
@@ -1947,7 +2366,8 @@ html[data-theme="dark"] .inkcard:hover {
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-height: 380px;
+  min-height: 190px;
+  padding: 18px 20px 14px;
   color: inherit;
   text-decoration: none;
   border-radius: inherit;
@@ -1957,95 +2377,99 @@ html[data-theme="dark"] .inkcard:hover {
   outline-offset: 3px;
 }
 
-/* 画区：约四成视高，底缘渐隐晕入纸底，如墨迹洇进宣纸 */
-.inkcard-art {
-  position: relative;
-  display: block;
-  aspect-ratio: 21 / 10;
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(to bottom, #000 58%, transparent 97%);
-  mask-image: linear-gradient(to bottom, #000 58%, transparent 97%);
+/* 印记：八式水墨小品收进信笺右下角，如渗进纸里的一枚淡印。
+   绝对定位，不参与卡片布局；低透明度 + 轻微模糊 + 径向羽化，四周不越出纸边 */
+.inkcard-print {
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  z-index: 0;
+  width: 124px;
+  height: 83px;
+  opacity: 0.34;
+  filter: blur(0.5px);
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(ellipse 82% 82% at 50% 50%, #000 52%, transparent 98%);
+  mask-image: radial-gradient(ellipse 82% 82% at 50% 50%, #000 52%, transparent 98%);
 }
-.inkcard-art-img,
-.inkcard-art-svg {
+.inkcard-print-img,
+.inkcard-print-svg {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  background-color: var(--color-surface);
 }
-.inkcard-art-svg {
-  background-image: var(--tex-noise);
-  background-size: 90px 90px;
-}
-.inkcard-art-svg.art-flip { transform: scaleX(-1); }
+.inkcard-print-svg.art-flip { transform: scaleX(-1); }
 
 /* 水墨小品用色：全走 token，明暗与点缀色自动跟随 */
-.inkcard-art-svg .ink-strong { fill: var(--color-title); }
-.inkcard-art-svg .ink-mid { fill: var(--color-text); }
-.inkcard-art-svg .ink-soft { fill: var(--color-text-secondary); }
-.inkcard-art-svg .cov-sun { fill: var(--color-accent-soft); }
+.inkcard-print .ink-strong { fill: var(--color-title); }
+.inkcard-print .ink-mid { fill: var(--color-text); }
+.inkcard-print .ink-soft { fill: var(--color-text-secondary); }
+.inkcard-print .cov-sun { fill: var(--color-accent-soft); }
+/* 晓日的日头：用朱砂实心，让它在淡印浓度下也立得住 */
+.inkcard-print .cov-sun-strong { fill: var(--color-zhu); }
 /* 通用笔意线条：新式水墨小品（孤舟/红杏/云岫/杨柳岸）共用，线宽逐笔另定 */
-.inkcard-art-svg .ink-stroke {
+.inkcard-print .ink-stroke {
   fill: none;
   stroke: var(--color-title);
   stroke-linecap: round;
 }
-.inkcard-art-svg .ink-stroke-mid {
+.inkcard-print .ink-stroke-mid {
   fill: none;
   stroke: var(--color-text);
   stroke-linecap: round;
 }
-.inkcard-art-svg .ink-stroke-soft {
+.inkcard-print .ink-stroke-soft {
   fill: none;
   stroke: var(--color-text-secondary);
   stroke-linecap: round;
 }
-.inkcard-art-svg .art-zhu { fill: var(--color-zhu); }
-.inkcard-art-svg .rain line {
+.inkcard-print .art-zhu { fill: var(--color-zhu); }
+.inkcard-print .rain line {
   stroke: var(--color-text-secondary);
   stroke-width: 1.6;
   stroke-linecap: round;
 }
 /* 空亭：一笔弧顶 + 细柱 + 地线，与孤雁同笔意，不取实形 */
-.inkcard-art-svg .pavilion path {
+.inkcard-print .pavilion path {
   fill: none;
   stroke: var(--color-title);
   stroke-width: 3.2;
   stroke-linecap: round;
 }
-.inkcard-art-svg .pavilion .pav-col {
+.inkcard-print .pavilion .pav-col {
   stroke: var(--color-text);
   stroke-width: 2.2;
 }
-.inkcard-art-svg .pavilion .pav-ground {
+.inkcard-print .pavilion .pav-ground {
   stroke: var(--color-text-secondary);
   stroke-width: 2;
   opacity: 0.6;
 }
 /* 檐角滴水：水丝 + 半空坠滴 */
-.inkcard-art-svg .drip line {
+.inkcard-print .drip line {
   stroke: var(--color-text-secondary);
   stroke-width: 1.6;
   stroke-linecap: round;
   opacity: 0.9;
 }
-.inkcard-art-svg .drip ellipse {
+.inkcard-print .drip ellipse {
   fill: var(--color-text-secondary);
   opacity: 0.85;
 }
-.inkcard-art-svg .geese path {
+.inkcard-print .geese path {
   fill: none;
   stroke: var(--color-title);
   stroke-width: 2.6;
   stroke-linecap: round;
 }
 
-/* 日期邮戳：朱砂印泥质感双环，盖画区右上 */
+/* 日期邮戳：朱砂印泥质感双环，盖卡片右上 */
 .inkcard-postmark {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  z-index: 2;
+  top: 12px;
+  right: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2082,19 +2506,18 @@ html[data-theme="dark"] .inkcard:hover {
 }
 .inkcard-link:hover .inkcard-postmark { animation: stamp-press 0.5s ease; }
 
-/* 文本区：题字式标题左对齐，摘要灰褐两行 */
-.inkcard-body {
-  display: block;
-  padding: 14px 20px 0;
-}
+/* 题名与摘要：压在印记之上；题名右留白给邮戳让位 */
 .inkcard-title {
+  position: relative;
+  z-index: 1;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
-  /* 恒占两行高：单行标题的卡与两行的画框对齐 */
+  /* 恒占两行高：单行标题的卡与两行的对齐 */
   min-height: 3.1em;
   margin: 0 0 8px;
+  padding-right: 66px;
   font-family: var(--font-title);
   font-size: 1.18rem;
   font-weight: 600;
@@ -2104,25 +2527,29 @@ html[data-theme="dark"] .inkcard:hover {
   color: var(--color-title);
 }
 .inkcard-summary {
+  position: relative;
+  z-index: 1;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
-  margin: 0;
+  margin: 0 0 12px;
   font-size: 0.9rem;
   line-height: 1.5;
   letter-spacing: 0.03em;
   color: var(--color-text-note);
 }
 
-/* 底部信息栏：批注式标签（细竖线分隔）在左，「缄」印在右 */
+/* 落款区：一道细线隔开，分类与标签在左 */
 .inkcard-foot {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 10px;
   margin-top: auto;
-  padding: 12px 20px 16px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border-light);
 }
 .inkcard-tags {
   display: flex;
@@ -2140,24 +2567,28 @@ html[data-theme="dark"] .inkcard:hover {
   margin: 0 9px;
   background-color: var(--color-border);
 }
-/* 朱砂小印：朱底纸字，微倾带噪，像随手钤盖 */
-.inkcard-seal {
-  display: flex;
+/* 分类批注：行首一枚微倾小朱点，与标签同级排布但一眼可辨 */
+.inkcard-cat {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 2px;
-  background-color: var(--color-zhu);
-  background-image: var(--tex-noise);
-  background-size: 90px 90px;
-  color: var(--color-surface);
-  font-size: 0.82rem;
-  line-height: 1;
-  opacity: 0.88;
+  gap: 5px;
+  color: var(--color-zhu-strong);
+}
+.inkcard-cat::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  background: var(--color-zhu);
+  opacity: 0.7;
   transform: rotate(-3deg);
 }
-
+.inkcard-cat + .inkcard-tag::before {
+  content: "";
+  width: 1px;
+  height: 0.85em;
+  margin: 0 9px;
+  background-color: var(--color-border);
+}
 @media (prefers-reduced-motion: reduce) {
   .inkcard,
   .inkcard:hover { transition: none; transform: none; }
@@ -2175,5 +2606,5 @@ html[data-theme="dark"] .inkcard:hover {
   .poem-line { font-size: 1.05rem; letter-spacing: 0.24em; }
 
   .inkcard-grid { grid-template-columns: minmax(0, 1fr); gap: 20px; }
-  .inkcard-link { min-height: 340px; }
+  .inkcard-print { width: 104px; height: 70px; right: 8px; bottom: 6px; }
 }
