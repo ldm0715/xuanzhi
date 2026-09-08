@@ -133,9 +133,8 @@ enableEmoji = true
 
 `definitionList`（定义列表）、`footnote`（脚注）、`table`、`taskList`、`strikethrough`、`linkify` —— 这些不写进 `hugo.toml` 也生效。`tableOfContents` 的 `startLevel` / `endLevel` 可按需调（示例用 2–4）。
 
-### 两条容易踩的
+### 容易踩的
 
-- **主题目录必须叫 `xuanzhi`**。`head.html` 用 `fileExists "themes/xuanzhi/static/fonts/..."` 探测自托管字体，改名（或挂到别的路径）会**静默不加载字体**，页面掉回系统字体。
 - **`public/` 里看到的 URL 依赖 `baseURL`**。开发服务器运行时 Hugo 会把 baseURL 覆盖成 `http://localhost:1314/`，所以别在 `hugo server` 开着的时候去 `public/` 检查绝对地址——那会儿看什么都是 localhost。跑一次 `hugo` 再看。
 
 ## 站点的其他自定义
@@ -300,9 +299,10 @@ assets/
 ├── css/token.css        # 设计 token（全部颜色/字体/版式变量在这里）
 ├── css/chroma.css       # 代码高亮（变量驱动，明暗自动跟随）
 ├── css/main.css         # 版式
+├── fonts/               # 自托管字体的 @font-face CSS（head.html 用 resources.Get 探测）
 └── js/site.js           # 明暗切换 + 外观面板 + 站内搜索 + 移动端下拉面板 + 复制按钮
                          # + scrollspy + 长目录折叠 + 诗笺刷新 + 图片灯箱
-static/fonts/       # 霞鹜文楷 GB（regular/medium）+ 思源宋体 700 切片 + JetBrains Mono
+static/fonts/       # 字体二进制切片（woff2），原样发布到 /fonts/... 供上面的 CSS 相对引用
 static/images/covers/    # 八式水墨小品定妆预览稿（页面按题哈希内联渲染）
 scripts/                 # 开发辅助脚本
 ```
@@ -330,8 +330,29 @@ scripts/                 # 开发辅助脚本
 ```bash
 npm view lxgw-wenkai-gb-web dist.tarball   # 拿最新地址
 # 下载解压后，用 package/lxgwwenkaigb-regular 与 lxgwwenkaigb-medium
-# 覆盖 static/fonts/lxgw/regular 与 medium（result.min.css 一并更新）
+# 覆盖 static/fonts/lxgw/regular 与 medium（woff2 切片）
+# 对应的 @font-face CSS 在 assets/fonts/lxgw/ 下，一并更新 result.min.css
 ```
+
+> 字体分成两半放：**CSS 在 `assets/fonts/`**（走 Hugo 的资源管线，`head.html` 用 `resources.Get` 探测——这是 module-aware 的，主题目录改名或用 Hugo Modules 安装都找得到），**woff2 切片在 `static/fonts/`**（原样发布）。两边的相对位置必须保持一致，因为 CSS 里是 `url(220.woff2)` 这种相对引用。
+
+## 第三方资产与许可
+
+主题本体（模板 / CSS / JS）是 **MIT**，见仓库根目录的 `LICENSE`。
+
+仓库里随主题分发的第三方资产**各有各的许可，不因打包在一起而变成 MIT**：
+
+| 资产 | 位置 | 许可 |
+|---|---|---|
+| 霞鹜文楷 GB（LXGW WenKai GB） | `static/fonts/lxgw/` + `assets/fonts/lxgw/` | SIL OFL 1.1 |
+| 思源宋体 700 切片（Source Han Serif / Noto Serif SC） | `static/fonts/noto-serif-sc/` + `assets/fonts/noto-serif-sc/` | SIL OFL 1.1 |
+| JetBrains Mono | `static/fonts/jbm/` + `assets/fonts/jbm/` | SIL OFL 1.1 |
+| KaTeX（只用到样式表） | `static/katex/` | MIT |
+| Material Design 图标 path | 模板内联（`header.html` / `footer.html` 等） | Apache-2.0 |
+
+图标取自 `@material-design-icons/svg`。
+
+> OFL 字体允许随任何软件打包分发，但**必须保留各自的版权与许可声明**，也不得单独改标协议。想换掉字体（比如改用自己的）：删掉 `static/fonts/` 与 `assets/fonts/` 下对应的目录即可——`head.html` 用 `resources.Get` 探测，文件不在了就自动不输出那几行 `<link>`，不会 404。
 
 ## 备份建议
 

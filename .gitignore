@@ -1,0 +1,14 @@
+# Hugo 构建产物 —— 主题仓库本身不跑构建，防的是本地手滑在主题目录里跑 hugo
+public/
+resources/
+.hugo_build.lock
+
+# 依赖（README「字体更新」一节用到 npm 取包，但不必把 node_modules 入库）
+node_modules/
+npm-debug.log*
+
+# 编辑器 / 系统
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
