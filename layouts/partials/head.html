@@ -103,19 +103,20 @@
 <link rel="stylesheet" href="{{ $chroma.RelPermalink }}">
 <link rel="stylesheet" href="{{ $main.RelPermalink }}">
 
-{{- if fileExists "themes/xuanzhi/static/fonts/lxgw/regular/result.min.css" -}}
-<link rel="stylesheet" href="/fonts/lxgw/regular/result.min.css">
-<link rel="stylesheet" href="/fonts/lxgw/medium/result.min.css">
+{{- /* 自托管字体：CSS 放在 assets/ 下（module-aware——主题目录改名、用 Hugo Modules 安装
+       都找得到，不像 fileExists 只认站点根目录下的真实路径），二进制切片留在 static/fonts/
+       原样发布。资源的发布路径 = 文件路径，所以 CSS 内部的 url(...) 相对引用仍指向 /fonts/...，
+       和切片实际位置对得上。
+       某个字体被删掉时 resources.Get 返回 nil，with 直接跳过——与原来的 fileExists 守卫同义。 */ -}}
+{{- range slice
+    "fonts/lxgw/regular/result.min.css"
+    "fonts/lxgw/medium/result.min.css"
+    "fonts/jbm/400.css"
+    "fonts/jbm/700.css"
+    "fonts/noto-serif-sc/700.css" -}}
+{{- with resources.Get . -}}
+<link rel="stylesheet" href="{{ .RelPermalink }}">
 {{- end -}}
-
-{{- if fileExists "themes/xuanzhi/static/fonts/jbm/400.css" -}}
-<link rel="stylesheet" href="/fonts/jbm/400.css">
-<link rel="stylesheet" href="/fonts/jbm/700.css">
-{{- end -}}
-
-{{- /* 题字宋体：思源宋体 700（自托管切片，unicode-range 按需加载） */ -}}
-{{- if fileExists "themes/xuanzhi/static/fonts/noto-serif-sc/700.css" -}}
-<link rel="stylesheet" href="/fonts/noto-serif-sc/700.css">
 {{- end -}}
 
 {{- $js := resources.Get "js/site.js" | minify | fingerprint -}}

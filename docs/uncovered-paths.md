@@ -64,4 +64,4 @@
 |---|---|
 | `qr` 短代码把 PNG 写到站点根目录 | 构建产物里会出现 `public/qr_<hash>.png`。短代码支持 `targetDir` 参数，建议约定写到 `images/qr/` 下，别污染根目录 |
 | `single.html` 的 TOC 渲染两次 | `single.html:37` 在 `<details>` 里一份、`:65` 在侧栏 `.toc-memo` 一份。宽屏时 CSS 隐藏页内那份，但**HTML 里确实有两份**（DOM 重复、`id` 也重复）。P0 只修了标题的重复 `id`，TOC 这份还在 |
-| `fileExists "themes/xuanzhi/static/..."` | `head.html` 里三处字体探测**写死了 `themes/xuanzhi` 这个挂载路径**。主题目录一改名（或改用 submodule 的别的路径），字体就会静默不加载 |
+| ~~`fileExists "themes/xuanzhi/static/..."`~~ | **已修**：字体 @font-face CSS 挪进 `assets/fonts/`，`head.html` 改用 `resources.Get` 探测（module-aware，不依赖主题目录名）。woff2 切片仍留在 `static/fonts/`，两边相对位置保持一致 |

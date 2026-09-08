@@ -55,7 +55,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 - **界面文案全在 `i18n/zh-cn.yaml`**：模板里禁止硬编码中文界面词。**key 必须扁平**——`i18n "posts.other"` 这种点号访问嵌套 key 会**静默返回空串**（踩过，归档页的「篇」消失）。JS 拿不到 i18n，复制按钮文案由 `baseof.html` 写到 `<html data-copy/data-copied>`，`site.js` 读 dataset 并留中文兜底
 - **滚动条**：滑块走 `--scrollbar-thumb`（token.css 里由 `color-mix(in srgb, var(--color-zhu) 55%, transparent)` 派生，随点缀色换朱砂/黛青，派生式写法不必补四象限）。作用域是 `html`（窗口那根竖向滚动条）+ 内容里**四个**横向滚动容器：`pre`、`.lntable`（chroma 带行号代码块，定义在 chroma.css，最容易漏）、`.table-wrap`、`.katex-display`
 - **新增标记先问它是「装饰」还是「语义」**：装饰性的一律走朱饰系（`--color-zhu` / `--color-zhu-soft`），随 `data-accent` 换色——着重号、缩写点线、外链 ↗、锚点落点朱砂短竖、「续读」都是这一类；语义性的留墨阶——`strong` 浓墨、`del` 褪色、`dd`/`ul ul` 引导虚线（引导线要和墨阶一致，染色会喧宾夺主）
-- `static/` 下约 30MB 是自托管资产（霞鹜文楷切片、思源宋体 700 切片、JetBrains Mono、KaTeX），属正常入库内容
+- `static/` 下约 30MB 是自托管资产（霞鹜文楷切片、思源宋体 700 切片、JetBrains Mono、KaTeX），属正常入库内容。**字体 CSS 与二进制分开放**：@font-face CSS 在 `assets/fonts/`（`head.html` 用 `resources.Get` 探测，module-aware，主题目录改名或用 Hugo Modules 安装都找得到），woff2 切片在 `static/fonts/`（原样发布）。两边相对位置必须一致——CSS 里是 `url(220.woff2)` 这种相对引用，挪动任一边都会断
 
 ## 已知坑（都踩过）
 
