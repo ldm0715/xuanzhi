@@ -48,6 +48,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 - **打印样式**：`main.css` 末尾 `@media print` 是全站**唯一刻意不用 token 的地方**（打印必须黑白，宣纸底/夜墨底都要还原成纸），隐藏头栏/页脚/目录/外观面板，外链把地址印出来
 - 正文 `<em>` 用**着重号**（`text-emphasis: filled dot` + `text-emphasis-color: var(--color-zhu)`）而不是斜体：`--font-sans` 是文楷，没有真斜体字面，浏览器合成假斜在汉字上很脏
 - **站内搜索**：索引由 `layouts/home.json` 构建期生成（站点需在 `[outputs]` 给 home 加 `json`），`site.js`「站内搜索」段在**打开面板时**才 fetch；纯子串匹配，标题权重 3 / 标签 2 / 正文 1，正文命中给片段。**没有中文分词**——这是"能用"版，要真分词得换 Pagefind（选型对比在 `docs/structure.md`）
+- **文章工具栏**（`single.html` 末尾）：收成一枚朱印（站名首字），点开展开「回到顶部 / 分享 / 目录」。整枚可拖动，位置存 `localStorage` 的 `xuanzhi-toolbar`，**以「左缘 + 下边缘」为锚**（锚上边缘的话展开时按钮会往下挤），越界坐标会被夹回视口，**上边界必须让开吸顶头栏**（头栏 z10 > 工具栏 z5，不夹的话会藏进头栏后面抓不回来）；拖到屏幕左三分之一时加 `.tip-right`，悬停标签与分享卡片改贴右侧。**层级 5**（压正文、在头栏 10 之下、远在图窗 100 之下），且**必须 `position: fixed`**——`.post-layout > .post` 是 `display: contents`，在流内的新元素会变成第三个网格项打乱 `grid-template-areas`。分享卡片写剪贴板的内容由 `data-share-text` 提供（`站名 - 标题 - 地址`）。悬停提示走 `data-tip` + `::after`，**不用原生 `title`**（系统提示要悬停一两秒，样式也不搭）。打印隐藏清单里已含 `.post-toolbar`
 - **导航走 Hugo 菜单**：`header.html` 读 `site.Menus.main`（站点在 `hugo.toml` 配 `[[menus.main]] name/pageRef/weight`），加页面只改配置；站点没配菜单时兜底成「`site.MainSections` + 分类法页」的旧算法，所以主题单独拿去也能用
 - **界面文案全在 `i18n/zh-cn.yaml`**：模板里禁止硬编码中文界面词。**key 必须扁平**——`i18n "posts.other"` 这种点号访问嵌套 key 会**静默返回空串**（踩过，归档页的「篇」消失）。JS 拿不到 i18n，复制按钮文案由 `baseof.html` 写到 `<html data-copy/data-copied>`，`site.js` 读 dataset 并留中文兜底
 - **滚动条**：滑块走 `--scrollbar-thumb`（token.css 里由 `color-mix(in srgb, var(--color-zhu) 55%, transparent)` 派生，随点缀色换朱砂/黛青，派生式写法不必补四象限）。作用域是 `html`（窗口那根竖向滚动条）+ 内容里**四个**横向滚动容器：`pre`、`.lntable`（chroma 带行号代码块，定义在 chroma.css，最容易漏）、`.table-wrap`、`.katex-display`
@@ -79,6 +80,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 - 全屏遮罩层用 `position:absolute`、被遮的内容用 `static` 时，**遮罩会盖在内容之上**：定位元素绘在流内元素之上。图窗第一版就是这样——图片被遮罩挡掉，滚轮/拖动/滑动全部失灵，图还被洗淡（看着像"渲染正常"）。遮罩里的内容必须自己进定位层（`.lightbox-figure` 给 `position:relative`），或在 DOM 里排在遮罩之后且同样定位
 - `<script>` 里输出 JSON 必须 `jsonify | safeJS`：html/template 把 `<script>` 当 JS 上下文，只写 `{{ . | jsonify }}` 会被转义成一个**带引号的字符串字面量**，页面看着正常、`JSON.parse` 却拿到字符串（JSON-LD 踩过，表现为 `Object.keys` 全是数字下标）
 - `:target` 的 `:is(...)` 白名单要**含 h1**：给标题加落点标记时只写了 h2–h6，正文 h1 永远匹配不到——而 h1 恰恰是"最少见、最容易漏测"的那一档
+- **弹层别留在流里**：工具栏的按钮栈和分享卡片**都是绝对定位**。留在 flex 流里的话，一出现就把朱印顶跑（"往下挤"）；改成绝对定位后 `.post-toolbar` 高度恒为 40px（只有印），锚点才稳。栈朝上放不下时加 `.stack-below` 翻到下方（测的是**朱印**上方余量，不是容器，因为栈是绝对定位的）；卡片用 `--card-lift` 让开栈的高度，再用 `card-below` / `tip-right` 处理边界翻转
+- **绝对定位 + `right:0` 的元素要给宽度**：可用宽度只有容器（40px 的朱印），只写 `max-width` 会被压成一列一个字。分享卡片写 `width: min(300px, calc(100vw - 40px))`
+- **小尺寸印章不要套 `--tex-mask-paste` 毛边 mask**：那套是给 96px 以上的大印用的，40px 上噪声与字抢对比，印面糊成一团。小印用「朱色底 + `--tex-noise` 颗粒」就够
 - **元素自己写了 `display` 时，`hidden` 属性会失效**：UA 的 `[hidden]{display:none}` 特异性低于作者样式里任何 `display:flex`，面板会一直显形。必须显式补 `[hidden]{display:none}`（搜索面板踩过；图窗的 `.lightbox` 同源）
 - **`i18n` 不认嵌套 key 的点号写法**：`i18n/zh-cn.yaml` 里写 `posts:\n  other: 篇`，模板里 `{{ i18n "posts.other" }}` 不报错、**返回空串**，页面上的字直接消失（归档页的「七篇」变成「七」）。一律用扁平 key（`unitPosts: 篇`）
 - PowerShell 5.1 把**无 BOM 的 UTF-8 `.ps1` 按 GBK 读**：脚本里写中文字面量（连注释也算）会让解析器报 `MissingEndParenthesisInMethodCall`。生成 OG 图的脚本踩过，改成全 ASCII + `[char]0x5BA3` 取字形才通

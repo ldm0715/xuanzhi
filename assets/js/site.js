@@ -263,6 +263,201 @@
     });
   })();
 
+  /* 文章工具栏：收成一枚朱印，点开展开三个按钮（回到顶部 / 分享 / 目录）。
+     整枚可拖动，位置存 localStorage；拖动超过 5px 就不再触发展开——
+     否则拖完松手会把按钮栈一起点开。 */
+  (function () {
+    var bar = document.getElementById('post-toolbar');
+    var stack = document.getElementById('post-toolbar-stack');
+    var seal = bar && bar.querySelector('.post-seal');
+    if (!bar || !stack || !seal) return;
+
+    var POS_KEY = 'xuanzhi-toolbar';
+    var DRAG_THRESHOLD = 5;
+    var dragging = false, moved = false;
+    var startX = 0, startY = 0, originX = 0, originBottom = 0;
+
+    /* ---- 位置：以「左缘 + 下边缘」为准，夹回视口 ----
+       两个约束都不能少：
+       1. 锚下边缘——展开按钮栈时整列只往上长，朱印不会往下跑
+       2. 上边界让开吸顶头栏——工具栏层级 5、头栏 10，拖到顶部就藏进头栏后面抓不回来了 */
+    function headerOffset() {
+      var header = document.querySelector('.site-header');
+      return header ? header.getBoundingClientRect().height + 8 : 8;
+    }
+
+    function clamp(x, bottom) {
+      var w = bar.offsetWidth || 40, h = bar.offsetHeight || 40;
+      var maxBottom = window.innerHeight - h - headerOffset();
+      return {
+        x: Math.min(Math.max(0, x), Math.max(0, window.innerWidth - w)),
+        bottom: Math.min(Math.max(0, bottom), Math.max(0, maxBottom))
+      };
+    }
+
+    function apply(x, bottom) {
+      var p = clamp(x, bottom);
+      bar.classList.add('is-moved');
+      bar.style.left = p.x + 'px';
+      bar.style.bottom = p.bottom + 'px';
+      /* 拖到屏幕左三分之一时，悬停提示与分享卡片改贴右侧，免得跑出视口 */
+      bar.classList.toggle('tip-right', p.x < window.innerWidth / 3);
+      syncStackSide();
+    }
+
+    /* 按钮栈朝哪边开：朱印上方放得下就朝上，放不下翻到下方。
+       测的是**朱印**上方的余量——按钮栈是绝对定位的，翻边不会改变容器高度 */
+    function syncStackSide() {
+      if (stack.hasAttribute('hidden')) return;
+      var roomAbove = seal.getBoundingClientRect().top - headerOffset();
+      bar.classList.toggle('stack-below', roomAbove < stack.offsetHeight + 8);
+    }
+
+    try {
+      var saved = JSON.parse(localStorage.getItem(POS_KEY) || 'null');
+      if (saved && typeof saved.x === 'number') {
+        /* 兼容旧格式 {x, y}：把「上边缘」换算成「下边缘」 */
+        var b = typeof saved.bottom === 'number'
+          ? saved.bottom
+          : window.innerHeight - (saved.y + (bar.offsetHeight || 40));
+        apply(saved.x, b);
+      }
+    } catch (err) { /* 隐私模式 / 脏数据，忽略 */ }
+
+    window.addEventListener('resize', function () {
+      if (bar.classList.contains('is-moved')) apply(parseFloat(bar.style.left), parseFloat(bar.style.bottom));
+      else syncStackSide();
+    });
+
+    /* ---- 拖动 ---- */
+    seal.addEventListener('pointerdown', function (e) {
+      if (e.button !== undefined && e.button !== 0) return;
+      var r = bar.getBoundingClientRect();
+      dragging = true;
+      moved = false;
+      startX = e.clientX; startY = e.clientY;
+      originX = r.left;
+      originBottom = window.innerHeight - r.bottom;   /* 以「离视口底部的距离」为锚 */
+      if (seal.setPointerCapture) {
+        try { seal.setPointerCapture(e.pointerId); } catch (err) { /* 忽略 */ }
+      }
+    });
+
+    seal.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      var dx = e.clientX - startX, dy = e.clientY - startY;
+      if (!moved && Math.abs(dx) + Math.abs(dy) < DRAG_THRESHOLD) return;
+      if (!moved) { moved = true; bar.classList.add('is-dragging'); }
+      e.preventDefault();
+      apply(originX + dx, originBottom - dy);   /* 往上拖 dy<0 → bottom 变大 */
+    });
+
+    function endDrag() {
+      if (!dragging) return;
+      dragging = false;
+      bar.classList.remove('is-dragging');
+      if (!moved) return;
+      try {
+        localStorage.setItem(POS_KEY, JSON.stringify({
+          x: parseFloat(bar.style.left) || 0,
+          bottom: parseFloat(bar.style.bottom) || 0
+        }));
+      } catch (err) { /* 忽略 */ }
+    }
+    seal.addEventListener('pointerup', endDrag);
+    seal.addEventListener('pointercancel', endDrag);
+
+    /* ---- 分享卡片：亮出来 + 6 秒后自动收起 ---- */
+    var card = document.getElementById('post-share-card');
+    var cardTimer = null;
+
+    function showCard() {
+      if (!card) return;
+      /* 按钮栈朝上展开时，卡片要让开一整个栈的高度，否则会压在按钮上 */
+      var lift = (!stack.hasAttribute('hidden') && !bar.classList.contains('stack-below'))
+        ? stack.offsetHeight + 8
+        : 0;
+      bar.style.setProperty('--card-lift', lift + 'px');
+      card.removeAttribute('hidden');
+      /* 上方放不下就翻到下方 */
+      var cardTop = bar.getBoundingClientRect().top - 8 - lift - card.offsetHeight;
+      bar.classList.toggle('card-below', cardTop < headerOffset());
+      window.clearTimeout(cardTimer);
+      cardTimer = window.setTimeout(hideCard, 6000);
+    }
+
+    function hideCard() {
+      if (card) card.setAttribute('hidden', '');
+    }
+
+    /* ---- 按钮行为 ---- */
+    bar.addEventListener('click', function (e) {
+      var btn = e.target.closest('button[data-act]');
+      if (!btn) return;
+      /* 刚拖过就不算点击 */
+      if (btn === seal && moved) { moved = false; return; }
+      var act = btn.dataset.act;
+
+      if (act === 'expand') {
+        var open = stack.hasAttribute('hidden');
+        if (open) stack.removeAttribute('hidden');
+        else stack.setAttribute('hidden', '');
+        btn.setAttribute('aria-expanded', String(open));
+        syncStackSide();
+        return;
+      }
+
+      if (act === 'top') {
+        var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+        return;
+      }
+
+      if (act === 'share') {
+        /* 不走系统分享：统一把「站名 - 标题 - 地址」写进剪贴板，同时亮出卡片让读者看见复制了什么 */
+        var text = bar.getAttribute('data-share-text') || location.href;
+        var flash = function () {
+          btn.classList.add('is-copied');
+          window.setTimeout(function () { btn.classList.remove('is-copied'); }, 1500);
+          showCard();
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(flash, flash);
+        } else {
+          flash();
+        }
+        return;
+      }
+
+      if (act === 'toc') {
+        var memo = document.querySelector('.toc-memo');
+        if (!memo) return;
+        if (window.innerWidth >= 1200) {
+          memo.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        } else {
+          document.documentElement.classList.toggle('xz-toc-open');
+        }
+      }
+    });
+
+    /* 窄屏浮层目录：点它外面关掉 */
+    document.addEventListener('click', function (e) {
+      if (!document.documentElement.classList.contains('xz-toc-open')) return;
+      if (e.target.closest('.toc-memo') || e.target.closest('[data-act="toc"]')) return;
+      document.documentElement.classList.remove('xz-toc-open');
+    });
+
+    /* 分享卡片：点它外面或按 Esc 收起 */
+    document.addEventListener('click', function (e) {
+      if (!card || card.hasAttribute('hidden')) return;
+      if (e.target.closest('.post-share-card') || e.target.closest('[data-act="share"]')) return;
+      hideCard();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') hideCard();
+    });
+  })();
+
   /* 复制按钮文案由 baseof.html 写在 <html data-copy/data-copied> 上——
      JS 拿不到 Hugo 的 i18n，只能由模板传进来；没传时退回中文默认值 */
   var COPY = document.documentElement.dataset.copy || '复制';

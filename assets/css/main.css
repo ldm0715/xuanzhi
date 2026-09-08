@@ -2478,6 +2478,267 @@ html[data-theme="dark"] .toc-memo nav a { color: #CDBB92; }
 .toc-memo.toc-fold nav li:hover > a::before,
 .toc-memo.toc-fold nav li:has(> ul a.toc-active) > a::before { transform: rotate(90deg); }
 
+/* ============ 文章工具栏（回到顶部 / 分享 / 目录） ============
+ * 收成一枚朱印（站名首字），点开展开三个按钮；整枚可拖动，位置存 localStorage。
+ * 视觉沿用 .toc-memo 的牛皮纸语言（浅米底、1px 圆角、双层柔影），不用面板那套 8px 圆角——
+ * 这是压在纸边的签条，不是浮在纸上的对话框。
+ * 层级 5：压正文、在吸顶头栏（10）之下、远在图窗（100）之下。
+ * 定位必须 fixed：.post-layout > .post 是 display:contents，在流内的新元素会变成
+ * 第三个网格项，打乱 grid-template-areas。
+ */
+.post-toolbar {
+  position: fixed;
+  right: 20px;
+  bottom: 28px;
+  z-index: 5;
+  display: block;       /* 流内只有朱印；按钮栈与分享卡片都是绝对定位 */
+  touch-action: none;   /* 拖动时不让浏览器接管手势 */
+}
+/* 拖过之后用 left/bottom 行内定位。锚下边缘，且容器高度恒定（只有 40px 的印） */
+.post-toolbar.is-moved { right: auto; }
+
+/* 按钮栈：绝对定位，默认贴在朱印**上方**；上方放不下时加 .stack-below 翻到下方。
+   必须绝对定位——留在流里的话，展开会把朱印顶跑（"往下挤"那个 bug） */
+.post-toolbar-stack {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.post-toolbar-stack[hidden] { display: none; }
+.post-toolbar.stack-below .post-toolbar-stack {
+  bottom: auto;
+  top: calc(100% + 8px);
+}
+/* 工具栏在屏幕左三分之一时，按钮栈改从左边对齐 */
+.post-toolbar.tip-right .post-toolbar-stack {
+  right: auto;
+  left: 0;
+}
+
+.post-tool-btn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid rgba(140, 100, 45, 0.30);
+  border-radius: 1px;
+  background-color: #F0E5CC;
+  background-image: var(--tex-noise);
+  background-size: 90px 90px;
+  color: #4A3A22;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(60, 45, 20, 0.14), 0 4px 12px rgba(60, 45, 20, 0.08);
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+.post-tool-btn:hover { color: var(--color-accent); transform: translateY(-2px); }
+html[data-theme="dark"] .post-tool-btn {
+  background-color: #3E3425;
+  border-color: rgba(190, 100, 75, 0.18);
+  color: #CDBB92;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.40), 0 4px 12px rgba(0, 0, 0, 0.30);
+}
+
+/* 朱印：站名首字。印泥毛边做在背景层上——不蒙文字、不吃点击 */
+.post-seal {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: none;
+  color: #F7F4EC;
+  font-family: var(--font-title);
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: grab;
+  box-shadow: 0 1px 2px rgba(60, 45, 20, 0.14), 0 4px 12px rgba(60, 45, 20, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+/* 印面：朱色底 + 极淡的纸颗粒。
+   这里**不用** --tex-mask-paste 的毛边 mask——那套是给 96px 以上的大印用的，
+   40px 上噪声会和字抢对比，印面糊成一团。小印靠颗粒和字距就够。 */
+.post-seal::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 2px;
+  background-color: var(--color-seal);
+  background-image: var(--tex-noise);
+  background-size: 40px 40px;
+}
+.post-seal > span { position: relative; }
+/* 悬停浮起：印轻轻抬起，影子跟着变深 */
+.post-seal:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 3px 6px rgba(60, 45, 20, 0.20), 0 10px 24px rgba(60, 45, 20, 0.16);
+}
+/* 拖动中：不浮起（免得和位移打架），光标改成抓握 */
+.post-toolbar.is-dragging .post-seal {
+  cursor: grabbing;
+  transform: none;
+  transition: none;
+}
+
+/* ---- 分享卡片：点分享时亮出来，同时把文字写进剪贴板 ----
+ * 形制同工具栏（牛皮纸签条），比按钮宽。
+ * 必须绝对定位——它要是留在 flex 流里，一出现就把整列按钮顶上去（工具栏会"跳"）。 */
+.post-share-card {
+  position: absolute;
+  right: 0;
+  /* --card-lift 由 JS 写入：按钮栈朝上展开时，卡片要再让开一整个栈的高度，免得压住按钮 */
+  bottom: calc(100% + 8px + var(--card-lift, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  /* 必须给宽度：绝对定位 + right:0 时，可用宽度只有容器（40px 的朱印），
+     只写 max-width 的话卡片会被压成一列一个字 */
+  width: min(300px, calc(100vw - 40px));
+  padding: 12px 14px 10px;
+  border: 1px solid rgba(140, 100, 45, 0.30);
+  border-radius: 1px;
+  background-color: #F0E5CC;
+  background-image: var(--tex-noise);
+  background-size: 90px 90px;
+  color: #4A3A22;
+  box-shadow: 0 1px 2px rgba(60, 45, 20, 0.14), 0 8px 22px rgba(60, 45, 20, 0.16);
+  text-align: right;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.18s ease, transform 0.18s ease, display 0.18s ease allow-discrete;
+}
+.post-share-card[hidden] { display: none; }
+.post-share-card:not([hidden]) { opacity: 1; transform: none; }
+@starting-style {
+  .post-share-card:not([hidden]) { opacity: 0; transform: translateY(4px); }
+}
+html[data-theme="dark"] .post-share-card {
+  background-color: #3E3425;
+  border-color: rgba(190, 100, 75, 0.18);
+  color: #CDBB92;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.40), 0 8px 22px rgba(0, 0, 0, 0.36);
+}
+.post-share-site {
+  font-family: var(--font-title);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.post-share-title {
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+.post-share-url {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  word-break: break-all;
+  opacity: 0.75;
+}
+.post-share-note {
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(140, 100, 45, 0.22);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--color-zhu);
+}
+html[data-theme="dark"] .post-share-note { border-top-color: rgba(190, 100, 75, 0.18); }
+
+/* 工具栏被拖到屏幕上半部时，卡片改贴在下方，免得跑出视口 */
+.post-toolbar.card-below .post-share-card {
+  bottom: auto;
+  top: calc(100% + 8px);
+}
+/* 工具栏被拖到屏幕左三分之一时（.tip-right 同源），卡片改从左缘向右展开 */
+.post-toolbar.tip-right .post-share-card {
+  right: auto;
+  left: 0;
+}
+
+/* 分享按钮复制成功后短暂染色 */
+.post-tool-btn.is-copied { color: var(--color-zhu); }
+
+/* ---- 悬停提示：即时出现的牛皮纸小标签 ----
+ * 不用原生 title——系统提示要悬停一两秒才弹，样式也跟主题不搭。
+ * 文案来自 data-tip，默认贴在按钮左侧（工具栏在右边）；被拖到屏幕左三分之一时
+ * JS 给 .tip-right，改贴右侧，免得标签跑出视口。
+ */
+.post-tool-btn,
+.post-seal { position: relative; }
+
+.post-tool-btn::after,
+.post-seal::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 9px);
+  transform: translateY(-50%);
+  padding: 3px 8px;
+  border: 1px solid rgba(140, 100, 45, 0.30);
+  border-radius: 1px;
+  background-color: #F0E5CC;
+  background-image: var(--tex-noise);
+  background-size: 90px 90px;
+  color: #4A3A22;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  line-height: 1.6;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(60, 45, 20, 0.16);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+html[data-theme="dark"] .post-tool-btn::after,
+html[data-theme="dark"] .post-seal::after {
+  background-color: #3E3425;
+  border-color: rgba(190, 100, 75, 0.18);
+  color: #CDBB92;
+}
+.post-tool-btn:hover::after,
+.post-tool-btn:focus-visible::after,
+.post-seal:hover::after,
+.post-seal:focus-visible::after { opacity: 1; }
+
+/* 拖到屏幕左三分之一后，提示改贴右侧 */
+.post-toolbar.tip-right .post-tool-btn::after,
+.post-toolbar.tip-right .post-seal::after {
+  right: auto;
+  left: calc(100% + 9px);
+}
+
+/* 拖动中不弹提示，免得跟着手飘 */
+.post-toolbar.is-dragging .post-seal::after { opacity: 0; }
+
+/* 窄屏：目录按钮把**同一份** .toc-memo 当浮层打开，不重复渲染第三份 TOC */
+@media (max-width: 1199px) {
+  html.xz-toc-open .toc-memo {
+    display: block;
+    position: fixed;
+    top: 84px;
+    left: 16px;
+    right: 16px;
+    max-height: 60vh;
+    overflow-y: auto;
+    z-index: 40;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .post-tool-btn,
+  .post-seal { transition: none; }
+  .post-tool-btn:hover,
+  .post-seal:hover { transform: none; }
+}
+
 /* ============ 页脚 ============ */
 
 .site-footer {
@@ -3162,6 +3423,7 @@ html::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radiu
   .lightbox,
   .hero,
   .pagination,
+  .post-toolbar,
   .post-sign-seal { display: none !important; }
 
   .post-content a { color: #000; }

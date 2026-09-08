@@ -63,6 +63,13 @@ postedAt: 撰于
 jumpToSection: 跳转到此节
 readMore: 续读
 
+# ---- 浮动工具条 ----
+toolbarMore: 更多工具
+toolbarTop: 回到顶部
+toolbarShare: 分享
+toolbarToc: 目录
+shareCopied: 已复制到剪贴板
+
 # ---- 归档页 ----
 yearNote: 岁在
 monthUnit: 月
