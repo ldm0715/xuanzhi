@@ -1,25 +1,20 @@
-{{/* 山水画框文章卡片（仅首页使用；归档/标签页仍用 post-item.html）
-     上部约四成是水墨画区（自定义图或生成水墨小品），底缘渐隐晕入纸底；
-     朱砂日期邮戳盖画区右上角；下部题字式标题 + 灰褐摘要；
-     底部批注式标签（细竖线分隔）+ 朱砂「缄」印 */}}
+{{/* 主页红框封卡片：素纸 + 一道朱丝框；八式水墨小品缩成居中铺底的一枚淡印（从下缘溢出）；
+     朱砂日期邮戳盖右上；下部题字式标题 + 灰褐摘要 + 落款行（分类与标签，细竖线分隔） */}}
+{{ $cats := .GetTerms "categories" }}
 {{ $tags := .GetTerms "tags" }}
 <article class="inkcard">
   <a class="inkcard-link" href="{{ .RelPermalink }}">
-    <span class="inkcard-art">
-      {{ partial "post-card-cover.html" . }}
-      <span class="inkcard-postmark" aria-hidden="true">
-        <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006.01.02" }}</time>
-      </span>
+    <span class="inkcard-print" aria-hidden="true">{{ partial "post-card-cover.html" . }}</span>
+    <span class="inkcard-postmark" aria-hidden="true">
+      <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006.01.02" }}</time>
     </span>
-    <span class="inkcard-body">
-      <h3 class="inkcard-title">{{ .Title }}</h3>
-      <p class="inkcard-summary">{{ .Summary | plainify | chomp | truncate 52 }}</p>
-    </span>
+    <h3 class="inkcard-title">{{ .Title }}</h3>
+    <p class="inkcard-summary">{{ .Summary | plainify | chomp | truncate 52 }}</p>
     <span class="inkcard-foot">
       <span class="inkcard-tags">
+        {{- range $cats }}<span class="inkcard-cat">{{ .LinkTitle }}</span>{{ end -}}
         {{- range $tags }}<span class="inkcard-tag">{{ .LinkTitle }}</span>{{ end -}}
       </span>
-      <span class="inkcard-seal" aria-hidden="true">缄</span>
     </span>
   </a>
 </article>

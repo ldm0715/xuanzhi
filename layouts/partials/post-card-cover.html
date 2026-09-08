@@ -1,94 +1,83 @@
-{{/* 首页画框卡封面：front matter 给 cover（page bundle 内文件名或图片 URL）则用自定义图；
+{{/* 主页卡片的印记：front matter 给 cover（page bundle 内文件名或图片 URL）则用自定义图；
 否则按标题哈希生成一幅横构图（3:2）水墨小品——八式轮换（远山晓日 / 竹影 / 空亭听雨 / 汀洲孤雁 /
-孤舟远影 / 红杏出墙 / 云岫 / 杨柳岸），种子、翻转亦由哈希决定，每篇文章稳定且各不相同。
-墨晕毛边用 feTurbulence 位移，同标题圈点工艺。
-各式的定妆预览稿在 static/images/covers/（固定种子、亮色调自包含），改形状请两处同步。 */}}
-{{- $md5 := md5 .Title -}}
+孤舟远影 / 红杏出墙 / 云岫 / 杨柳岸），翻转由哈希决定，每篇文章稳定且各不相同。
+图案在 CSS 里被压成居中铺底的一枚淡印（20% 不透明度 + 模糊 0.5px），
+所以不再套 feTurbulence 毛边滤镜——那个浓度下根本看不出来，只白付每张卡的栅格化开销。
+各式的定妆预览稿在 static/images/covers/（亮色调自包含），改形状请两处同步。 */}}
 {{- $hash := int (hash.FNV32a .Title) -}}
 {{- $variant := mod $hash 8 -}}
-{{- $seed := add (mod (div $hash 7) 900) 1 -}}
 {{- $flip := mod (div $hash 13) 2 -}}
-{{- $uid := substr $md5 14 8 -}}
 {{- with .Params.cover -}}
   {{- with $.Resources.GetMatch . -}}
     {{- $thumb := . -}}
     {{- if and (eq .ResourceType "image") (not (in .MediaType.SubType "svg")) (not (eq .MediaType.SubType "gif")) -}}
       {{- $thumb = .Resize "600x400 webp q80" -}}
     {{- end -}}
-    <img class="inkcard-art-img" src="{{ $thumb.RelPermalink }}" alt="" loading="lazy">
+    <img class="inkcard-print-img" src="{{ $thumb.RelPermalink }}" alt="" loading="lazy">
   {{- else -}}
-    <img class="inkcard-art-img" src="{{ . | relURL }}" alt="" loading="lazy">
+    <img class="inkcard-print-img" src="{{ . | relURL }}" alt="" loading="lazy">
   {{- end -}}
   {{- else -}}
-<svg class="inkcard-art-svg{{ with $flip }} art-flip{{ end }}" viewBox="0 0 390 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
-  <defs>
-    <filter id="ink-{{ $uid }}" x="-40%" y="-40%" width="180%" height="180%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.013 0.02" numOctaves="3" seed="{{ $seed }}" result="n"/>
-      <feDisplacementMap in="SourceGraphic" in2="n" scale="30"/>
-    </filter>
-    <filter id="pen-{{ $uid }}" x="-40%" y="-40%" width="180%" height="180%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.09 0.12" numOctaves="2" seed="{{ $seed }}" result="n"/>
-      <feDisplacementMap in="SourceGraphic" in2="n" scale="6"/>
-    </filter>
-    <filter id="rainp-{{ $uid }}" x="-40%" y="-40%" width="180%" height="180%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.14 0.2" numOctaves="2" seed="{{ $seed }}" result="n"/>
-      <feDisplacementMap in="SourceGraphic" in2="n" scale="3"/>
-    </filter>
-  </defs>
+<svg class="inkcard-print-svg{{ with $flip }} art-flip{{ end }}" viewBox="0 0 390 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
   {{- if eq $variant 0 }}
-  <circle class="cov-sun" cx="308" cy="62" r="28"/>
-  <rect class="ink-soft" x="-30" y="142" width="450" height="55" filter="url(#ink-{{ $uid }})" opacity="0.5"/>
-  <rect class="ink-mid" x="-30" y="172" width="450" height="60" filter="url(#ink-{{ $uid }})" opacity="0.55"/>
-  <rect class="ink-strong" x="-30" y="208" width="450" height="70" filter="url(#ink-{{ $uid }})" opacity="0.85"/>
+  {{/* 远山晓日：日头是主角——朱砂实心、放大居中；山退成陪衬，第二道山压淡 */}}
+  <circle class="cov-sun-strong" cx="236" cy="94" r="30" opacity="0.9"/>
+  <path class="ink-stroke" d="M38 196 C 92 138 132 106 172 110 C 208 114 232 146 264 180 C 288 206 318 200 352 188" stroke-width="3"/>
+  <path class="ink-stroke-soft" d="M96 198 C 140 158 176 140 214 146 C 248 152 274 176 300 198" stroke-width="2" opacity="0.6"/>
+  <path class="ink-stroke-soft" d="M116 74 q7 -8 14 0 q7 -8 14 0" stroke-width="2" opacity="0.6"/>
   {{- else if eq $variant 1 }}
-  <g filter="url(#pen-{{ $uid }})">
-    <rect class="ink-mid" x="98" y="-12" width="9" height="200" opacity="0.7"/>
-    <rect class="ink-strong" x="248" y="28" width="12" height="240" opacity="0.9"/>
-  </g>
-  <g filter="url(#pen-{{ $uid }})">
-    <ellipse class="ink-strong" cx="122" cy="44" rx="28" ry="6.5" transform="rotate(-38 122 44)"/>
-    <ellipse class="ink-mid" cx="142" cy="66" rx="24" ry="5.5" transform="rotate(24 142 66)" opacity="0.8"/>
-    <ellipse class="ink-soft" cx="108" cy="76" rx="20" ry="5" transform="rotate(-12 108 76)" opacity="0.8"/>
-    <ellipse class="ink-strong" cx="274" cy="108" rx="28" ry="6.5" transform="rotate(30 274 108)" opacity="0.9"/>
-    <ellipse class="ink-mid" cx="252" cy="128" rx="22" ry="5.5" transform="rotate(-28 252 128)" opacity="0.75"/>
-  </g>
+  {{/* 竹影：竹从石后生出，落地有线，成一角小景（原来只有两竿竹浮在空中） */}}
+  <path class="ink-stroke-soft" d="M28 222 Q120 214 216 220 Q296 226 372 218" stroke-width="2" opacity="0.45"/>
+  <path class="ink-soft" d="M84 222 Q104 188 130 196 Q150 202 158 222 Z" opacity="0.55"/>
+  <rect class="ink-mid" x="140" y="34" width="7" height="188" opacity="0.55"/>
+  <rect class="ink-strong" x="228" y="-6" width="11" height="228" opacity="0.9"/>
+  <ellipse class="ink-strong" cx="252" cy="66" rx="30" ry="7" transform="rotate(26 252 66)" opacity="0.9"/>
+  <ellipse class="ink-mid" cx="206" cy="92" rx="26" ry="6" transform="rotate(-32 206 92)" opacity="0.75"/>
+  <ellipse class="ink-mid" cx="162" cy="60" rx="22" ry="5.5" transform="rotate(18 162 60)" opacity="0.6"/>
+  <ellipse class="ink-soft" cx="186" cy="128" rx="24" ry="5.5" transform="rotate(-20 186 128)" opacity="0.55"/>
+  <ellipse class="ink-soft" cx="250" cy="152" rx="26" ry="6" transform="rotate(30 250 152)" opacity="0.6"/>
   {{- else if eq $variant 4 }}
-  <rect class="ink-soft" x="-30" y="148" width="450" height="26" filter="url(#ink-{{ $uid }})" opacity="0.3"/>
-  <rect class="ink-soft" x="-30" y="196" width="450" height="34" filter="url(#ink-{{ $uid }})" opacity="0.45"/>
-  <path class="ink-stroke" d="M148 188 Q196 204 246 186" stroke-width="3"/>
-  <path class="ink-stroke-mid" d="M176 184 Q196 166 216 184" stroke-width="2.4"/>
-  <line class="ink-stroke-soft" x1="182" y1="216" x2="228" y2="216" stroke-width="2" opacity="0.5"/>
+  {{/* 孤舟远影：远山 + 月 + 飞鸟 + 舟 + 水，成一角江景（原来只有一条船和两道水） */}}
+  <path class="ink-stroke-soft" d="M36 150 Q96 118 158 142 Q196 156 232 148" stroke-width="2" opacity="0.45"/>
+  <circle class="cov-sun" cx="292" cy="86" r="13"/>
+  <path class="ink-stroke-soft" d="M120 60 q7 -8 14 0 q7 -8 14 0" stroke-width="1.8" opacity="0.5"/>
+  <path class="ink-stroke" d="M150 186 Q196 202 248 186" stroke-width="3.2"/>
+  <path class="ink-stroke-mid" d="M196 186 L196 132" stroke-width="2.2"/>
+  <path class="ink-stroke-mid" d="M199 136 Q230 156 202 180" stroke-width="2"/>
+  <path class="ink-stroke-mid" d="M60 204 Q130 196 200 204 Q262 210 330 202" stroke-width="2.2" opacity="0.75"/>
+  <path class="ink-stroke-mid" d="M96 220 Q160 214 224 220" stroke-width="1.8" opacity="0.6"/>
   {{- else if eq $variant 5 }}
-  <path class="ink-stroke" d="M-30 146 Q90 140 204 145 Q212 146 212 153" stroke-width="4.5"/>
-  <g class="ink-stroke-soft" filter="url(#rainp-{{ $uid }})">
-    <path d="M48 151 Q46 176 44 197" stroke-width="1.5" opacity="0.4"/>
-    <path d="M128 150 Q131 172 129 194" stroke-width="1.5" opacity="0.35"/>
-    <path d="M180 151 Q177 167 175 183" stroke-width="1.5" opacity="0.45"/>
+  {{/* 红杏出墙：墙头与墙脚两道线立起墙，枝从墙头斜出，花与叶分层，成一角院景 */}}
+  <path class="ink-stroke-mid" d="M-10 168 Q60 162 140 166 Q146 167 146 174" stroke-width="4" opacity="0.7"/>
+  <path class="ink-stroke-soft" d="M-10 196 Q60 190 140 194 Q146 195 146 202" stroke-width="2" opacity="0.35"/>
+  <path class="ink-stroke" d="M146 168 Q220 160 274 118 Q306 92 330 60" stroke-width="3.2"/>
+  <path class="ink-stroke-mid" d="M250 132 Q286 132 312 110" stroke-width="2" opacity="0.8"/>
+  <path class="ink-stroke-soft" d="M290 96 Q316 84 338 88" stroke-width="1.8" opacity="0.6"/>
+  <g class="ink-soft" opacity="0.5">
+    <ellipse cx="240" cy="146" rx="18" ry="5" transform="rotate(-28 240 146)"/>
+    <ellipse cx="300" cy="76" rx="16" ry="4.5" transform="rotate(22 300 76)"/>
   </g>
-  <path class="ink-stroke" d="M390 88 Q316 92 272 106 Q246 116 230 132" stroke-width="3"/>
-  <path class="ink-stroke-mid" d="M272 106 Q258 106 248 112" stroke-width="1.8"/>
-  <g class="art-zhu" filter="url(#pen-{{ $uid }})">
-    <circle cx="302" cy="90" r="3.5" opacity="0.55"/>
-    <circle cx="272" cy="105" r="4" opacity="0.7"/>
-    <circle cx="248" cy="112" r="3" opacity="0.5"/>
-    <circle cx="234" cy="136" r="4" opacity="0.7"/>
-    <circle cx="218" cy="150" r="3.5" opacity="0.6"/>
-    <circle cx="206" cy="164" r="3" opacity="0.45"/>
+  <g class="art-zhu">
+    <circle cx="330" cy="58" r="5" opacity="0.8"/>
+    <circle cx="312" cy="108" r="4.5" opacity="0.7"/>
+    <circle cx="288" cy="130" r="4" opacity="0.65"/>
+    <circle cx="266" cy="122" r="3.5" opacity="0.55"/>
+    <circle cx="342" cy="86" r="3.5" opacity="0.6"/>
   </g>
   {{- else if eq $variant 6 }}
-  <path class="ink-soft" d="M40 208 L150 84 Q160 72 172 86 L300 208 Z" filter="url(#ink-{{ $uid }})" opacity="0.5"/>
-  <path class="ink-mid" d="M196 208 L268 126 L352 208 Z" filter="url(#ink-{{ $uid }})" opacity="0.35"/>
-  <rect class="ink-soft" x="-30" y="148" width="450" height="28" filter="url(#ink-{{ $uid }})" opacity="0.5"/>
+  <path class="ink-soft" d="M40 208 L150 84 Q160 72 172 86 L300 208 Z" opacity="0.5"/>
+  <path class="ink-mid" d="M196 208 L268 126 L352 208 Z" opacity="0.35"/>
+  <rect class="ink-soft" x="-30" y="148" width="450" height="28" opacity="0.5"/>
   <path class="ink-stroke" d="M92 70 Q99 62 106 70 Q113 62 120 70" stroke-width="2.2"/>
   {{- else if eq $variant 7 }}
-  <rect class="ink-soft" x="-30" y="176" width="450" height="40" filter="url(#ink-{{ $uid }})" opacity="0.4"/>
+  <rect class="ink-soft" x="-30" y="176" width="450" height="40" opacity="0.4"/>
   <path class="ink-stroke" d="M390 26 Q320 34 268 52" stroke-width="3"/>
   <path class="ink-stroke-mid" d="M268 52 Q262 94 268 134" stroke-width="1.8" opacity="0.7"/>
   <path class="ink-stroke-mid" d="M300 44 Q296 98 306 160" stroke-width="1.8" opacity="0.6"/>
   <path class="ink-stroke-mid" d="M330 40 Q330 102 342 172" stroke-width="1.8" opacity="0.7"/>
   <path class="ink-stroke-mid" d="M356 34 Q358 92 370 148" stroke-width="1.8" opacity="0.55"/>
   {{- else if eq $variant 2 }}
-  <g class="rain" filter="url(#rainp-{{ $uid }})">
+  <g class="rain">
     <line x1="36" y1="12" x2="30" y2="30" opacity="0.75"/>
     <line x1="100" y1="62" x2="94" y2="80" opacity="0.55"/>
     <line x1="36" y1="108" x2="30" y2="126" opacity="0.65"/>
@@ -106,29 +95,29 @@
     <line x1="366" y1="186" x2="360" y2="204" opacity="0.5"/>
     <line x1="296" y1="236" x2="290" y2="254" opacity="0.75"/>
   </g>
-  <g class="pavilion" filter="url(#rainp-{{ $uid }})">
-    <path class="pav-roof" d="M132 138 Q164 108 195 102 Q226 108 258 138"/>
-    <line class="pav-col" x1="171" y1="112" x2="171" y2="174"/>
-    <line class="pav-col" x1="219" y1="112" x2="219" y2="174"/>
-    <line class="pav-ground" x1="148" y1="184" x2="242" y2="184"/>
+  <g class="pavilion">
+    {{/* 飞檐：檐角起翘的弧线；宝顶立在脊心；柱接到檐下；台基落地 */}}
+    <path class="pav-roof" d="M112 144 Q116 132 124 126 Q156 108 195 104 Q234 108 266 126 Q274 132 278 144"/>
+    <line class="pav-col" x1="195" y1="104" x2="195" y2="93"/>
+    <circle class="ink-strong" cx="195" cy="91" r="3"/>
+    <line class="pav-col" x1="162" y1="112" x2="162" y2="182"/>
+    <line class="pav-col" x1="228" y1="112" x2="228" y2="182"/>
+    <path class="pav-ground" d="M136 182 L254 182"/>
   </g>
   <g class="drip">
-    <line x1="131.5" y1="142" x2="131.5" y2="152"/>
-    <ellipse cx="131" cy="162" rx="1.5" ry="3"/>
-    <line x1="258.5" y1="142" x2="258.5" y2="150"/>
-    <ellipse cx="259" cy="160" rx="1.5" ry="3"/>
+    <line x1="116" y1="146" x2="116" y2="156"/>
+    <ellipse cx="116" cy="166" rx="1.5" ry="3"/>
+    <line x1="274" y1="146" x2="274" y2="154"/>
+    <ellipse cx="274" cy="164" rx="1.5" ry="3"/>
   </g>
   {{- else }}
-  <g filter="url(#ink-{{ $uid }})">
-    <rect class="ink-soft" x="-30" y="190" width="450" height="55" opacity="0.45"/>
-    <rect class="ink-mid" x="-30" y="220" width="450" height="55" opacity="0.5"/>
-  </g>
-  <ellipse class="ink-mid" cx="64" cy="210" rx="4.5" ry="24" transform="rotate(14 64 210)" filter="url(#pen-{{ $uid }})" opacity="0.7"/>
-  <g class="geese" filter="url(#pen-{{ $uid }})">
-    <path d="M52 52 q8 -9 16 0 q8 -9 16 0"/>
-    <path d="M116 76 q7 -8 14 0 q7 -8 14 0" opacity="0.7"/>
-    <path d="M172 98 q5 -6 10 0 q5 -6 10 0" opacity="0.5"/>
-  </g>
+  {{/* 汀洲孤雁：雁放大到看得见（原来太小），水改横笔，苇保留 */}}
+  <path class="ink-stroke" d="M84 100 q14 -16 28 0 q14 -16 28 0" stroke-width="3"/>
+  <path class="ink-stroke-mid" d="M170 132 q11 -13 22 0 q11 -13 22 0" stroke-width="2.4" opacity="0.85"/>
+  <path class="ink-stroke-soft" d="M250 158 q8 -10 16 0 q8 -10 16 0" stroke-width="2" opacity="0.7"/>
+  <path class="ink-stroke-soft" d="M60 206 Q140 198 220 206 Q280 212 334 204" stroke-width="2" opacity="0.5"/>
+  <path class="ink-stroke-soft" d="M104 224 Q176 218 248 224" stroke-width="1.6" opacity="0.4"/>
+  <ellipse class="ink-mid" cx="70" cy="196" rx="4.5" ry="24" transform="rotate(14 70 196)" opacity="0.6"/>
   {{- end }}
 </svg>
 {{- end -}}
