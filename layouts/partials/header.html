@@ -7,6 +7,9 @@
       <a href="{{ .RelPermalink }}">{{ i18n "archive" }}</a>
       {{- end -}}
       {{- end -}}
+      {{ with site.GetPage "categories" -}}
+      <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+      {{- end }}
       {{ with site.GetPage "tags" -}}
       <a href="{{ .RelPermalink }}">{{ i18n "tags" }}</a>
       {{- end }}
@@ -18,30 +21,31 @@
           </svg>
         </button>
         <div id="appearance-panel" class="appearance-panel" hidden>
+          <p class="panel-title">外观</p>
           <div class="panel-group">
             <span class="panel-label">背景</span>
-            <div class="panel-options">
-              <button type="button" data-bg="grid" aria-pressed="true"><span class="swatch swatch-grid"></span>稿纸格</button>
-              <button type="button" data-bg="plain" aria-pressed="false"><span class="swatch swatch-plain"></span>素纸</button>
-              <button type="button" data-bg="noise" aria-pressed="false"><span class="swatch swatch-noise"></span>噪点</button>
-              <button type="button" data-bg="noise-vignette" aria-pressed="false"><span class="swatch swatch-noise swatch-vignette"></span>暗角</button>
-              <button type="button" data-bg="ruled" aria-pressed="false"><span class="swatch swatch-ruled"></span>信笺</button>
+            <div class="panel-tiles">
+              <button type="button" class="panel-tile" data-bg="grid" aria-pressed="true"><span class="swatch swatch-grid"></span><span class="panel-tile-label">稿纸格</span></button>
+              <button type="button" class="panel-tile" data-bg="plain" aria-pressed="false"><span class="swatch swatch-plain"></span><span class="panel-tile-label">素纸</span></button>
+              <button type="button" class="panel-tile" data-bg="noise" aria-pressed="false"><span class="swatch swatch-noise"></span><span class="panel-tile-label">噪点</span></button>
+              <button type="button" class="panel-tile" data-bg="noise-vignette" aria-pressed="false"><span class="swatch swatch-noise swatch-vignette"></span><span class="panel-tile-label">暗角</span></button>
+              <button type="button" class="panel-tile" data-bg="ruled" aria-pressed="false"><span class="swatch swatch-ruled"></span><span class="panel-tile-label">信笺</span></button>
             </div>
           </div>
           <div class="panel-group">
             <span class="panel-label">点缀色</span>
-            <div class="panel-options">
-              <button type="button" data-accent="terracotta" aria-pressed="true"><span class="swatch swatch-terracotta"></span>陶土橘</button>
-              <button type="button" data-accent="indigo" aria-pressed="false"><span class="swatch swatch-indigo"></span>黛青</button>
+            <div class="panel-tiles">
+              <button type="button" class="panel-tile" data-accent="terracotta" aria-pressed="true"><span class="swatch swatch-terracotta"></span><span class="panel-tile-label">陶土橘</span></button>
+              <button type="button" class="panel-tile" data-accent="indigo" aria-pressed="false"><span class="swatch swatch-indigo"></span><span class="panel-tile-label">黛青</span></button>
             </div>
           </div>
           <div class="panel-group">
             <span class="panel-label">分隔线</span>
-            <div class="panel-options">
-              <button type="button" data-hr="ink" aria-pressed="true"><span class="swatch swatch-hr-ink"></span>一笔</button>
-              <button type="button" data-hr="zhu" aria-pressed="false"><span class="swatch swatch-hr-zhu"></span>断栏</button>
-              <button type="button" data-hr="dots" aria-pressed="false"><span class="swatch swatch-hr-dots"></span>墨点</button>
-              <button type="button" data-hr="feibai" aria-pressed="false"><span class="swatch swatch-hr-feibai"></span>飞白</button>
+            <div class="panel-tiles">
+              <button type="button" class="panel-tile" data-hr="ink" aria-pressed="true"><span class="swatch swatch-hr-ink"></span><span class="panel-tile-label">一笔</span></button>
+              <button type="button" class="panel-tile" data-hr="zhu" aria-pressed="false"><span class="swatch swatch-hr-zhu"></span><span class="panel-tile-label">断栏</span></button>
+              <button type="button" class="panel-tile" data-hr="dots" aria-pressed="false"><span class="swatch swatch-hr-dots"></span><span class="panel-tile-label">墨点</span></button>
+              <button type="button" class="panel-tile" data-hr="feibai" aria-pressed="false"><span class="swatch swatch-hr-feibai"></span><span class="panel-tile-label">飞白</span></button>
             </div>
           </div>
         </div>
@@ -80,10 +84,21 @@
     root.classList.add('xz-frame-anim');
     inner.style.transition = 'none';
     inner.style.maxWidth = start;
-    void inner.offsetWidth; /* 强制回流，确保起步值成为过渡起点 */
-    inner.style.transition = '';
-    inner.style.maxWidth = ''; /* 放开，交回 CSS 过渡到当前档 */
-    root.classList.add('xz-page-in'); /* 正文淡入与展开同步播放 */
+    void inner.offsetWidth; /* 强制回流，确保起步值成为首帧样式 */
+    root.classList.add('xz-page-hold'); /* 正文先按住，等动画真正起步再放 */
+    /* 动画时钟从样式计算就开始走，若此刻直接放开，首屏绘制（可达数百毫秒）期间
+       动画已跑掉大半，画面出来时只剩尾巴。所以等第一帧画出来后再起步 */
+    var released = false;
+    function release() {
+      if (released) return;
+      released = true;
+      inner.style.transition = '';
+      inner.style.maxWidth = ''; /* 放开，交回 CSS 过渡到当前档 */
+      root.classList.remove('xz-page-hold');
+      root.classList.add('xz-page-in'); /* 正文淡入与展开同步播放 */
+    }
+    requestAnimationFrame(function () { requestAnimationFrame(release); });
+    setTimeout(release, 1200); /* 兜底：万一 rAF 没来，不能把正文一直扣着 */
 
     var done = function () {
       root.classList.remove('xz-frame-anim');
