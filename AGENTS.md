@@ -28,6 +28,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 - 首页 = 诗笺 + 信封卡片两段：诗笺由 `home.html` 构建期 `resources.GetRemote` 预取绝句（`try` + 内置《鹿柴》兜底）、`site.js` 每次到访随机刷新（`lang=zh-Hant` 繁体）；信封卡片 = `partials/post-card.html`（结构）+ `partials/post-card-cover.html`（封面：front matter `cover` 自定义图，否则按标题哈希生成四式水墨小品）
 - 朱饰系 token（`--color-zhu` / `--color-zhu-strong` / `--color-zhu-soft`）随 `data-accent` 换色：terracotta = 朱砂，indigo = 黛青（青印）；新增装饰色一律进 token.css 并补齐亮暗 + 双点缀色四象限
 - 头栏是半透明宣纸毛玻璃（`--color-header-bg` + backdrop-filter）；头栏宽度随页面类型过渡：窄 `--content-width` / 文章页 1150px，CSS 基础值与 `site.js`「头栏宽度过渡」段的 NARROW/WIDE 常量必须同步改
+- 明暗切换圆形揭示：`site.js`「明暗切换」段写 `--theme-x/y/r`（**百分比**，理由见已知坑），`main.css`「明暗切换圆形揭示」段定义方向与 keyframes；方向靠「动画运行时 `data-theme` 已是新值」判定（dark 收缩旧快照、light 扩张新快照），改时长/曲线只动 main.css 两条 `animation`
 - KaTeX 按需加载：`head.html` 用 `findRE` 检测 `.RawContent` 里的公式定界符，只有含公式的页面引入
 - `static/` 下 27MB 是自托管资产（霞鹜文楷切片、JetBrains Mono、KaTeX），属正常入库内容
 
@@ -40,6 +41,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 - 测试文章日期写成未来时间会"消失"（默认不渲染 future content）
 - CSS mask 方案里 `background-color: transparent` 会让整条形状消失——mask 只管形状，颜色必须给非透明 `background-color`
 - SVG 图标 path 一律从官方 npm 包取（`@material-design-icons/svg`），不凭记忆手写
+- View Transitions 的快照盒在**浏览器缩放≠100% 时不按 CSS 像素取尺寸**（Edge 页面缩放 125% 实测圆心大幅偏移）：圆形揭示的圆心/半径必须写**百分比**（对 `root.clientWidth/clientHeight` 取比例，半径对 `sqrt(w²+h²)/√2` 解析基准取比例），绝对 px 只在 100% 缩放下正确（已踩过）
 
 ## 相关文档
 

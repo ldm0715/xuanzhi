@@ -158,6 +158,36 @@ html[data-theme="dark"] #theme-toggle .icon-moon { opacity: 0; }
 html[data-theme="light"] #theme-toggle .icon-moon,
 html[data-theme="dark"] #theme-toggle .icon-sun { opacity: 1; }
 
+/* ---- 明暗切换圆形揭示：圆心始终是 #theme-toggle 按钮中心 ----
+   圆心与半径由 site.js 写入 --theme-x / --theme-y / --theme-r（百分比，
+   按动画盒自身比例解析，浏览器缩放≠100% 时依然对准按钮）；
+   动画运行时 data-theme 已是新值，借此区分方向：
+   切暗色让旧亮色快照向按钮收缩，切亮色让新亮色快照从按钮扩张 */
+::view-transition-old(root),
+::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+
+/* 切到暗色：旧亮色快照抬到上层向按钮收缩，露出下方暗色 */
+html[data-theme="dark"]::view-transition-old(root) {
+  z-index: 2;
+  animation: theme-collapse 0.45s ease-in both;
+}
+
+/* 切到亮色：新亮色快照从按钮向外扩张，盖过下方暗色 */
+html[data-theme="light"]::view-transition-new(root) {
+  z-index: 2;
+  animation: theme-expand 0.45s ease-out both;
+}
+
+@keyframes theme-collapse {
+  from { clip-path: circle(var(--theme-r) at var(--theme-x) var(--theme-y)); }
+  to { clip-path: circle(0px at var(--theme-x) var(--theme-y)); }
+}
+
+@keyframes theme-expand {
+  from { clip-path: circle(0px at var(--theme-x) var(--theme-y)); }
+  to { clip-path: circle(var(--theme-r) at var(--theme-x) var(--theme-y)); }
+}
+
 /* ---- 外观面板 ---- */
 
 .appearance { position: relative; }

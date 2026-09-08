@@ -35,13 +35,40 @@
     });
   })();
 
-  /* 明暗切换：light <-> dark，初值由 head 内联脚本根据系统偏好决定 */
+  /* 明暗切换：light <-> dark，初值由 head 内联脚本根据系统偏好决定。
+     切换以 #theme-toggle 按钮中心为圆心做圆形揭示：
+     切暗色旧页面向按钮收缩，切亮色新页面从按钮扩张（动画在 main.css） */
   var toggle = document.getElementById('theme-toggle');
   if (toggle) {
     toggle.addEventListener('click', function () {
-      var next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-      document.documentElement.dataset.theme = next;
-      try { localStorage.setItem('xuanzhi-theme', next); } catch (err) { /* 隐私模式忽略 */ }
+      var root = document.documentElement;
+      var next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+
+      function apply() {
+        root.dataset.theme = next;
+        try { localStorage.setItem('xuanzhi-theme', next); } catch (err) { /* 隐私模式忽略 */ }
+      }
+
+      /* 不支持 View Transitions 或用户偏好减少动画：维持原瞬时切换 */
+      var reduce = window.matchMedia
+        && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (typeof document.startViewTransition !== 'function' || reduce) { apply(); return; }
+
+      /* 圆心 = 按钮中心；半径 = 圆心到视口最远角的距离，保证圆形能铺满全屏。
+         坐标写成百分比：浏览器缩放≠100% 时过渡快照盒不按 CSS 像素取尺寸
+         （如 Edge 125% 下按设备像素），绝对 px 会让圆心偏离按钮，
+         百分比按动画盒自身比例解析，任何缩放下都落在按钮上 */
+      var rect = toggle.getBoundingClientRect();
+      var x = rect.left + rect.width / 2;
+      var y = rect.top + rect.height / 2;
+      var w = root.clientWidth;  /* 排除滚动条的布局视口，与快照盒一致 */
+      var h = root.clientHeight;
+      var r = Math.hypot(Math.max(x, w - x), Math.max(y, h - y));
+      var diag = Math.sqrt(w * w + h * h) / Math.SQRT2; /* clip-path 百分比半径的解析基准 */
+      root.style.setProperty('--theme-x', (x / w * 100).toFixed(3) + '%');
+      root.style.setProperty('--theme-y', (y / h * 100).toFixed(3) + '%');
+      root.style.setProperty('--theme-r', (r / diag * 100).toFixed(3) + '%');
+      document.startViewTransition(apply);
     });
   }
 
