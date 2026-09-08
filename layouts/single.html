@@ -1,6 +1,18 @@
 {{ define "main" -}}
 <div class="post-layout">
 <article class="post">
+{{/* 分类毛笔记号：一撇（评点的「抹」）。全页定义一次，落款行里按需 <use>，
+     避免一篇文章有多个分类时重复 id。笔法同 _markup/render-heading.html：
+     粗起笔弧 + 细收锋弧 + feTurbulence 位移滤镜啃出毛边。 */}}
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <filter id="cat-mark-brush"><feTurbulence type="fractalNoise" baseFrequency="0.4" numOctaves="3" seed="14" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2" xChannelSelector="R" yChannelSelector="G"/></filter>
+    <g id="cat-mark" filter="url(#cat-mark-brush)" fill="none" stroke="currentColor" stroke-linecap="round">
+      <path d="M 5.5 6.5 C 9 9 12.5 12.5 15.5 16" stroke-width="3"/>
+      <path d="M 15.5 16 C 17.5 18.2 19 20 20 21.5" stroke-width="1.4"/>
+    </g>
+  </defs>
+</svg>
   <header class="post-header">
     <h1 class="post-title">{{ .Title }}</h1>
     <div class="post-meta">
@@ -9,6 +21,10 @@
       <span class="meta-item">{{ .WordCount }} {{ i18n "words" }}</span>
       <span class="meta-sep" aria-hidden="true"></span>
       <span class="meta-item">≈ {{ math.Ceil (div (float .WordCount) 400.0) }} {{ i18n "minutes" }}</span>
+      {{- with .GetTerms "categories" }}
+      <span class="meta-sep" aria-hidden="true"></span>
+      <span class="meta-item meta-cats">{{- range . }}<a class="cat" href="{{ .RelPermalink }}"><svg class="cat-mark" viewBox="0 0 24 24" aria-hidden="true"><use href="#cat-mark"></use></svg>{{ .Title }}</a>{{ end -}}</span>
+      {{- end }}
       {{- with .GetTerms "tags" }}
       <span class="meta-sep" aria-hidden="true"></span>
       <span class="meta-item meta-tags">{{- range . }}<a class="tag" href="{{ .RelPermalink }}">{{ .Title }}</a>{{ end -}}</span>
