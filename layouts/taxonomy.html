@@ -1,22 +1,10 @@
+{{/* 分类法索引页分发器：分类走「书架」，标签走「印谱」。
+     不按 .Data.Plural 分文件，是为了不依赖 Hugo 的 taxonomy 模板查找顺序——
+     这个文件已被验证命中 taxonomy kind，分发最稳。 */}}
 {{ define "main" -}}
-<div class="container sealbook-page">
-<header class="page-heading">
-  <h1>{{ .Title | default (i18n "tags") }}</h1>
-  <p class="sealbook-note">钤印{{ partial "seal-count.html" (len .Data.Terms.ByCount) }}枚</p>
-</header>
-<ul class="seal-wall">
-  {{- range .Data.Terms.ByCount }}
-  {{- $name := .Page.Title }}
-  {{- $runes := countrunes $name }}
-  <li class="seal-tile">
-    <a class="seal-stamp" href="{{ .Page.RelPermalink }}" aria-label="{{ $name }} {{ .Count }} {{ i18n "posts" }}">
-      <span class="seal-face">
-        <span class="seal-name{{ if le $runes 2 }} seal-name--vert{{ else if gt $runes 4 }} seal-name--sm{{ end }}">{{ $name }}</span>
-      </span>
-      <span class="seal-side">{{ partial "seal-count.html" .Count }}篇</span>
-    </a>
-  </li>
-  {{- end }}
-</ul>
-</div>
+{{- if eq .Data.Plural "categories" -}}
+  {{ partial "taxonomy-shelf.html" . }}
+{{- else -}}
+  {{ partial "taxonomy-sealwall.html" . }}
+{{- end -}}
 {{- end }}

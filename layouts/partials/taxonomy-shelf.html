@@ -1,0 +1,45 @@
+{{/* 分类页 · 通栏长架：函套站在长搁板上，签条竖排类名与篇数，函底压一枚「类」印。
+     搁板不是独立元素，由 .shelf-row 的重复背景按行高画出（见 main.css 书架段），
+     所以函套折到第几层，每层都自动是完整一条通栏长板。
+     架边清供（胆瓶一枝）只画淡墨线稿，用 currentColor 跟随主题墨色，不另存图片。 */}}
+
+{{/* 清供图形：主轮廓 1.6、细节 1.0–1.3，口沿椭圆透视，花心点实 */}}
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="shelf-prop-vase" viewBox="0 0 96 120" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M48 30 C 46 20 41 12 33 6" stroke-width="1.3"/>
+    <path d="M43 21 C 37 18 31 20 27 25 C 33 27 40 25 43 21 Z" stroke-width="1.2"/>
+    <path d="M46 25 C 52 21 58 21 63 25 C 57 29 50 28 46 25 Z" stroke-width="1.2"/>
+    <circle cx="32" cy="5" r="3" stroke-width="1.3"/>
+    <circle cx="32" cy="5" r=".8" fill="currentColor" stroke="none" opacity=".55"/>
+    <ellipse cx="48" cy="31" rx="9" ry="2.6"/>
+    <path d="M39 31 C 38 37 35 39 31 43 C 23 50 19 61 21 73 C 23 86 33 94 48 94 C 63 94 73 86 75 73 C 77 61 73 50 65 43 C 61 39 58 37 57 31"/>
+    <path d="M40 38 C 44 40 52 40 56 38" stroke-width="1" opacity=".65"/>
+    <path d="M37 93 C 40 97 56 97 59 93" stroke-width="1.3"/>
+  </symbol>
+</svg>
+
+<div class="container shelf-page">
+<header class="page-heading">
+  <h1>{{ .Title | default "分类" }}</h1>
+  <p class="shelf-note">架上存函{{ partial "seal-count.html" (len .Data.Terms.ByCount) }}只</p>
+</header>
+<div class="shelf-row">
+  <span class="shelf-prop shelf-prop--l" aria-hidden="true"><svg width="60" height="75"><use href="#shelf-prop-vase"></use></svg></span>
+  <span class="shelf-prop shelf-prop--r" aria-hidden="true"><svg width="60" height="75"><use href="#shelf-prop-vase"></use></svg></span>
+  <ul class="shelf-grid">
+    {{- range .Data.Terms.ByCount }}
+    {{- $name := .Page.Title }}
+    {{- $runes := countrunes $name }}
+    <li>
+      <a class="shelf-folder" href="{{ .Page.RelPermalink }}" aria-label="{{ $name }} {{ .Count }} {{ i18n "posts" }}">
+        <span class="folder-label">
+          <span class="folder-name{{ if gt $runes 4 }} folder-name--sm{{ end }}">{{ $name }}</span>
+          <span class="folder-count">{{ partial "seal-count.html" .Count }}篇</span>
+        </span>
+        <span class="folder-seal" aria-hidden="true">类</span>
+      </a>
+    </li>
+    {{- end }}
+  </ul>
+</div>
+</div>
