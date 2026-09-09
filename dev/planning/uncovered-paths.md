@@ -25,7 +25,7 @@
 
 | 能力 | 状态 | 说明 |
 |---|---|---|
-| `definitionList` | **默认开着**，零内容使用 | `术语\n: 释义` 能渲染出 `<dl>`，但没样式（见 `content-elements.md` 第 6 条） |
+| `definitionList` | **默认开着**，零内容使用 | `术语\n: 释义` 能渲染出 `<dl>`，但没样式（见 `../archive/02-content-elements.md` 第 6 条） |
 | `extras`（`==mark==`、`++ins++`、`~sub~`、`^sup^`） | **未开启** | 内容里的 `<mark>` 是手写 HTML 不是扩展 |
 | h5 / h6 | 从未出现 | 正文最深只到 h4；`hugo.toml` 的 `tableOfContents.endLevel = 4` 也没被压到 |
 | 引用式链接 `[文本][id]` | 零使用 | 长文里能显著降低重复 URL，值得知道它可用 |
@@ -42,6 +42,8 @@
 ---
 
 ## 3. `themes/ananke` 子模块：死重
+
+> **已清理（2026-09-09）**：站点仓库已 `git submodule deinit -f themes/ananke` + `git rm` 移除，`.gitmodules` 与 git 模块元数据一并清掉；`themes/` 下现在只剩 `xuanzhi`。下方为当时的记录。
 
 **现状**：站点 `.gitmodules` 注册了 `themes/ananke` 子模块，目录也检出了，但 `hugo.toml` 里 `theme = 'xuanzhi'`——**ananke 从未被引用**。
 
@@ -62,6 +64,6 @@
 
 | 项 | 说明 |
 |---|---|
-| `qr` 短代码把 PNG 写到站点根目录 | 构建产物里会出现 `public/qr_<hash>.png`。短代码支持 `targetDir` 参数，建议约定写到 `images/qr/` 下，别污染根目录 |
-| `single.html` 的 TOC 渲染两次 | `single.html:37` 在 `<details>` 里一份、`:65` 在侧栏 `.toc-memo` 一份。宽屏时 CSS 隐藏页内那份，但**HTML 里确实有两份**（DOM 重复、`id` 也重复）。P0 只修了标题的重复 `id`，TOC 这份还在 |
+| ~~`qr` 短代码把 PNG 写到站点根目录~~ | **已修**：默认 `targetDir = "images/qr"`，产物落在 `public/images/qr/qr_<hash>.png`；仍可传 `targetDir` 覆盖 |
+| ~~`single.html` 的 TOC 渲染两次~~ | **已修**（2026-09-09）：正文那份 `<details class="toc">` 移除，改为窄屏顶部触发条 `.toc-bar`，点开**同一份** `.toc-memo` 浮层；宽屏 `.toc-memo` 仍作侧栏。目录树只渲染一次，`id="TableOfContents"` 全页唯一（构建实测 count = 1） |
 | ~~`fileExists "themes/xuanzhi/static/..."`~~ | **已修**：字体 @font-face CSS 挪进 `assets/fonts/`，`head.html` 改用 `resources.Get` 探测（module-aware，不依赖主题目录名）。woff2 切片仍留在 `static/fonts/`，两边相对位置保持一致 |

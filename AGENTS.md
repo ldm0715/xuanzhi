@@ -1,10 +1,12 @@
 # Xuanzhi（宣纸）Hugo 主题
 
-自研 Hugo 博客主题（≥0.146 extended），设计语言：暖宣纸底、稿纸格纹、霞鹜文楷、墨阶排版、朱砂/黛青双点缀色。定位是"资产化"主题——源全在 Git、零第三方运行时依赖。
+自研 Hugo 博客主题（≥0.146 extended），设计语言：暖宣纸底、稿纸格纹、霞鹜文楷、墨阶排版、朱砂/黛青双点缀色。定位是"资产化"主题——源全在 Git、零第三方**网络**依赖（Pagefind 等构建工具只在构建期跑，运行时只加载自托管文件）。
+
+> 本文件是主题的**开发指引**，位于仓库根；`AGENTS.md` 与本文逐字相同（供其他 agent 读取）。使用者请去 `README.md`（简介）与 `docs/`（手册），别把本文当使用文档。改动主题代码前先读完本文；文末「相关文档」指到 `dev/` 的运行手册与待办。
 
 ## 目录关系（重要）
 
-- 本仓库 = 主题，独立 Git 仓库（远端未配置，勿 push）
+- 本仓库 = 主题，独立 Git 仓库（远端与 push 流程见 [`dev/publishing.md`](dev/publishing.md)）
 - 配套博客站点：`F:\hugo_gcnanmu`（另一个独立仓库，主题以 **junction** 挂载：`F:\hugo_gcnanmu\themes\xuanzhi → F:\hugo_theme`，两个路径是同一目录；站点 `.gitignore` 已排除该 junction，勿删）
 - 主题改动即时生效于站点，无需同步文件
 
@@ -47,7 +49,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 - **归档/分类页刻意不放摘要**：`.post-item` 是传统目录式（日期居左、点线引导、题名贴右），加一行摘要会破坏这个语言——试过又撤了，别再往上加。只有首页卡片带摘要：`.Summary | plainify | chomp | replaceRE \s+ " " | truncate`（`.Summary` 是 `template.HTML`，不 plainify 会带出各级标题文字）
 - **打印样式**：`main.css` 末尾 `@media print` 是全站**唯一刻意不用 token 的地方**（打印必须黑白，宣纸底/夜墨底都要还原成纸），隐藏头栏/页脚/目录/外观面板，外链把地址印出来
 - 正文 `<em>` 用**着重号**（`text-emphasis: filled dot` + `text-emphasis-color: var(--color-zhu)`）而不是斜体：`--font-sans` 是文楷，没有真斜体字面，浏览器合成假斜在汉字上很脏
-- **站内搜索**：索引由 `layouts/home.json` 构建期生成（站点需在 `[outputs]` 给 home 加 `json`），**两个搜索框共用一份索引**——桌面浮层面板 `#search-input` 与移动端下拉面板里的 `[data-search-input]`，谁先被打开/聚焦谁触发 fetch，之后两处都能用、不会重复请求。`site.js` 已把这段拆成「模块级加载器 + `makeSearch(input, list, hint)` 工厂」，要再加搜索框只需再 `makeSearch()` 一次。纯子串匹配，标题权重 3 / 标签 2 / 正文 1，正文命中给片段。**没有中文分词**——这是"能用"版，要真分词得换 Pagefind（选型对比在 `docs/structure.md`）
+- **站内搜索**：索引由构建后的一步 Pagefind 生成（部署跑 `npx pagefind --site public`），**两个搜索框共用一份索引**——桌面浮层面板 `#search-input` 与移动端下拉面板里的 `[data-search-input]`，谁先输入谁触发一次懒加载，之后两处共用同一实例。`site.js` 搜索块 = 「懒加载器 + `makeSearch(input, list, hint)` 工厂」。Pagefind headless：包地址走 `<html data-pagefind-index>`（baseof 用 **relURL**，子路径安全）+ `pf.options({ baseUrl })` 修结果前缀；正文只在 `single.html` 的 `<article>` 标 `data-pagefind-body`（**显式模式**——站内出现它就只索引带它的页，首页/归档/分类等自动不入索引）
 - **文章工具栏**（`single.html` 末尾）：收成一枚朱印（站名首字），点开展开「回到顶部 / 分享 / 目录」。整枚可拖动，位置存 `localStorage` 的 `xuanzhi-toolbar`，**以「左缘 + 下边缘」为锚**（锚上边缘的话展开时按钮会往下挤），越界坐标会被夹回视口，**上边界必须让开吸顶头栏**（头栏 z10 > 工具栏 z5，不夹的话会藏进头栏后面抓不回来）；拖到屏幕左三分之一时加 `.tip-right`，悬停标签与分享卡片改贴右侧。**层级 5**（压正文、在头栏 10 之下、远在图窗 100 之下），且**必须 `position: fixed`**——`.post-layout > .post` 是 `display: contents`，在流内的新元素会变成第三个网格项打乱 `grid-template-areas`。分享卡片写剪贴板的内容由 `data-share-text` 提供（`站名 - 标题 - 地址`）。悬停提示走 `data-tip` + `::after`，**不用原生 `title`**（系统提示要悬停一两秒，样式也不搭）。打印隐藏清单里已含 `.post-toolbar`
 - **导航走 Hugo 菜单**：`partials/nav-links.html` 读 `site.Menus.main`（站点在 `hugo.toml` 配 `[[menus.main]] name/pageRef/weight`），加页面只改配置；站点没配菜单时兜底成「`site.MainSections` + 分类法页」的旧算法，所以主题单独拿去也能用。**桌面 `.site-nav` 与移动端 `.nav-panel-links` 共用这一份 partial**，改一处两处都变
 - **移动端头栏收起**（≤640px）：头栏只留 `☰ · 站名 · #theme-toggle`，导航链接 / 搜索 / 外观收进 `#nav-panel`（挂在 `.site-header` 内、`position:absolute; top:100%`，所以打印隐藏 `.site-header` 时它跟着消失，不必单独加进 `@media print` 清单）。三条硬约束：① 隐藏规则是**黑名单** `.site-nav > *:not(#theme-toggle){display:none}`——退回点名式白名单的话，站点往 `.site-nav` 加任何东西都会重新把窄屏挤爆；② 面板自己写了 `display`，必须显式补 `.nav-panel[hidden]{display:none}` 压过 UA 规则；③ 面板比矮屏视口高，它是绝对定位在吸顶头栏上的、页面滚动带不出下缘，必须 `max-height: calc(100dvh - 56px)` + `overflow-y:auto`
@@ -92,5 +94,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 
 ## 相关文档
 
-- `README.md`：站点引入方式（junction → submodule）、主题配置项、字体更新方法
+- 用户文档：`README.md`（简要介绍）+ `docs/`（使用手册与设计理念）——面向使用者
+- `AGENTS.md`：与本文逐字相同，供其他 agent 读取
+- `dev/README.md`：开发入口（目录关系、常用命令、文档导航）
+- `dev/publishing.md` / `dev/maintenance.md`：发布与维护运行手册
+- `dev/planning/`：**待办**台账与未完成项（`README.md` 封面 + `structure.md` 备查 + `uncovered-paths.md`）
+- `dev/archive/`：**已完成**的实现/修复档案（P1 决策记录 + 历史修复，`README.md` 封面）
 - git stash 里有失败的书桌场景实验（`desk scene experiment`），仅作参考，未验收

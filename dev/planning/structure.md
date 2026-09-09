@@ -66,15 +66,15 @@
 
 ---
 
-## 3. 搜索索引（**已实施「能用」版**，2026-09-08）
+## 3. 搜索索引（**已升级为 Pagefind**，2026-09-09）
 
-**现状**：头栏放大镜 → 素纸面板。索引由 `layouts/home.json` 构建期生成（`/index.json`，站点需在 `[outputs]` 给 home 加 `json`），`site.js` 在**打开面板时**才 fetch；纯子串匹配，标题权重 3 / 标签 2 / 正文 1，正文命中给一段片段并高亮。
+> **2026-09-09 升级为 Pagefind**：旧子串引擎（`home.json → /index.json`）已废弃删除。实现约定见 `../CLAUDE.md`「站内搜索」条；下方表格是当时（2026-09-08）的选型记录。
 
-**已验证**：17 项浏览器检查全过（面板开合、索引懒加载、命中高亮、标题优先、无结果提示、Esc / 点外关闭、回车跳转、窄屏不溢出、暗色 + 黛青）。
+**现状**：头栏放大镜 → 素纸面板，引擎 = **Pagefind**（中文分词原生）。索引由构建后的一步 `npx pagefind --site public` 生成 `/pagefind/`；`site.js` 在打开/输入时才懒加载 `pagefind.js`。正文只在 `single.html` 的 `<article>` 标 `data-pagefind-body`（显式模式，首页/归档/分类等不入索引）；结果要显示的日期在 `<time>` 上标 `data-pagefind-meta="date[datetime]"`。
 
-**遗留问题（明确记录，不是 bug）**：**没有中文分词**。搜「排版设计」命中不了「排版与设计」；搜「宣纸」能命中「宣纸主题」。这是"够用"与"好用"的分界，用户接受先这样。
+**已验证（2026-09-09）**：示例站 `hugo` 构建 + `npx pagefind` 索引成功；每篇文章 HTML 含 `data-pagefind-body`、首页不含（不入索引）；`data-pagefind-index` 子路径部署为 `/demo/pagefind/pagefind.js`；没生成索引时面板提示「索引未生成」。
 
-### 若将来要升级：选型对比（重查时从这里开始）
+### 当时的选型对比（2026-09-09 已落地为 Pagefind，下表留档）
 
 | 方案 | 中文分词 | 索引 | UI | 代价 |
 |---|---|---|---|---|
@@ -85,7 +85,7 @@
 
 **升级首选 Pagefind**，理由只有一条：中文分词是自己造不出来的那块。它的索引从**构建后的 HTML** 抓，所以目录式标记、`data-pagefind-ignore` 排除项都能精确控制；`<html lang="zh-cn">` 正好命中它多语言机制的 `zh-` 前缀。
 
-**Pagefind 的三个代价**（都要先接受再动工）：
+**当时列的 Pagefind 三个代价**（落地后的处置）：
 1. **多一个构建步骤**：`hugo` 之后跑 `npx pagefind --site public`。`hugo server` 看不到搜索结果，本地得 `hugo --gc && npx pagefind --site public && npx serve public` 才验得了。
 2. **UI 是别人的**：能靠 CSS 变量调成宣纸色，但等于在别人的设计上刷漆，不如现在这块面板原生。要 100% 原生 UI 就只剩 FlexSearch 那条自写分词的路。
 3. **定位要改**：不管选哪个，主题「零第三方**运行时**依赖」都得改写成「零第三方**网络**依赖（全部自托管、随仓库走）」。KaTeX 已经是这个先例。
@@ -98,6 +98,6 @@
 |---|---|
 | **相关文章 `.Related`** | Hugo 内置按关键词/日期算相关度（`hugo config` 里的 `[related] threshold = 80` 是 Hugo 默认值，站点 `hugo.toml` 没写过）。文末加「延伸阅读」能显著提升停留时长；不做的代价是每篇文章都是"死胡同" |
 | **`lastmod` / `enableGitInfo`** | 现在只显示发布日期（`single.html:19`），改过的文章看不出来。开 `enableGitInfo` 后 `.Lastmod` 取自 Git 提交时间，适合"长期维护的技术文"。注意：**它会让每次 commit 都改变页面**，对缓存不友好 |
-| **面包屑** | 文章页没有"首页 › 分类 › 文章"的路径。可以用 `BreadcrumbList` JSON-LD 一并做（见 `seo-and-distribution.md` 第 4 条） |
+| **面包屑** | 文章页没有"首页 › 分类 › 文章"的路径。可以用 `BreadcrumbList` JSON-LD 一并做（见 `../archive/01-seo-and-distribution.md` 第 4 条） |
 | **series 分类法** | 连载型内容（如"从零搭一个博客"）用 `series` 比 tags 更合适——Hugo 加一行 `[taxonomies]` 即可，但需要配套模板 |
 | **作者页** | 单作者站用不上；将来多人写才需要 |

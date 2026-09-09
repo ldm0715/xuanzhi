@@ -259,7 +259,8 @@ html[data-theme="light"]::view-transition-new(root) {
 .appearance { position: relative; display: flex; }
 
 /* ============ 搜索面板 ============
- * 索引在构建期由 layouts/home.json 生成（/index.json），打开面板时才 fetch。
+ * 索引由 Pagefind 在构建后生成（部署时 npx pagefind --site public）；
+ * 运行期打开面板才 import pagefind.js，结果行由 site.js 渲染进本列表。
  * 定位算术同外观面板：搜索按钮右缘距头栏右缘 96px
  * （主题按钮 30 + 间距 18 + 外观按钮 30 + 间距 18），所以右贴边写 -96px
  */
@@ -356,6 +357,8 @@ html[data-theme="dark"] .search-panel { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3
   font-variant-numeric: tabular-nums;
 }
 .search-result-title { flex: 1; text-align: right; }
+/* 无日期结果（meta.date 缺失）时标题贴左，别空着右半屏 */
+.search-result-head.no-date .search-result-title { text-align: left; }
 /* 命中的字：用已有的 mark 语言（淡朱底） */
 .search-results mark {
   background: var(--color-accent-soft);
@@ -1066,15 +1069,25 @@ details[open]::details-content {
   }
 }
 
-/* 目录 */
-.toc {
-  margin: 1.4rem 0 2rem;
+/* 窄屏目录触发条（宽屏隐藏；正文里不放目录树，宽屏目录在侧栏 .toc-memo，
+   窄屏点开的是同一份 .toc-memo 浮层——目录树全站只渲染一次） */
+.toc-bar {
+  display: none;
+  align-items: baseline;
+  gap: 0.35em;
+  margin: 0.5rem 0 1.4rem;
+  padding: 2px 10px;
+  font: inherit;
   font-size: 0.92rem;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+  background: none;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
 }
-.toc #TableOfContents ul { list-style: none; margin: 0.4em 0; padding-left: 1.2em; }
-.toc #TableOfContents > ul { padding-left: 0; }
-.toc #TableOfContents a { color: var(--color-text); text-decoration: none; }
-.toc #TableOfContents a:hover { color: var(--color-accent); }
+.toc-bar:hover { color: var(--color-accent); }
+.toc-bar::after { content: " ▾"; font-size: 0.85em; }
 
 /* 正文 */
 .post-content {
@@ -2448,8 +2461,6 @@ html[data-theme="dark"] .shelf-folder:focus-visible {
   .post-content { grid-area: body; }
   .post-footer { grid-area: foot; }
   .toc-memo { display: block; grid-area: memo; }
-  /* 笺纸在场时，正文内的折叠目录退位 */
-  .post > .toc { display: none; }
 }
 
 /* 画廊留白：宽屏亮色时，纸缘一抹远山淡墨（纯装饰） */
@@ -2849,8 +2860,10 @@ html[data-theme="dark"] .post-seal::after {
 /* 拖动中不弹提示，免得跟着手飘 */
 .post-toolbar.is-dragging .post-seal::after { opacity: 0; }
 
-/* 窄屏：目录按钮把**同一份** .toc-memo 当浮层打开，不重复渲染第三份 TOC */
+/* 窄屏：顶部「目录」触发条常驻正文上方；点它或朱印都打开**同一份** .toc-memo 浮层 */
 @media (max-width: 1199px) {
+  .toc-bar { display: inline-flex; }
+  html.xz-toc-open .toc-bar { display: none; }
   html.xz-toc-open .toc-memo {
     display: block;
     position: fixed;
@@ -3594,7 +3607,7 @@ html::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radiu
   .site-header,
   .site-footer,
   .post-footer,
-  .toc,
+  .toc-bar,
   .toc-memo,
   .appearance,
   .copy-code-btn,

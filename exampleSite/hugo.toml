@@ -14,10 +14,6 @@ locale = 'zh-cn'
 enableRobotsTXT = true
 enableEmoji = true
 
-# 站内搜索：首页多输出一份 json（主题的 layouts/home.json 生成 /index.json）
-[outputs]
-  home = ['html', 'rss', 'json']
-
 [markup]
   [markup.highlight]
     style = 'monokailight'

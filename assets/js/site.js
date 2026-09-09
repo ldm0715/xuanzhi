@@ -108,95 +108,57 @@
     syncPressed();
   })();
 
-  /* 站内搜索：索引在构建期由 layouts/home.json 生成（/index.json），首次打开/输入时才 fetch。
-     索引与加载状态是模块级共享的——桌面浮层面板与移动端下拉面板各有一个搜索框，只 fetch 一次。
-     中文不分词，走子串匹配——标题命中权重最高，标签次之，正文最低。
-     这是「能用」版：没有分词、没有相关度模型，搜「排版设计」命中不了「排版与设计」。
-     要真正的中文分词得换 Pagefind 之类（见 docs/structure.md 的选型对比）。 */
+  /* 站内搜索：Pagefind（构建后由 npx pagefind --site public 生成 /pagefind/ 索引）。
+     运行期按需 import pagefind.js（headless API），全程自托管、不发外部网络请求。
+     两个搜索框（桌面浮层 + 移动下拉面板）共用同一个 Pagefind 实例与状态。
+     部署没跑 pagefind 时（如本地 hugo server），面板提示「索引未生成」。 */
   (function () {
-    /* 索引路径来自 <html data-search-index>（baseof 用 home 的 json RelPermalink 输出），
-       子路径部署（如 GitHub Pages project site）下也能取到 /repo/index.json；无则兜底根路径 */
-    var INDEX_URL = document.documentElement.dataset.searchIndex || '/index.json';
-    var MAX_HITS = 12;
     var root = document.documentElement;
+    /* 包地址来自 <html data-pagefind-index>（baseof 用 relURL 输出，子路径部署也正确） */
+    var PF_URL = root.dataset.pagefindIndex || '/pagefind/pagefind.js';
+    /* 结果 URL 前缀：从包地址反推出站点根（含子路径），喂给 pagefind.options({ baseUrl }) */
+    var BASE = PF_URL.slice(0, PF_URL.length - 'pagefind/pagefind.js'.length);
+    var MAX_HITS = 12;
     var T = {
       empty: root.dataset.searchEmpty || '没有找到相关文章',
-      loading: root.dataset.searchLoading || '正在载入索引…',
-      error: root.dataset.searchError || '索引加载失败，刷新页面再试'
+      loading: root.dataset.searchLoading || '正在搜索…',
+      unindexed: root.dataset.searchUnindexed || '索引未生成——发布前请运行 pagefind',
+      error: root.dataset.searchError || '搜索出错了，请刷新页面重试'
     };
 
-    var docs = null, loading = false, failed = false;
-    var waiters = [];   /* 各实例的「索引状态变了」回调 */
+    var pfPromise = null;      /* 共享 Pagefind 实例 Promise（懒加载一次） */
+    var pfFailed = false;
+    var waiters = [];          /* 各实例「引擎就绪/失败」回调 */
 
     function notify() { waiters.forEach(function (fn) { fn(); }); }
 
-    function load() {
-      if (typeof fetch !== 'function') { failed = true; notify(); return; }
-      loading = true;
-      notify();
-      fetch(INDEX_URL)
-        .then(function (res) {
-          if (!res.ok) throw new Error('HTTP ' + res.status);
-          return res.json();
-        })
-        .then(function (json) {
-          docs = json || [];
-          loading = false;
-          notify();
-        })
-        .catch(function () {
-          loading = false;
-          failed = true;
-          notify();
-        });
-    }
-
-    function ensureLoaded() {
-      if (!docs && !loading && !failed) load();
-    }
-
-    function esc(s) {
-      return String(s).replace(/[&<>"]/g, function (c) {
-        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
-      });
-    }
-
-    /* 命中处包 <mark>：先转义再插标记，正文里的尖括号不会变成 HTML */
-    function mark(text, q) {
-      var i = String(text).toLowerCase().indexOf(q);
-      if (i < 0) return esc(text);
-      return esc(text.slice(0, i)) + '<mark>' + esc(text.slice(i, i + q.length)) + '</mark>' + esc(text.slice(i + q.length));
-    }
-
-    function search(q) {
-      var hits = [];
-      for (var i = 0; i < docs.length; i++) {
-        var d = docs[i];
-        var inTitle = String(d.title).toLowerCase().indexOf(q) >= 0;
-        var inTag = (d.tags || []).concat(d.categories || []).join(' ').toLowerCase().indexOf(q) >= 0;
-        var inBody = String(d.content || '').toLowerCase().indexOf(q) >= 0;
-        if (inTitle || inTag || inBody) {
-          hits.push({ d: d, w: (inTitle ? 3 : 0) + (inTag ? 2 : 0) + (inBody ? 1 : 0) });
+    /* 懒加载 Pagefind：成功把实例 resolve 出来并调 options({ baseUrl })；
+       失败 resolve null——不让 promise 抛给调用方 */
+    function ensure() {
+      if (pfPromise) return pfPromise;
+      pfPromise = import(PF_URL).then(function (m) {
+        var pf = m && (m.default || m);
+        var base = BASE || '/';
+        if (pf && pf.options) {
+          return pf.options({ baseUrl: base }).then(function () { return pf; });
         }
-      }
-      hits.sort(function (a, b) { return b.w - a.w || (a.d.date < b.d.date ? 1 : -1); });
-      return hits.slice(0, MAX_HITS).map(function (h) { return h.d; });
+        return pf;
+      }).then(function (pf) {
+        notify();
+        return pf;
+      }).catch(function () {
+        pfFailed = true;
+        notify();
+        return null;
+      });
+      return pfPromise;
     }
 
-    /* 正文片段：截命中处前后一小段，让人知道凭什么命中 */
-    function snippet(text, q) {
-      var s = String(text || '');
-      var i = s.toLowerCase().indexOf(q);
-      if (i < 0) return '';
-      var start = i > 20 ? i - 20 : 0;
-      var end = i + q.length + 30 < s.length ? i + q.length + 30 : s.length;
-      return (start > 0 ? '…' : '') + mark(s.slice(start, end), q) + (end < s.length ? '…' : '');
-    }
-
-    /* 一个搜索框实例：绑自己的输入框 / 结果列表 / 提示行，共用上面的索引缓存。
-       实例可以有两个（桌面浮层 + 移动下拉面板），互不干扰 */
+    /* 一个搜索框实例：绑自己的输入框/结果列表/提示行，共用上面的 Pagefind 实例 */
     function makeSearch(input, list, hint) {
       var initialHint = hint ? hint.textContent : '';
+      var seq = 0;             /* 令牌：丢弃过期请求 */
+      var pendingEnter = false;
 
       function setHint(text) {
         if (!hint) return;
@@ -204,64 +166,99 @@
         else { hint.setAttribute('hidden', ''); }
       }
 
-      function render(q) {
-        if (!docs) return;
-        var needle = String(q || '').trim().toLowerCase();
+      function openFirst() {
+        var first = list.querySelector('a');
+        if (first) { window.location.href = first.getAttribute('href'); return true; }
+        return false;
+      }
+
+      function render(items) {
         list.textContent = '';
-        if (!needle) { setHint(initialHint); return; }
-        var hits = search(needle);
-        if (!hits.length) { setHint(T.empty); return; }
-        setHint('');
         var frag = document.createDocumentFragment();
-        hits.forEach(function (d) {
+        items.forEach(function (d) {
+          var meta = d.meta || {};
           var li = document.createElement('li');
           var a = document.createElement('a');
           a.href = d.url;
 
           var head = document.createElement('span');
           head.className = 'search-result-head';
-          var t = document.createElement('time');
-          t.textContent = d.date;
+          var hasDate = false;
+          if (meta.date) {
+            hasDate = true;
+            var t = document.createElement('time');
+            t.textContent = meta.date;
+            head.appendChild(t);
+          }
           var title = document.createElement('span');
           title.className = 'search-result-title';
-          title.innerHTML = mark(d.title, needle);   /* mark() 内部已转义 */
-          head.appendChild(t);
+          title.textContent = meta.title || d.url;    /* 标题/地址只走 textContent */
           head.appendChild(title);
+          if (!hasDate) head.className += ' no-date';
           a.appendChild(head);
 
-          var snip = snippet(d.content, needle);
-          if (snip) {
+          var excerpt = d.excerpt || d.plain_excerpt;
+          if (excerpt) {
             var sn = document.createElement('span');
             sn.className = 'search-result-snippet';
-            sn.innerHTML = snip;                     /* snippet() 内部已转义 */
+            sn.innerHTML = excerpt;                   /* Pagefind 已转义并带 <mark> */
             a.appendChild(sn);
           }
-
           li.appendChild(a);
           frag.appendChild(li);
         });
         list.appendChild(frag);
+        if (pendingEnter) { pendingEnter = false; openFirst(); }
       }
 
-      /* 索引加载状态变化时，刷新本实例的提示与结果 */
+      /* 引擎状态变化（就绪/未生成索引）时刷新本实例提示 */
       waiters.push(function () {
-        if (failed) { setHint(T.error); return; }
-        if (loading) { setHint(T.loading); return; }
-        render(input.value);
+        if (pfFailed) { setHint(T.unindexed); return; }
+        if (input.value.trim()) setHint(T.loading);
       });
 
-      input.addEventListener('input', function () { ensureLoaded(); render(input.value); });
-      input.addEventListener('focus', ensureLoaded);
+      function run(q) {
+        var token = ++seq;
+        pendingEnter = false;
+        list.textContent = '';
+        var needle = String(q || '').trim();
+        if (!needle) { setHint(initialHint); return; }
+        setHint(T.loading);
+        ensure().then(function (pf) {
+          if (token !== seq) return;                  /* 已有更新的输入，丢弃 */
+          if (!pf) { setHint(T.unindexed); return; }
+          return pf.search(needle).then(function (res) {
+            if (token !== seq) return;
+            var hits = (res && res.results || []).slice(0, MAX_HITS);
+            if (!hits.length) { setHint(T.empty); return; }
+            return Promise.all(hits.map(function (r) { return r.data(); })).then(function (ds) {
+              if (token !== seq) return;
+              setHint('');
+              render(ds);
+            });
+          }).catch(function () {
+            if (token !== seq) return;
+            setHint(T.error);
+          });
+        });
+      }
+
+      var debTimer = null;
+      input.addEventListener('input', function () {
+        window.clearTimeout(debTimer);
+        debTimer = window.setTimeout(function () { run(input.value); }, 120);
+      });
+      input.addEventListener('focus', function () { ensure(); });
       input.addEventListener('keydown', function (e) {
         if (e.key !== 'Enter') return;
-        var first = list.querySelector('a');
-        if (first) { e.preventDefault(); window.location.href = first.getAttribute('href'); }
+        e.preventDefault();
+        if (!openFirst()) pendingEnter = true;   /* 结果还没回来时记住，渲染后跳转 */
       });
 
       setHint(initialHint);
     }
 
-    /* 桌面浮层面板：按钮开合 + 打开时聚焦输入框（原有行为） */
+    /* 桌面浮层面板：按钮开合 + 打开时聚焦输入框 */
     (function () {
       var btn = document.getElementById('search-toggle');
       var panel = document.getElementById('search-panel');
@@ -274,14 +271,12 @@
         panel.setAttribute('hidden', '');
         btn.setAttribute('aria-expanded', 'false');
       }
-
       function open() {
         panel.removeAttribute('hidden');
         btn.setAttribute('aria-expanded', 'true');
         input.focus();
-        ensureLoaded();
+        ensure();
       }
-
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
         if (panel.hasAttribute('hidden')) open(); else close();
@@ -296,7 +291,7 @@
       makeSearch(input, list, hint);
     })();
 
-    /* 移动端下拉面板里的搜索框：没有开合按钮，聚焦或输入即触发加载 */
+    /* 移动端下拉面板里的搜索框：没有开合按钮，聚焦或输入即触发 */
     (function () {
       var panel = document.getElementById('nav-panel');
       if (!panel) return;
@@ -482,6 +477,13 @@
       if (card) card.setAttribute('hidden', '');
     }
 
+    /* 目录浮层统一开关：改 <html> 的 xz-toc-open，并同步窄屏触发条的 aria */
+    function setTocOverlay(open) {
+      document.documentElement.classList.toggle('xz-toc-open', !!open);
+      var b = document.querySelector('.toc-bar');
+      if (b) b.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+
     /* ---- 按钮行为 ---- */
     bar.addEventListener('click', function (e) {
       var btn = e.target.closest('button[data-act]');
@@ -527,7 +529,7 @@
         if (window.innerWidth >= 1200) {
           memo.scrollIntoView({ block: 'start', behavior: 'smooth' });
         } else {
-          document.documentElement.classList.toggle('xz-toc-open');
+          setTocOverlay(!document.documentElement.classList.contains('xz-toc-open'));
         }
       }
     });
@@ -535,9 +537,18 @@
     /* 窄屏浮层目录：点它外面关掉 */
     document.addEventListener('click', function (e) {
       if (!document.documentElement.classList.contains('xz-toc-open')) return;
-      if (e.target.closest('.toc-memo') || e.target.closest('[data-act="toc"]')) return;
-      document.documentElement.classList.remove('xz-toc-open');
+      if (e.target.closest('.toc-memo') || e.target.closest('[data-act="toc"]') || e.target.closest('.toc-bar')) return;
+      setTocOverlay(false);
     });
+
+    /* 窄屏顶部「目录」触发条：与朱印目录按钮同源，开闭同一份 memo 浮层 */
+    var tocBar = document.querySelector('.toc-bar');
+    if (tocBar) {
+      tocBar.addEventListener('click', function () {
+        if (window.innerWidth >= 1200) return;
+        setTocOverlay(!document.documentElement.classList.contains('xz-toc-open'));
+      });
+    }
 
     /* 分享卡片：点它外面或按 Esc 收起 */
     document.addEventListener('click', function (e) {

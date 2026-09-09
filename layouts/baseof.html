@@ -2,12 +2,13 @@
 <html lang="{{ site.Language.Lang }}"
       data-theme="light"
       data-accent="{{ or site.Params.accent "terracotta" }}"
-      data-search-index="{{ with site.Home.OutputFormats.Get "json" }}{{ .RelPermalink }}{{ end }}"
+      data-pagefind-index="{{ "pagefind/pagefind.js" | relURL }}"
       data-copy="{{ i18n "copy" }}"
       data-copied="{{ i18n "copied" }}"
       data-search-empty="{{ i18n "searchEmpty" }}"
       data-search-loading="{{ i18n "searchLoading" }}"
       data-search-error="{{ i18n "searchError" }}"
+      data-search-unindexed="{{ i18n "searchUnindexed" }}"
       data-menu-open="{{ i18n "menuOpen" }}"
       data-menu-close="{{ i18n "menuClose" }}">
 <head>

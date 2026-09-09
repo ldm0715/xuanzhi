@@ -1,6 +1,6 @@
 {{ define "main" -}}
 <div class="post-layout">
-<article class="post">
+<article class="post" data-pagefind-body>
 {{/* 分类毛笔记号：一撇（评点的「抹」）。全页定义一次，落款行里按需 <use>，
      避免一篇文章有多个分类时重复 id。笔法同 _markup/render-heading.html：
      粗起笔弧 + 细收锋弧 + feTurbulence 位移滤镜啃出毛边。 */}}
@@ -16,7 +16,7 @@
   <header class="post-header">
     <h1 class="post-title">{{ .Title }}</h1>
     <div class="post-meta">
-      <span class="meta-item"><span class="meta-prefix">{{ i18n "postedAt" }}</span><time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006-01-02" }}</time></span>
+      <span class="meta-item"><span class="meta-prefix">{{ i18n "postedAt" }}</span><time datetime="{{ .Date.Format "2006-01-02" }}" data-pagefind-meta="date[datetime]">{{ .Date.Format "2006-01-02" }}</time></span>
       <span class="meta-sep" aria-hidden="true"></span>
       <span class="meta-item">{{ .WordCount }} {{ i18n "words" }}</span>
       <span class="meta-sep" aria-hidden="true"></span>
@@ -34,10 +34,11 @@
 
   {{- $toc := .TableOfContents -}}
   {{- if findRE "<li" $toc -}}
-  <details class="toc">
-    <summary>{{ i18n "toc" }}</summary>
-    {{ $toc | safeHTML }}
-  </details>
+  {{/* 窄屏目录入口：一条常驻触发条；点开的是文章末那一份 .toc-memo（宽屏它是侧栏），
+       目录树在页面里只渲染一次，不重复 DOM / id */}}
+  <button type="button" class="toc-bar" aria-expanded="false" aria-controls="toc-memo">
+    <span>{{ i18n "toc" }}</span>
+  </button>
   {{- end }}
 
   <div class="post-content">
@@ -63,7 +64,7 @@
 </article>
 
 {{- if findRE "<li" $toc -}}
-<aside class="toc-memo" aria-label="{{ i18n "toc" }}">
+<aside class="toc-memo" id="toc-memo" aria-label="{{ i18n "toc" }}">
   <span class="toc-zhenzhi" aria-hidden="true"></span>
   <span class="toc-memo-title">{{ i18n "toc" }}</span>
   {{ $toc | safeHTML }}

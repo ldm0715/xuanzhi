@@ -11,7 +11,8 @@
 {{- $text := or (.Get "text") (strings.TrimSpace .Inner) "" }}
 {{- $level := or (.Get "level") "medium" }}
 {{- $scale := or (.Get "scale") 4 }}
-{{- $targetDir := or (.Get "targetDir") "" }}
+{{- /* 默认输出到 images/qr/，别让 public/qr_<hash>.png 污染站点根；要覆盖可传 targetDir */}}
+{{- $targetDir := or (.Get "targetDir") "images/qr" }}
 {{- $alt := or (.Get "alt") $text }}
 {{- $class := or (.Get "class") "" }}
 {{- $id := or (.Get "id") "" }}

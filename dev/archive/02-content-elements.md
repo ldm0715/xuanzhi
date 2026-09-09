@@ -174,7 +174,7 @@ Goldmark 能产出、主题却没写样式的元素。共同点是：**不写也
 
 注意 `:visited` 能改的属性被浏览器严格限制（只有 `color` 等少数几个），这是隐私设计，别试图改背景/边框。
 
-**怎么修**：`:visited { color: var(--color-text-secondary) }`；外链标记建议配合 `render-link.html`（见 `rendering-pipeline.md` 第 1 条）在**服务端**加类，比 CSS 的 `a[href^="http"]` 更可靠（后者会把站内绝对链接也误判）。
+**怎么修**：`:visited { color: var(--color-text-secondary) }`；外链标记建议配合 `render-link.html`（见 `03-rendering-pipeline.md` 第 1 条）在**服务端**加类，比 CSS 的 `a[href^="http"]` 更可靠（后者会把站内绝对链接也误判）。
 
 **代价**：3 行 + 一条渲染钩子（另计）。
 

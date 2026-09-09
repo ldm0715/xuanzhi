@@ -57,8 +57,9 @@ search: 搜索
 searchPlaceholder: 搜索文章…
 searchHint: 输入关键词，从标题和正文里找
 searchEmpty: 没有找到相关文章
-searchLoading: 正在载入索引…
-searchError: 索引加载失败，刷新页面再试
+searchLoading: 正在搜索…
+searchUnindexed: 索引未生成——发布前请运行 pagefind
+searchError: 搜索出错了，请刷新页面重试
 searchOpen: 打开搜索
 
 # ---- 文章页 ----

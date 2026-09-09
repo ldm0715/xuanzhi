@@ -45,6 +45,11 @@ jobs:
           hugo --source exampleSite --minify \
             --baseURL "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
 
+      # 站内搜索（Pagefind）：在 hugo 构建后给 exampleSite/public 生成 /pagefind/ 索引，
+      # 产物随 public 一起上传。没跑这一步，演示站搜索面板只会提示「索引未生成」。
+      - name: Index with Pagefind
+        run: npx --yes pagefind@latest --site exampleSite/public
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
