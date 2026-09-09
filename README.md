@@ -1,24 +1,39 @@
 # Xuanzhi 宣纸
 
-暖纸底、稿纸格纹、霞鹜文楷、墨阶排版的**极简中文博客主题**，为 Hugo ≥ 0.146（extended）设计。
+[![license: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
+[![Hugo](https://img.shields.io/badge/Hugo-%E2%89%A50.146%20extended-ff4088)](https://gohugo.io/)
+[![lang](https://img.shields.io/badge/lang-zh--CN-blue)]()
 
-把博客装进一张宣纸：亮色是「宣纸」、暗色是「夜墨」；点缀色在陶土橘 / 黛青之间切换，访客还能在头栏的外观面板里自选纸面、点缀色与分隔线。字体、KaTeX、图标、站内搜索全部**自托管、无第三方网络请求**（搜索索引由构建时的 Pagefind 生成本地文件，运行期不发任何外部请求）。
+> 暖纸底 · 稿纸格纹 · 霞鹜文楷 · 墨阶排版 —— 一个把博客装进一张宣纸里的极简中文博客主题。
 
-## 特性一览
+宣纸为 **Hugo（≥ 0.146，extended）** 设计：亮色是「宣纸」、暗色是「夜墨」；点缀色在陶土橘 / 黛青之间切换，访客还可在头栏外观面板自选纸面、点缀色与分隔线。字体、KaTeX、图标、站内搜索全部**自托管、无第三方网络请求**——搜索索引由构建时的 Pagefind 生成本地文件，运行期不发任何外部请求。
 
-**写作即所得的渲染管线**
-- 图片自动转 WebP + 三档 srcset + 懒加载，点开进入「同纸虚化」的图窗灯箱
-- 公式**构建期**渲染（KaTeX），禁 JS / 爬虫 / RSS 阅读器都能读到排好的公式；代码块双明暗高亮、带复制按钮
-- 脚注、表格、任务列表、定义列表、嵌套引用等语义元素各有版式；中文着重号代替假斜体
+## 演示站
+
+- 在线演示：`https://ldm0715.github.io/xuanzhi/`（主题仓库推上 GitHub Pages 后可用）
+- 本地预览：仓库自带 `exampleSite/` 演示站（每种内容形态都有一篇测试稿）
+
+```bash
+git clone <本仓库>
+cd xuanzhi
+hugo server --source exampleSite      # http://localhost:1313/
+```
+
+## 特性
+
+**写作即所得**
+- 图片自动转 WebP + 三档 srcset + 懒加载；点图进入「同纸虚化」的图窗灯箱
+- 公式**构建期**渲染（KaTeX），禁 JS / 爬虫 / RSS 阅读器都能读到排版好的公式
+- 代码块双明暗高亮、带复制按钮；脚注 / 表格 / 任务列表 / 定义列表 / 嵌套引用各有版式；`<em>` 用中文着重号代替假斜体
 
 **内容组织**
-- 首页诗笺欢迎区 + 红框封文章卡片；归档按年/月（毛笔纪年 · 朱印领月）
-- 分类索引是通栏书柜、标签索引是印谱；分类词页像打开函套、标签词页像钤在纸上
+- 首页诗笺欢迎区 + 红框封文章卡片；归档按年 / 月（毛笔纪年 · 朱印领月）
+- 分类 = 通栏书柜，标签 = 印谱；分类词页开函、标签词页钤印
 - 目录（TOC）+ scrollspy、长目录自动折叠、分页、线装式上下篇翻页
 
 **分发与 SEO**
 - robots.txt / sitemap / 自定义 RSS / Open Graph 全套 / JSON-LD
-- **站内搜索（Pagefind）**：中文分词原生支持；构建后跑一次 `npx pagefind --site public` 生成索引，运行时只加载自托管文件
+- **站内搜索（Pagefind）**：中文分词原生支持；构建后跑一步 `npx pagefind --site public` 即生成自托管索引
 
 **可定制**
 - 头栏导航走 `hugo.toml` 菜单，加页面不改模板
@@ -28,31 +43,42 @@
 ## 快速开始
 
 ```bash
-# 1. 把主题放进站点（示例用 submodule；也可下载解压到 themes/xuanzhi）
+# 1. 把主题放进站点（submodule 方式；或下载解压到 themes/xuanzhi）
 git submodule add <你的主题仓库地址> themes/xuanzhi
 
 # 2. hugo.toml 声明主题
 theme = 'xuanzhi'
 
-# 3. 补最小配置并预览（完整配置项见 docs/configuration.md）
+# 3. 预览
 hugo server
 ```
 
-## 文档
+> 环境要求：**Hugo extended ≥ 0.146**（图片管线需要 extended）。站内搜索是可选增强，想用的话在部署时于 `hugo` 后多跑一步 `npx pagefind --site public`（详见下方「搜索」与配置文档）。
 
-- [docs/installation.md](docs/installation.md) — 安装、引入方式与本地演示
-- [docs/design.md](docs/design.md) — 设计理念：这套视觉语言为什么长这样
-- [docs/configuration.md](docs/configuration.md) — 站点配置参考（含「功能 → 配置 → 不配的后果」）
-- [docs/writing.md](docs/writing.md) — 写作约定：图片 / 公式 / 短代码 / 封面印记
-- [docs/customization.md](docs/customization.md) — 菜单、界面文案、头栏图标按钮等自定义
-- [docs/licenses.md](docs/licenses.md) — 主题与第三方资产许可
+## 使用
 
-仓库里的 `exampleSite/` 是演示站，本地预览：`hugo server --source exampleSite`。
+| 想做什么 | 看这里 |
+|---|---|
+| 安装、引入方式、junction → submodule | [docs/installation.md](docs/installation.md) |
+| `hugo.toml` 全量配置（含「功能 → 配置 → 不配的后果」与复制粘贴样板） | [docs/configuration.md](docs/configuration.md) |
+| 写作约定：图片 / 公式 / 短代码 / 封面印记 | [docs/writing.md](docs/writing.md) |
+| 自定义：菜单、界面文案、头栏图标按钮 | [docs/customization.md](docs/customization.md) |
+| 设计理念：这套视觉语言为什么长这样 | [docs/design.md](docs/design.md) |
+| 主题与第三方资产许可 | [docs/licenses.md](docs/licenses.md) |
+
+**站内搜索（可选，Pagefind）**：头栏放大镜 → 素纸面板，中文分词原生支持。索引不在 Hugo 构建里生成，需要在你的构建流程里多跑一步：
+
+```bash
+hugo
+npx pagefind --site public
+```
+
+本地 `hugo server` 预览时搜索会提示「索引未生成」，这属预期——只有构建后跑过 pagefind 才有索引。GitHub Actions 写法与更多说明见 [docs/configuration.md「站内搜索：能力与边界」](docs/configuration.md#站内搜索能力与边界)。
+
+## 开发
+
+维护者与 AI 编码的完整指引在仓库根 [`CLAUDE.md`](CLAUDE.md)（与 `AGENTS.md` 逐字相同），发布 / 维护运行手册、待办台账与决策记录在 [`dev/`](dev/README.md)。主题仓库尚未正式发布，首次发布流程见 [`dev/publishing.md`](dev/publishing.md)。
 
 ## 许可
 
-主题本体（模板 / CSS / JS）为 **MIT**（见 `LICENSE`）。随主题分发的字体与图标各有其许可，不因打包而变为 MIT，明细见 [docs/licenses.md](docs/licenses.md)。
-
----
-
-面向维护者与 AI 编码：开发指引在仓库根 [`CLAUDE.md`](CLAUDE.md)（与 `AGENTS.md` 逐字相同，供其他 agent 读取）；发布 / 维护运行手册与待办台账在 [`dev/`](dev/README.md)。
+主题本体（模板 / CSS / JS）为 **MIT**，见 [LICENSE](LICENSE)。随主题分发的字体（霞鹜文楷 / 思源宋体 / JetBrains Mono）、KaTeX 样式与图标各有其许可，不因打包而变为 MIT，明细见 [docs/licenses.md](docs/licenses.md)。

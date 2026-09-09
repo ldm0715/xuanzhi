@@ -18,6 +18,7 @@
 | 首页欢迎语 | `params.hero.greeting` | 用主题默认（i18n 的 `greeting`） |
 | 默认点缀色 | `params.accent` | `terracotta`（访客仍可在外观面板自行切换） |
 | JSON-LD 作者 | `params.author` | 回落成站点 `title` |
+| 站点描述（meta description） | `params.description`（站点级兜底）；单篇可用 front matter `description` 优先 | 单篇没写描述时，`<meta name="description">` 用该页自动摘要（压平到 160 字）；站点级兜底缺失 |
 
 > 不走 `hugo.toml` 的自定义还有两处——**界面文案**和**头栏图标按钮**，改的是站点仓库里的文件，见 [customization.md](customization.md)。
 
@@ -47,6 +48,7 @@ enableEmoji = true
 [params]
   accent = 'terracotta'   # terracotta（陶土橘）/ indigo（黛青）
   author = '你的名字'      # 可省；省略则回落成站点 title
+  description = '一句话介绍你的博客'   # 可省；站点级 meta description 兜底
   [params.hero]
     greeting = '一纸短笺，见字如面'
 
