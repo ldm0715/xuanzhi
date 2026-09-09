@@ -127,5 +127,5 @@
    原来的 katex.min.js / auto-render.min.js 与客户端渲染脚本已去掉——
    爬虫、禁 JS 的读者、RSS 阅读器现在都能拿到排好版的公式 */ -}}
 {{- if and .IsPage (or (findRE "\\$\\$" .RawContent) (findRE "\\\\\\(" .RawContent) (findRE "\\\\\\[" .RawContent)) -}}
-<link rel="stylesheet" href="/katex/katex.min.css">
+<link rel="stylesheet" href="{{ "katex/katex.min.css" | relURL }}">
 {{- end -}}

@@ -24,6 +24,18 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* 窄屏文章页：单栏版心与顶部飞鸟水印重叠会压到题名，隐去飞鸟层；首页/列表/宽屏保留。
+   须同时覆写 4 个 background 属性——只改 background-image 会让原两层的
+   background-repeat/position 只剩首值（no-repeat），把纸面格纹背景弄破 */
+@media (max-width: 900px) {
+  body[data-layout="page"] {
+    background-image: var(--bg-image);
+    background-position: 0 0;
+    background-repeat: repeat;
+    background-size: var(--bg-size);
+  }
+}
+
 /* ---- 背景方案 ---- */
 
 html[data-bg="plain"] { --bg-image: none; --bg-size: auto; }
@@ -1909,6 +1921,11 @@ html[data-hr="feibai"] .post-content hr {
   max-width: 46%;
   text-decoration: none;
   font-size: 0.95rem;
+  /* 按住拖动不要在链接上触发浏览器原生拖放会话：Edge/Chromium 在拖完松开后
+     偶发把拖放会话卡死，导致整页不再响应点击（只能刷新恢复） */
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 .post-nav-next {
   margin-left: auto;
@@ -2667,7 +2684,7 @@ html[data-theme="dark"] .post-tool-btn {
   border: 0;
   border-radius: 2px;
   background: none;
-  color: #F7F4EC;
+  color: var(--color-bg);
   font-family: var(--font-title);
   font-size: 1.05rem;
   font-weight: 700;
@@ -2675,7 +2692,7 @@ html[data-theme="dark"] .post-tool-btn {
   box-shadow: 0 1px 2px rgba(60, 45, 20, 0.14), 0 4px 12px rgba(60, 45, 20, 0.08);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-/* 印面：朱色底 + 极淡的纸颗粒。
+/* 印面：点缀色底（随 data-accent 在陶土橘/黛青间切换，暗色另调亮）+ 极淡的纸颗粒。
    这里**不用** --tex-mask-paste 的毛边 mask——那套是给 96px 以上的大印用的，
    40px 上噪声会和字抢对比，印面糊成一团。小印靠颗粒和字距就够。 */
 .post-seal::before {
@@ -2683,7 +2700,7 @@ html[data-theme="dark"] .post-tool-btn {
   position: absolute;
   inset: 0;
   border-radius: 2px;
-  background-color: var(--color-seal);
+  background-color: var(--color-accent);
   background-image: var(--tex-noise);
   background-size: 40px 40px;
 }
@@ -2870,7 +2887,11 @@ html[data-theme="dark"] .post-seal::after {
   gap: 12px;
 }
 .footer-line p { margin: 0; }
-.footer-links { margin-left: auto; }
+.footer-links {
+  display: flex;
+  align-items: center;
+  margin-left: auto;   /* 任何宽度都把 RSS 推到行尾，与版权同行右对齐 */
+}
 /* RSS 入口是枚图标：行内 flex 让 svg 与文字基线对齐，svg 转块级消掉行内基线空隙 */
 .footer-links a {
   display: inline-flex;
@@ -2956,10 +2977,14 @@ html[data-theme="dark"] .post-seal::after {
   .archive-month .post-item-title-text::after,
   .term-page .post-item-title-text::after { display: none; }
 
-  /* 上下篇各占一半，长题名在半栏内自行换行，不再整体堆叠 */
-  .post-nav { max-width: 47%; }
+  /* 上下篇各占一半：flex 均分让两侧可点区域等宽（content 上限会随题名长短不等），
+     长题名在半栏内自行换行 */
+  .post-nav {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: none;
+  }
   .post-footer { gap: 18px 16px; }
-  .footer-links { margin-left: 0; }
 }
 
 /* ============ 首页欢迎区：整屏 + 诗笺（竖排，从左到右） ============ */
@@ -3004,6 +3029,10 @@ html[data-theme="dark"] .post-seal::after {
 }
 
 /* 诗笺：一张双线朱丝栏笺，竖排书写，列序从左到右 */
+.poem-wrap {
+  position: relative;
+  width: max-content;   /* 诗笺是 JS 每次刷新的对象，意象放兄弟节点、锚在这层 */
+}
 .poem-scroll {
   position: relative;
   writing-mode: vertical-lr;
@@ -3222,20 +3251,24 @@ html[data-theme="dark"] .inkcard:hover {
   outline-offset: 3px;
 }
 
-/* 印记：八式水墨小品收进信笺右下角，如渗进纸里的一枚淡印。
+/* 印记：八式水墨小品铺在信笺下缘居中（续读与标签之间的大片空白处），如渗进纸里的一枚淡印。
    绝对定位，不参与卡片布局；低透明度 + 轻微模糊 + 径向羽化，四周不越出纸边 */
 .inkcard-print {
+  /* 暂隐意象，预览「无意象」观感；要恢复删掉这一行即可 */
+  display: none;
   position: absolute;
-  right: 10px;
+  left: 50%;
+  transform: translateX(-50%);
   bottom: 8px;
   z-index: 0;
-  width: 124px;
-  height: 83px;
-  opacity: 0.34;
-  filter: blur(0.5px);
+  width: 192px;
+  height: 128px;
+  opacity: 0.18;
+  filter: blur(1px);
   pointer-events: none;
-  -webkit-mask-image: radial-gradient(ellipse 82% 82% at 50% 50%, #000 52%, transparent 98%);
-  mask-image: radial-gradient(ellipse 82% 82% at 50% 50%, #000 52%, transparent 98%);
+  /* 径向大范围羽化：中心到外缘渐隐入纸，外圈不落硬边 */
+  -webkit-mask-image: radial-gradient(ellipse 85% 85% at 50% 50%, #000 30%, transparent 92%);
+  mask-image: radial-gradient(ellipse 85% 85% at 50% 50%, #000 30%, transparent 92%);
 }
 .inkcard-print-img,
 .inkcard-print-svg {
@@ -3307,6 +3340,30 @@ html[data-theme="dark"] .inkcard:hover {
   stroke: var(--color-title);
   stroke-width: 2.6;
   stroke-linecap: round;
+}
+
+/* ---- 试验：诗笺右下角意象（随机亮一枚） ----
+ * 复用卡片那套八式水墨小品（描色吃 .inkcard-print 前缀规则），8 枚叠在右下角同一位，
+ * 默认随 .inkcard-print 整体 display:none，JS 每访问给其中一枚加 .is-on 亮出来。
+ * 不需要时删掉本块 + home.html 的 .poem-art + site.js 的随机段三处即可 */
+.poem-art.inkcard-print {
+  left: auto;
+  right: 8px;
+  bottom: 16px;
+  transform: none;
+  width: 92px;
+  height: 62px;
+  opacity: 0.5;
+  filter: blur(0.4px);
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+.poem-art.inkcard-print.is-on { display: block; }
+.poem-art svg,
+.poem-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 /* 日期邮戳：朱砂印泥质感双环，盖卡片右上 */
@@ -3463,7 +3520,7 @@ html[data-theme="dark"] .inkcard:hover {
   .poem-line { font-size: 1.05rem; letter-spacing: 0.24em; }
 
   .inkcard-grid { grid-template-columns: minmax(0, 1fr); gap: 20px; }
-  .inkcard-print { width: 104px; height: 70px; right: 8px; bottom: 6px; }
+  .inkcard-print { width: 132px; height: 88px; left: 50%; bottom: 6px; }
 }
 
 /* ============ 锚点落点与滚动条 ============ */

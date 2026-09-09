@@ -4,11 +4,16 @@
 图案在 CSS 里被压成居中铺底的一枚淡印（20% 不透明度 + 模糊 0.5px），
 所以不再套 feTurbulence 毛边滤镜——那个浓度下根本看不出来，只白付每张卡的栅格化开销。
 各式的定妆预览稿在 static/images/covers/（亮色调自包含），改形状请两处同步。 */}}
-{{- $hash := int (hash.FNV32a .Title) -}}
+{{- $page := .page -}}
+{{- $hash := int (hash.FNV32a $page.Title) -}}
 {{- $variant := mod $hash 8 -}}
 {{- $flip := mod (div $hash 13) 2 -}}
-{{- with .Params.cover -}}
-  {{- with $.Resources.GetMatch . -}}
+{{- /* 可选覆盖：dict 传 variant(0-7)/flip(0-1) 强制某一式（诗笺意象随机用）。
+     调用方统一传 (dict "page" $page ...)，保证 isset 只作用于 dict，不落到 pageState */ -}}
+{{- if isset . "variant" }}{{ $variant = mod (int .variant) 8 }}{{ end -}}
+{{- if isset . "flip" }}{{ $flip = mod (int .flip) 2 }}{{ end -}}
+{{- with $page.Params.cover -}}
+  {{- with $page.Resources.GetMatch . -}}
     {{- $thumb := . -}}
     {{- if and (eq .ResourceType "image") (not (in .MediaType.SubType "svg")) (not (eq .MediaType.SubType "gif")) -}}
       {{- $thumb = .Resize "600x400 webp q80" -}}

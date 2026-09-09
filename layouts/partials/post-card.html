@@ -4,7 +4,7 @@
 {{ $tags := .GetTerms "tags" }}
 <article class="inkcard">
   <a class="inkcard-link" href="{{ .RelPermalink }}">
-    <span class="inkcard-print" aria-hidden="true">{{ partial "post-card-cover.html" . }}</span>
+    <span class="inkcard-print" aria-hidden="true">{{ partial "post-card-cover.html" (dict "page" .) }}</span>
     <span class="inkcard-postmark" aria-hidden="true">
       <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006.01.02" }}</time>
     </span>

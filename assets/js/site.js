@@ -114,7 +114,9 @@
      这是「能用」版：没有分词、没有相关度模型，搜「排版设计」命中不了「排版与设计」。
      要真正的中文分词得换 Pagefind 之类（见 docs/structure.md 的选型对比）。 */
   (function () {
-    var INDEX_URL = '/index.json';
+    /* 索引路径来自 <html data-search-index>（baseof 用 home 的 json RelPermalink 输出），
+       子路径部署（如 GitHub Pages project site）下也能取到 /repo/index.json；无则兜底根路径 */
+    var INDEX_URL = document.documentElement.dataset.searchIndex || '/index.json';
     var MAX_HITS = 12;
     var root = document.documentElement;
     var T = {
@@ -956,14 +958,17 @@
       .catch(function () { /* 保留构建期烘入的诗 */ })
       .then(function () { window.clearTimeout(timer); });
 
-    /* 与构建期同口径的校验：标题 ≤12 字、每句 ≤16 字、至少两句。
-       诗泉偶尔返回带考据注释的条目（标题如「果州百姓爲史謙恕歌（題從《古謠諺》卷五三）」，
-       或句尾缀《海錄碎事》卷十二…），竖排诗笺会被撑爆——这时静默保留当前这首 */
+    /* 与构建期同口径的校验：标题 ≤12 字、朝代 ≤6 字、作者 ≤8 字、两句到六句、每句 ≤16 字。
+       诗泉偶尔返回带考据注释/超长的条目（标题如「果州百姓爲史謙恕歌（題從《古謠諺》卷五三）」，
+       或句尾缀《海錄碎事》卷十二…）——任一超限即整首弃用，静默保留构建期烘入的默认诗 */
     function isClean(d) {
-      var runes = function (s) { return Array.from(String(s)).length; };
+      var runes = function (s) { return Array.from(String(s || '')).length; };
+      var auth = (d.author && d.author.name) || '';
+      var dyn = (d.dynasty && d.dynasty.name) || '';
+      var lines = d.content || [];
       if (runes(d.title) > 12) return false;
-      var lines = Array.prototype.slice.call(d.content, 0, 6);
-      if (lines.length < 2) return false;
+      if (runes(auth) > 8 || runes(dyn) > 6) return false;
+      if (lines.length < 2 || lines.length > 6) return false;
       return lines.every(function (l) { return runes(l) <= 16; });
     }
 
@@ -978,7 +983,8 @@
     function render(d) {
       var author = (d.author && d.author.name) || '佚名';
       var dynasty = (d.dynasty && d.dynasty.name) || '';
-      var lines = Array.prototype.slice.call(d.content, 0, 6);
+      /* isClean 已保证 2–6 行，整首渲染，不再截断 */
+      var lines = d.content || [];
 
       var frag = document.createDocumentFragment();
       frag.appendChild(el('poem-heading', '「' + d.title + '」'));
@@ -997,5 +1003,16 @@
       scroll.textContent = '';
       scroll.appendChild(frag);
     }
+  })();
+
+  /* 诗笺意象：首页诗笺右下角的 8 式水墨小品，每次到访随机亮一枚 */
+  (function () {
+    var arts = document.querySelectorAll('.poem-art.inkcard-print');
+    if (!arts.length) return;
+    var pick = function () {
+      for (var i = 0; i < arts.length; i++) arts[i].classList.remove('is-on');
+      arts[Math.floor(Math.random() * arts.length)].classList.add('is-on');
+    };
+    pick();
   })();
 })();

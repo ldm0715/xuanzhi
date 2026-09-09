@@ -62,6 +62,13 @@ git push -u origin master        # 本仓库当前分支是 master
 https://<你的用户名>.github.io/xuanzhi/
 ```
 
+> **推的是 `master` 分支的话，还要再改一处**（否则 deploy 步骤必失败）：
+>
+> GitHub 新建仓库时会往 `github-pages` 环境里预置一条**只允许 `main`** 的部署分支策略，而本仓库分支叫 `master`，于是报
+> 「`master` 分支不允许部署到 github-pages 上。部署被拒绝或不符合其他保护规则」——注意 build 步骤是绿的，只有 deploy 挂。
+>
+> 去 **Settings → Environments → `github-pages` → Deployment branches and tags**，加一条 `master`（或直接选 No restriction），然后手动重跑一次 workflow。
+
 ### 4. 回填 `theme.toml` 的 homepage
 
 还空着，填上仓库地址（Hugo 主题站提交表单会读这一项）：
@@ -318,6 +325,7 @@ unitPosts: 则
 - 站名首字会渲染成页脚的印章，改 `title` 即生效
 - 滚动条滑块、着重号、缩写点线、外链 ↗、锚点落点的朱砂短竖、文章工具栏的朱印、首页「续读」——这些**装饰性标记**都走朱饰系，随 `accent` 在朱砂/黛青之间切换；`strong` 的浓墨、`del` 的褪色、定义列表的引导虚线属于**语义性**标记，留墨阶不动
 - 公式在**构建期**渲染（`transform.ToMath`），禁 JS、爬虫、RSS 阅读器都能拿到排好版的公式；客户端只加载 `katex.min.css`
+- 自托管的 `static/katex/katex.min.css` 版本必须与 Hugo `transform.ToMath` 输出匹配（现代类名 `.sizing`；若误用旧版 `.katex-sizing`，上下标不会缩小/抬起）。模板中对 KaTeX 样式表这类静态资源一律用**不带前导 `/` 的 `relURL`** 引用——写成 `/katex/…` 这类根绝对路径时，部署在项目型 Pages 子路径会 404，表现是公式旁露出 LaTeX 原文、搜索索引加载失败（2026-09-09，详见 `docs/2026-09-09-math-formula-subsuper-and-subpath-fixes.md`）
 
 ## 写作约定
 

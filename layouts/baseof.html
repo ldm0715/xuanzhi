@@ -2,6 +2,7 @@
 <html lang="{{ site.Language.Lang }}"
       data-theme="light"
       data-accent="{{ or site.Params.accent "terracotta" }}"
+      data-search-index="{{ with site.Home.OutputFormats.Get "json" }}{{ .RelPermalink }}{{ end }}"
       data-copy="{{ i18n "copy" }}"
       data-copied="{{ i18n "copied" }}"
       data-search-empty="{{ i18n "searchEmpty" }}"

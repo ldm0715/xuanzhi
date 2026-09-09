@@ -10,16 +10,21 @@
         {{ with .Value.data }}
           {{ if and .title (gt (len .content) 0) }}
             {{ $lines := .content }}
-            {{ if gt (len $lines) 6 }}{{ $lines = first 6 $lines }}{{ end }}
             {{ $title := .title | string }}
-            {{/* 只收干净的绝句：标题 ≤12 字、每句 ≤16 字，否则退回兜底《鹿柴》。
+            {{ $dyn := "" }}{{ with .dynasty }}{{ $dyn = .name | default "" }}{{ end }}
+            {{ $auth := "" }}{{ with .author }}{{ $auth = .name | default "" }}{{ end }}
+            {{/* 只收干净的绝句：标题 ≤12 字、朝代 ≤6 字、作者 ≤8 字、两句到六句、每句 ≤16 字。
+                 任一条不满足即整首弃用、退回构建期默认《鹿柴》（不再截断成前六句）。
                  诗泉偶尔返回带考据注释的条目（如「果州百姓爲史謙恕歌（題從《古謠諺》卷五三）」），
                  竖排诗笺会被撑爆 */}}
-            {{ $ok := le (countrunes $title) 12 }}
+            {{ $ok := and
+              (le (countrunes $title) 12)
+              (le (countrunes $dyn) 6)
+              (le (countrunes $auth) 8)
+              (ge (len $lines) 2)
+              (le (len $lines) 6) }}
             {{ range $lines }}{{ if gt (countrunes (string .)) 16 }}{{ $ok = false }}{{ end }}{{ end }}
             {{ if $ok }}
-              {{ $dyn := "" }}{{ with .dynasty }}{{ $dyn = .name | default "" }}{{ end }}
-              {{ $auth := "" }}{{ with .author }}{{ $auth = .name | default "" }}{{ end }}
               {{ $poem = dict "title" $title "dynasty" $dyn "author" $auth "content" $lines }}
             {{ end }}
           {{ end }}
@@ -35,6 +40,7 @@
   <div class="hero-inner">
     <p class="hero-greeting">{{ or site.Params.hero.greeting (i18n "greeting") }}</p>
     <h1 class="hero-title">{{ site.Title }}</h1>
+    <div class="poem-wrap">
     <div class="poem-scroll" id="poem-scroll" data-poem-api="https://poetry.palemoky.com/api/poems/random" aria-label="{{ i18n "poemLabel" }}">
       <span class="poem-heading">「{{ $poem.title }}」</span>
       <span class="poem-body">
@@ -44,6 +50,11 @@
         <span class="poem-author">{{ $sign }}</span>
         <span class="poem-seal" aria-hidden="true">{{ substr $author 0 1 }}</span>
       </span>
+    </div>
+      {{/* 试验：诗笺右下角意象 —— 8 式水墨小品全埋，JS 每次到访随机亮一枚（见 site.js） */}}
+      {{- range $v := seq 0 7 }}
+      <span class="poem-art inkcard-print" data-v="{{ $v }}" aria-hidden="true">{{ partial "post-card-cover.html" (dict "page" $ "variant" $v) }}</span>
+      {{- end }}
     </div>
   </div>
   <a class="hero-hint" href="#recent"><span class="hero-hint-text">{{ i18n "scrollHint" }}</span><span class="hero-hint-arrow" aria-hidden="true">↓</span></a>
