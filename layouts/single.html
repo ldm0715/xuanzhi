@@ -16,8 +16,14 @@
   <header class="post-header">
     <h1 class="post-title">{{ .Title }}</h1>
     <div class="post-meta">
+      {{- /* 没写 date 的页面（文档、说明页这类非文章内容）不渲染日期。
+             不判断的话 `.Date` 回落成零值，页面上会印出「撰于 0001-01-01」——
+             一个看起来很真、但纯属虚构的日期。
+             分隔线跟日期一起进 if：留着的话没有日期时开头会多出一条竖杠。 */ -}}
+      {{- if not .Date.IsZero }}
       <span class="meta-item"><span class="meta-prefix">{{ i18n "postedAt" }}</span><time datetime="{{ .Date.Format "2006-01-02" }}" data-pagefind-meta="date[datetime]">{{ .Date.Format "2006-01-02" }}</time></span>
       <span class="meta-sep" aria-hidden="true"></span>
+      {{- end }}
       <span class="meta-item">{{ .WordCount }} {{ i18n "words" }}</span>
       <span class="meta-sep" aria-hidden="true"></span>
       <span class="meta-item">≈ {{ math.Ceil (div (float .WordCount) 400.0) }} {{ i18n "minutes" }}</span>

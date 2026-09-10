@@ -19,8 +19,6 @@
     "@context" "https://schema.org"
     "@type" "BlogPosting"
     "headline" ($p.Title | plainify)
-    "datePublished" ($p.Date.Format "2006-01-02T15:04:05Z07:00")
-    "dateModified" ($p.Lastmod.Format "2006-01-02T15:04:05Z07:00")
     "author" (dict "@type" "Person" "name" $author)
     "publisher" (dict "@type" "Organization" "name" site.Title)
     "mainEntityOfPage" (dict "@type" "WebPage" "@id" $p.Permalink)
@@ -28,6 +26,16 @@
     "image" $image
     "description" $desc
   -}}
+  {{- /* 没写 date 的页面（文档、说明页这类非文章内容）**不输出日期字段**。
+         零值会序列化成 "0001-01-01T00:00:00Z"——一个看着像真的、实际不存在的
+         日期，爬虫可能据此判为无效结构化数据。datePublished 与 dateModified 一起收，
+         只缺一个同样不自洽。 */ -}}
+  {{- if not $p.Date.IsZero -}}
+    {{- $schema = $schema | merge (dict
+      "datePublished" ($p.Date.Format "2006-01-02T15:04:05Z07:00")
+      "dateModified" ($p.Lastmod.Format "2006-01-02T15:04:05Z07:00")
+    ) -}}
+  {{- end -}}
 {{- else if $p.IsHome -}}
   {{- $schema = dict
     "@context" "https://schema.org"
