@@ -67,6 +67,13 @@ enableEmoji = true
 #
 # 注意：TOML 里 [module] 一旦开始，后面的键就全归它了——所以这段必须放在文件最后。
 [module]
+  # 演示站自己的 static/ 必须**显式挂一次**：Hugo 的规则是「给某个 target 加了
+  # mount，该 target 的默认 mount 就被顶掉」——下面那条 '../static' 会连带把
+  # 演示站自己的 static/ 一起遮蔽，media/demo.lrc 就发不出去。
+  # 自己那份放前面，主题那份放后面。
+  [[module.mounts]]
+    source = 'static'
+    target = 'static'
   [[module.mounts]]
     source = '../layouts'
     target = 'layouts'
