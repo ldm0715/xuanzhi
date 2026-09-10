@@ -1,0 +1,19 @@
+# 控制 `git archive`（即发布 workflow 打的主题包）里放什么。
+#
+# `export-ignore` 标记的文件/目录不会进包，但**照常留在仓库里**——
+# 仓库是给作者看的，包是给用户 `themes/xuanzhi/` 直接解压用的，
+# 两者的合适内容不一样。
+#
+# 打了标记的：作者向开发文档、演示站、CI 配置、仓库级杂项配置。
+# 没打标记的（即会进包）：layouts/ assets/ static/ i18n/ docs/ theme.toml
+# LICENSE README.md CHANGELOG.md。
+#
+# exampleSite/public/ 不用在这里管——它被 .gitignore 的 `public/` 覆盖，本来就不入库。
+
+/.github        export-ignore
+/dev            export-ignore
+/exampleSite    export-ignore
+/CLAUDE.md      export-ignore
+/AGENTS.md      export-ignore
+/.gitignore     export-ignore
+/.gitattributes export-ignore

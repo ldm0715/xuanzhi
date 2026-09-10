@@ -1,0 +1,65 @@
+# 更新日志
+
+本主题遵循[语义化版本](https://semver.org/lang/zh-CN/)，变更记录的写法参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
+
+> **版本号的唯一出处就是本文件。** 发布新版本时：先在这里加一段 `## [x.y.z] - YYYY-MM-DD`，
+> 提交，再打同名 tag（`git tag vx.y.z && git push --tags`）。发布 workflow 会校验 tag 与本文
+> 的版本段是否对得上，对不上直接失败——所以 tag 和本文件不可能各说各话。
+
+## [Unreleased]
+
+## [1.0.0] - 2026-09-10
+
+首个正式版本。
+
+### 新增 · 版面与阅读
+
+- 首页两段式：欢迎区「诗笺」+ 文章卡片网格。诗笺在构建期向诗泉 API 预取一首绝句烘进 HTML，浏览器端每次到访再随机换新；取不到或校验不合格时静默保留已烘入的那首（内置《鹿柴》兜底）
+- 文章卡片：素纸底 + 一道朱丝框 + 右上邮戳 + 右下淡印 + 落款行。淡印按标题哈希从八式水墨小品（远山晓日 / 竹影 / 空亭听雨 / 汀洲孤雁 / 孤舟远影 / 红杏出墙 / 云岫 / 杨柳岸）中选一枚，也可用 front matter `cover` 换成自己的图
+- 归档页按年 / 月分组：年份下压一道折痕双细线，月份用行内小朱印领月、篇数是汉字数字；干支闲章按年份推算
+- 四套分类法页面各有形制：分类索引 = 通栏长架（≥800px 一排 5 只，余下摆淡墨胆瓶），标签索引 = 印谱印章墙（朱文 / 白文按奇偶相间，篇数为汉字边款），分类词页 = 打开函套，标签词页 = 钤在纸上
+- 文章页目录（TOC）+ scrollspy；目录条目超过 10 条自动折叠，阅读分支常开
+- 分页器与线装式上下篇翻页
+- 文章页右下角一枚可拖动的朱印：收起时外圈方框随阅读进度描边填充，展开为「回到顶部 / 分享 / 目录 / 进度读数」。位置随拖动记忆在 localStorage
+- 明暗双模式，首次到访跟随系统偏好，手动切换后记忆；切换时圆形揭示动画
+- 外观面板：纸面纹理 5 种、点缀色（陶土橘 / 黛青）2 种、分隔线 4 种，选择持久化并有防闪烁的内联恢复脚本
+- 框架宽度分两档（常规窄版 / 文章页 1150px），跨页导航时按档位差异播放过渡
+- 打印样式：黑白还原、隐藏头栏 / 页脚 / 目录 / 外观面板 / 浮动工具栏，外链把地址印出来
+
+### 新增 · 内容形态
+
+- 图片管线：正文图自动转 WebP + 三档 srcset + 懒加载；点击进入图窗灯箱，支持翻页、滚轮与双击缩放、拖动平移、双指捏合、窄屏滑动翻页、Esc 关闭与焦点锁
+- 公式**构建期**渲染（KaTeX，输出 `htmlAndMathml`）：爬虫、禁 JS 的读者、RSS 阅读器都能拿到排好版的公式；`katex.min.css` 只在有公式的页面引入
+- 代码块双明暗高亮、复制按钮、行号、长行横向滚动
+- 脚注、表格、任务列表、定义列表、嵌套列表与引用、删除线各有版式；`<em>` 用中文着重号代替合成斜体
+- 短代码：`details` / `qr` / `relref` / `highlight` / `video` / `audio` / `playlist` / `nameplate` / `social` / `project` / `colophon`
+- 自托管的视频 / 音频 / 播放列表（Plyr 管视频、APlayer 管音频），皮肤已覆写成宣纸风；只在嵌了媒体的页面加载
+- 关于页：`nameplate` / `social` / `project` / `colophon` 四颗短代码 + 普通 markdown，无私有 front matter schema
+- 渲染钩子：标题毛笔圈点与锚点、图片转 WebP 与图窗、服务端判定的外链标记与 `target`/`rel`
+- 自定义 RSS：`<description>` 走纯文本，完整正文放 `<content:encoded>` 并摘掉标题锚点的内联 SVG
+
+### 新增 · 分发与 SEO
+
+- `robots.txt`、sitemap、Open Graph、Twitter Card、JSON-LD（文章页 `BlogPosting`、首页 `WebSite`）
+- 社交卡片图优先取 front matter `cover`，无 cover 时回落主题默认图（站点放同名文件即可覆盖）
+- 站内搜索基于 Pagefind，中文分词原生支持；桌面与移动端两个搜索框共用一份索引，子路径部署安全
+
+### 新增 · 自定义
+
+- 头栏导航走 `hugo.toml` 的 `[[menus.main]]`，加页面不改模板；未配置菜单时回落成「主内容段 + 分类法页」的自动导航
+- 界面文案全部走 i18n，站点可在自己的 `i18n/zh-cn.yaml` 里同名 key 覆盖
+- `partials/header-extra.html` 头栏图标按钮插槽，站点在自己仓库建同名文件即可覆盖
+- 站点参数：`params.accent`、`params.author`、`params.description`、`params.hero.greeting`
+- 颜色与纹理一律走 `assets/css/token.css` 的设计 token，改一处两处点缀色与明暗自动跟随
+
+### 新增 · 资产自托管
+
+- 霞鹜文楷、思源宋体 700、JetBrains Mono 字体切片自托管，@font-face 走 Hugo 资源管线探测
+- KaTeX 样式、Material / Simple Icons 图标、Plyr 与 APlayer 全部随主题分发，无第三方 CDN 依赖
+
+### 已知限制
+
+- **唯一的对外请求**是首页诗笺（诗泉 API），构建期与运行期各一次，失败即静默兜底。不想要这个外部依赖的话见 [docs/design.md](docs/design.md)
+- 站内搜索的索引不由 Hugo 生成，需要在构建之后单独跑一步 `npx pagefind --site public`
+- 界面文案目前只有 `zh-cn` 一种语言
+- 要求 **Hugo ≥ 0.146（extended）**，图片管线需要 extended 版本

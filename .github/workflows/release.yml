@@ -1,0 +1,84 @@
+name: release
+
+# 发布主题包。触发方式只有一种：推一个 `v*` 的 tag。
+#
+#   git tag v1.0.0
+#   git push --tags
+#
+# 版本号的唯一出处是仓库根的 CHANGELOG.md —— 本 workflow 会先校验里面确实有
+# 对应版本段，没有就直接失败。所以不存在「tag 打了但没写更新日志」这种漂移。
+#
+# 演示站的部署是另一个 workflow（demo.yml），它监听分支，不会被 tag 触发。
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # git archive 要完整历史；浅克隆拿不到
+          fetch-depth: 0
+
+      - name: 校验 CHANGELOG 里有这个版本
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "tag = $GITHUB_REF_NAME，版本号 = $VERSION"
+          if ! grep -q "^## \[$VERSION\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md 里找不到 '## [$VERSION]' 版本段。"
+            echo "::error::发版前先在 CHANGELOG.md 顶部加一段 '## [$VERSION] - YYYY-MM-DD'。"
+            exit 1
+          fi
+          echo "OK：CHANGELOG.md 有 $VERSION 段"
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          # 与 theme.toml 的 min_version、demo.yml 对齐
+          hugo-version: '0.165.0'
+          extended: true
+
+      - name: 预检构建演示站
+        # 打出去的 tag 必须是一个能构建的提交。构建不过就不发布。
+        run: hugo --source exampleSite
+
+      - name: 抽取该版本的更新日志作为 release notes
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF_NAME#v}"
+          # 用 index() 做前缀精确匹配而不是正则：版本号里的 `.` 是正则元字符，
+          # 写成正则会把 1x0x0 这类行也匹配上。
+          awk -v heading="## [$VERSION]" '
+            index($0, heading) == 1 { found = 1; next }
+            found && substr($0, 1, 4) == "## [" { exit }
+            found { print }
+          ' CHANGELOG.md > RELEASE_NOTES.md
+          if [ ! -s RELEASE_NOTES.md ]; then
+            echo "::error::$VERSION 的版本段是空的，release notes 会没有内容"
+            exit 1
+          fi
+          echo "--- release notes 预览 ---"
+          cat RELEASE_NOTES.md
+
+      - name: 打包主题
+        # --prefix=xuanzhi/ 是刻意的：解压进站点的 themes/ 直接得到 themes/xuanzhi/，
+        # 与 hugo.toml 里的 `theme = 'xuanzhi'` 对得上。用 xuanzhi-v1.0.0/ 做前缀的话
+        # 用户还得改配置。
+        # 包里放什么由仓库根的 .gitattributes 的 export-ignore 决定。
+        run: git archive --format=zip --prefix=xuanzhi/ -o "xuanzhi-${GITHUB_REF_NAME}.zip" HEAD
+
+      - name: 建 Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          body_path: RELEASE_NOTES.md
+          files: xuanzhi-*.zip
+          # release notes 来自 CHANGELOG，不用 GitHub 自动生成的那份
+          generate_release_notes: false
