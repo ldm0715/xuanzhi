@@ -55,7 +55,7 @@ func main() { fmt.Println("hello") }
 
 ## 短代码
 
-主题自带的两个：
+### 内容类
 
 - **`details` 书函折叠块**（可折叠内容）：默认标签是「展卷」，可用 `title=` 改：
 
@@ -67,7 +67,62 @@ func main() { fmt.Println("hello") }
 
 - **`qr`**：包装 Hugo 内置二维码，`{{< qr "https://example.com" >}}`，默认 `alt` 已设为编码文本
 
-Hugo 内置的 `highlight`、`gist` 等短代码同样可用；`relref` 适合站内互链。详见 `exampleSite/content/posts/shortcode-demo.md`。
+Hugo 内置的 `highlight` 等短代码同样可用；`relref` 适合站内互链。详见 `exampleSite/content/posts/shortcode-demo.md`。
+
+### 媒体类
+
+分工是：**外部平台用裸 iframe，自托管媒体用短代码**。bilibili / YouTube 没有可直链的媒体文件，短代码不去假装能包住它们。
+
+自托管媒体由两个成熟库渲染——**视频走 Plyr、音频走 APlayer**（APlayer 只做音频）。它们在 `assets/vendor/`，出处与版本见那里的 `README.md`；两个库合计约 212KB，所以只有**真正嵌了媒体**的页面才会把它们拼进产物（`head.html` 用 `.HasShortcode` 判断）。皮肤覆写在 `main.css` 的「播放器」一节，**不要改 vendor 里的文件**，升级会被冲掉。
+
+| 短代码 | 用途 | 是否需闭合 |
+|---|---|---|
+| `video` | 单个视频 | 否 |
+| `audio` | 单个音频 | 否 |
+| `playlist` | 音频播放列表 | **是** |
+
+**`video`** —— `src` 必需，另有 `poster` / `caption` / `start`（起播秒数）/ `loop`：
+
+```markdown
+{{< video src="/media/demo.mp4" poster="/media/cover.jpg" caption="片头三十秒" start="12" >}}
+```
+
+**`audio`** —— `src` 必需，另有 `title` / `artist` / `cover` / `lrc` / `start`：
+
+```markdown
+{{< audio src="/media/nocturne.mp3" title="夜曲" artist="肖邦" >}}
+```
+
+**`playlist`** —— 内容体写 YAML 列表，每项字段同上：
+
+```markdown
+{{< playlist >}}
+- title: 夜曲
+  artist: 肖邦
+  src: /media/nocturne.mp3
+  cover: /media/nocturne.jpg
+  lrc: /media/nocturne.lrc
+- title: 雨滴
+  artist: 肖邦
+  src: /media/raindrop.mp3
+{{< /playlist >}}
+```
+
+为什么单曲和列表是两颗短代码、而不是一颗加参数：Hugo 是按**模板里有没有引用 `.Inner`** 来决定短代码要不要闭合的。一旦引用了 `.Inner`，`{{< audio src="…" >}}` 这种单曲写法就会被判成「未闭合」而构建失败（报 `must be closed or self-closed`）。拆开之后两种写法都自然。列表之所以用 YAML 而不是管道分隔的一行一曲，是因为标题里出现分隔符就崩。
+
+歌词由 APlayer 自己去拉 `.lrc`（标准 `[mm:ss.xx]词` 格式，`[offset:±ms]` 也认），所以 `.lrc` 和音频放一起、在曲目里写 `lrc:` 指过去即可。有一处默认值会静默坑人：**APlayer 的 `lrcType` 默认是 0（不显示歌词）**，主题已在 `player-audio.html` 里按「有没有 lrc」自动设成 3，不用你管。
+
+**封面要单独给，不会从音频文件里自动取**——Hugo 读不了 FLAC / MP3 的内嵌元数据。这两个库都不做这件事，是构建期的能力问题，不是配置漏了。很多音频文件其实自带封面，抽出来就行：
+
+```bash
+ffmpeg -i x.flac -an -c:v copy -frames:v 1 cover.jpg
+```
+
+没给 `cover` 时 APlayer 显示一块**点缀色**方块（它把封面底色设成主题色），不会留空洞。
+
+播放列表默认折叠（`listFolded`），点一下展开；多首之间、以及音视频之间都会互相打断。
+
+媒体路径写 `/media/…` 或 `media/…` 都会过 `relURL` 归一化；`http(s)://`、`//`、`data:` 开头的一律原样放行。
 
 ## 首页卡片的印记（封面）
 

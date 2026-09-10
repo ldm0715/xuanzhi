@@ -1,6 +1,6 @@
 # Xuanzhi（宣纸）Hugo 主题
 
-自研 Hugo 博客主题（≥0.146 extended），设计语言：暖宣纸底、稿纸格纹、霞鹜文楷、墨阶排版、朱砂/黛青双点缀色。定位是"资产化"主题——源全在 Git、零第三方**网络**依赖（Pagefind 等构建工具只在构建期跑，运行时只加载自托管文件）。
+原创 Hugo 博客主题（≥0.146 extended），设计语言：暖宣纸底、稿纸格纹、霞鹜文楷、墨阶排版、朱砂/黛青双点缀色。定位是"资产化"主题——源全在 Git，字体 / KaTeX / 图标 / 播放器 / 搜索索引一律自托管（Pagefind 等构建工具只在构建期跑）。**但并非「零网络」**：唯一的对外请求是首页诗笺（诗泉 API），构建期 `resources.GetRemote` 烘一首、运行期 `site.js` 再 `fetch` 随机换，两头都失败或校验不合格时静默兜底。端点硬编码在 `layouts/home.html` 的 `data-poem-api`（`site.js` 里还有一份同样的默认值，改要一起改）。
 
 > 本文件是主题的**开发指引**，位于仓库根；`AGENTS.md` 与本文逐字相同（供其他 agent 读取）。使用者请去 `README.md`（简介）与 `docs/`（手册），别把本文当使用文档。改动主题代码前先读完本文；文末「相关文档」指到 `dev/` 的运行手册与待办。
 
@@ -24,7 +24,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 ## 结构与规则
 
 - `assets/css/token.css`：**全部设计 token**（色彩、字体、纹理 data-uri、分隔线用色，亮暗各一套）。改样式从这里进，禁止在别处硬编码颜色
-- `assets/js/site.js`：全站唯一 JS（明暗切换、外观面板、站内搜索、移动端下拉面板、代码复制、目录 scrollspy、长目录折叠、诗笺刷新、图片灯箱）。新增交互必须并进这个文件
+- `assets/js/site.js`：全站唯一**自家** JS（明暗切换、外观面板、站内搜索、移动端下拉面板、代码复制、目录 scrollspy、长目录折叠、诗笺刷新、图片灯箱、播放器初始化）。新增交互必须并进这个文件
+- `assets/vendor/`：第三方库（Plyr 管视频、APlayer 管音频）。出处 / 版本 / 许可 / **升级时必须重做的改动**都记在 `assets/vendor/README.md`。**不要手工编辑 vendor 里的文件**——皮肤覆写一律写在 `main.css`，升级时才不会被冲掉。`head.html` 用 `.HasShortcode` 判断页面是否嵌了媒体，只有嵌了才把 vendor 拼进产物：两个库合计约 212KB，全站无脑打包等于让每个页面都白下
+- **`resources.Concat` 是按目标路径缓存的**：同一份模板里要给不同内容拼产物时，目标名必须区分开。两处写同一个名字的话，先算出来的那份会被复用给所有页面，而且结果**随构建顺序漂移**——是个很难查的不确定性 bug（踩过：`css/xuanzhi.css` 两个分支共用，结果媒体页永远拿不到 vendor CSS）
 - 外观系统全走 `html` 的 `data-*` 属性 + CSS 变量：`data-theme`(light/dark)、`data-accent`(terracotta/indigo)、`data-bg`(5 种纸面纹理)、`data-hr`(4 种分隔线)；选择持久化在 localStorage（键前缀 `xuanzhi-`），`head.html` 内联脚本负责防闪烁恢复。**样张 markup 抽在 `partials/appearance-tiles.html`**，桌面浮层面板与移动端下拉面板共用；`site.js` 的样张点击委托和 `syncPressed()` 都挂在 **document** 上——只查自己那个面板的话，另一组样张的高亮不会跟着变
 - `layouts/` 是 0.146+ 顶层模板结构；`_markup/render-image.html`（page bundle 图片 → WebP/srcset）和 `_markup/render-heading.html`（标题毛笔圈点 + 锚点）是渲染钩子
 - 图窗（点开看大图）：`render-image.html` 把每张正文图包进 `<a class="img-zoom" href="{最大档 WebP}">`——**这是渐进增强，不是唯一入口**，无 JS 时它就是「点开看原图」的链接，所以别把 href 换成 `#`。`site.js`「图片灯箱」段接管点击：开合 + ←→ 翻页 + 滚轮/双击缩放 + 拖动平移 + 双指捏合 + 窄屏滑动翻页 + Esc + 焦点锁/回焦。样式在 `main.css`「图片灯箱」段，遮罩取**同纸虚化**（当前纸色 90% + blur 10px，照片仍像贴在同一张纸上）、大图裱成**画框立轴**（`--lb-mat: 18px` 宽裱边 + `--color-frame` 细框 + 一道 `--color-zhu-soft` 内细边 + `--lb-shadow`），图注复刻 `.post-figure figcaption` 的题跋式两侧引线。`--lb-mat` 一变，`.lightbox-img` 的 max-width/height 里的 `calc` 会跟着走，别再写死 22px 之类的常数

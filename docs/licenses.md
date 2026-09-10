@@ -11,10 +11,18 @@
 | JetBrains Mono | `static/fonts/jbm/` + `assets/fonts/jbm/` | SIL OFL 1.1 |
 | KaTeX（只用到样式表） | `static/katex/` | MIT |
 | Material Design 图标 path | 模板内联（`header.html` / `footer.html` 等） | Apache-2.0 |
+| **Plyr 3.8.3**（视频播放器） | `assets/vendor/plyr/` + `static/vendor/plyr.svg` | MIT © Sam Potts |
+| **APlayer 1.10.1**（音频播放器） | `assets/vendor/aplayer/` | MIT © DIYgod |
 
 图标取自 `@material-design-icons/svg`。
 
 > OFL 字体允许随任何软件打包分发，但**必须保留各自的版权与许可声明**，也不得单独改标协议。
+
+### 播放器两个库的说明
+
+只在你**真正嵌了媒体**的页面上才会被加载（`head.html` 用 `.HasShortcode` 判断），没有媒体的页面一个字节都不带。两者的升级方式、以及升级时必须重做的改动（删掉末行的 `sourceMappingURL`、把 Plyr 的图标 sprite 放到 `static/`）记在 [`assets/vendor/README.md`](../assets/vendor/README.md)。
+
+> **版权声明保留在哪**：这两个库的 min 版**都把 MIT 版权头剥掉了**，所以那份 `assets/vendor/README.md` 同时充当它们的许可声明——里头写了上游仓库地址、版本与版权人。删它等于丢掉署名。
 
 想换掉字体（比如改用自己的）：删掉 `static/fonts/` 与 `assets/fonts/` 下对应的目录即可——主题会探测到文件不在就自动不输出那几个 `<link>`，不会 404。关于字体版本的更新方法见主题仓库 `dev/maintenance.md`。
 

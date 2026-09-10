@@ -74,6 +74,18 @@ enableEmoji = true
 
 `definitionList`（定义列表）、`footnote`（脚注）、`table`、`taskList`、`strikethrough`、`linkify` —— 这些不写进 `hugo.toml` 也生效。
 
+## 媒体短代码也不用配
+
+`video` / `audio` / `playlist` 三个短代码开箱即用，**没有开关**。两个播放器库（Plyr 管视频、APlayer 管音频）由 `head.html` 按 `.HasShortcode` 判断，**只有嵌了媒体的页面才加载**——不放媒体的站点不会为此多背 200 多 KB，其余页面的资源体积与从前一致。
+
+需要你自备的是素材本身：
+
+- **媒体文件**放 `static/media/` 或任何站内路径（写 `/media/x.flac` 或 `media/x.flac` 都行，会过 `relURL` 归一化；`http(s)://` 开头的外链原样放行）
+- **歌词**是标准 `.lrc`，与音频放一起即可
+- **封面要单独给一张图**——Hugo 读不了音频文件里内嵌的元数据，`cover=` 必须显式写。很多音频自带封面，抽出来就行：`ffmpeg -i x.flac -an -c:v copy -frames:v 1 cover.jpg`
+
+写法与参数见 [writing.md](writing.md)。
+
 ## 容易踩的
 
 - **`public/` 里看到的 URL 依赖 `baseURL`**。开发服务器运行时 Hugo 会把 baseURL 覆盖成 `http://localhost:1314/`，所以别在 `hugo server` 开着的时候去 `public/` 检查绝对地址——那会儿看什么都是 localhost。跑一次 `hugo` 再看。
@@ -112,3 +124,4 @@ npx pagefind --site public        # 在 public/ 里生成 pagefind/ 索引
 - 明暗模式：访客首次进入跟随系统偏好，点页头按钮手动切换后记忆在 localStorage（键 `xuanzhi-theme`）
 - 外观面板的选择也存 localStorage（键前缀 `xuanzhi-`）；不选时回落 `params.accent` 与默认格纹
 - 站名首字会渲染成页脚的印章与文章工具栏的朱印，改 `title` 即生效
+- 文章页那枚朱印同时是**阅读进度印**：收起时外圈方框随进度填充，展开后末位一格显示已读百分比。它按 `.post-content`（正文）计，不含页脚与上下篇
