@@ -77,10 +77,13 @@
 		<span class="xz-nameplate-seal" aria-hidden="true">{{ $seal }}</span>
 		{{- end }}
 	</div>
-	<div class="xz-nameplate-body">
+	{{- /* 名号与自述**故意分成两个兄弟节点**，不是一个 body 包住：
+	       窄屏要把名号搬到像的右边、自述留在下面整宽。包在一起的话
+	       CSS 只能整块搬，搬不动其中一半。 */ -}}
+	<div class="xz-nameplate-head">
 		<h2 class="xz-nameplate-name">{{ $name }}</h2>
 		{{- with $role }}<p class="xz-nameplate-role">{{ . }}</p>{{ end }}
-		{{- with $inner }}<div class="xz-nameplate-bio">{{ $.Page.RenderString (dict "display" "block") . }}</div>{{ end }}
 	</div>
+	{{- with $inner }}<div class="xz-nameplate-bio">{{ $.Page.RenderString (dict "display" "block") . }}</div>{{ end }}
 </div>
 {{- end -}}

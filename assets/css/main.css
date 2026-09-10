@@ -3928,14 +3928,20 @@ html::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radiu
    像放大到 132px 后两栏大致齐平，**同一个骨架就立住了——不是骨架变了，
    是变量的量级变了**。改这个数之前先回看 v15/v17 两版稿板。
 
-   垂直居中：像对齐右栏那一整块文字的中线（不是像顶齐名号顶）。 */
+   垂直居中：像对齐右栏那一整块文字的中线（不是像顶齐名号顶）。
+
+   三个子节点是**刻意的**：像 / 名号与身份 / 自述。窄屏要把名号搬到像右边、
+   自述留在下面整宽（见文件末尾的窄屏段），包成一个 body 就搬不动其中一半。 */
 .post-content .xz-nameplate {
   display: grid;
   grid-template-columns: 132px 1fr;
   gap: 0 40px;
   align-items: center;
 }
-.post-content .xz-nameplate-body { min-width: 0; }
+/* 桌面：像跨两行、居中于整块；名号与自述各占右栏一行 */
+.post-content .xz-nameplate-face { grid-row: 1 / span 2; }
+.post-content .xz-nameplate-head,
+.post-content .xz-nameplate-bio { grid-column: 2; min-width: 0; }
 
 /* 人脸与人像共用一个 footprint：相纸留边 + 极细浅褐框 + 柔散暖影 ——
    同正文图片那套（.post-content img），不另发明一种「头像」形制 */
@@ -4194,10 +4200,24 @@ html::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radiu
 @media (max-width: 640px) {
   .about { padding: 1.6rem 0 4rem; }
   .about .about-content > h2:not(:first-child) { margin-top: 3.6rem; }
-  /* 自述块退化为上下堆叠。左栏定宽 132px 在这里失效，所以要给 face 显式宽度——
-     否则 img/印的 width:100% 会撑满整行 */
-  .post-content .xz-nameplate { grid-template-columns: 1fr; gap: 20px; }
+  /* 窄屏：照片与名号那一组**整体居中**，自述横跨整宽落到下面。
+
+     这里从 grid 换成 flex-wrap，不是随手换的：要的是「把两件东西当**一个整体**
+     居中」。grid 的 justify-content 只在轨道总宽小于容器时才起效，而桌面那套
+     右栏是 1fr、会吃掉全部余量，居中根本不生效。flex + wrap 才能让第一行整体
+     居中，自述再用 flex-basis:100% 强行换到第二行。
+     （grid-row / grid-column 在 flex 下会被忽略，所以桌面那几条不用在这里撤销。）
+
+     照片保持 132px 定宽：img/印是 width:100%，不锁死会撑满整行。 */
+  .post-content .xz-nameplate {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0 20px;
+  }
   .post-content .xz-nameplate-face { width: 132px; }
+  .post-content .xz-nameplate-bio { flex: 0 0 100%; margin-top: 18px; }
   /* 题录式退化为上下堆叠 */
   .post-content .xz-project { grid-template-columns: 1fr; gap: 8px; padding: 18px 0; }
   .post-content .xz-project-meta { grid-column: 1; }
