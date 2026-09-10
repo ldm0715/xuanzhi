@@ -30,7 +30,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 |---|---|---|
 | [`../CLAUDE.md`](../CLAUDE.md)（根，与 `AGENTS.md` 逐字相同） | **实现约定**（结构、规则、token 体系、分发的设计约束）+ **已知坑**（都踩过） | 每次改主题代码前 |
 | [`planning/`](planning/README.md) | **待办**：台账 `README.md` + [`optimizations.md`](planning/optimizations.md) + `uncovered-paths.md` + `structure.md`（文末备查） | 排期、动未实现功能前 |
-| [`archive/`](archive/README.md) | **已完成**的实现记录与历史修复（P1 三篇 + 公式修复 + 暗角/飞白/朱印 + 媒体播放器） | 回顾当初为什么这么做 |
+| [`archive/`](archive/README.md) | **已完成**的实现记录与历史修复（P1 三篇 + 公式修复 + 暗角/飞白/朱印 + 媒体播放器 + 关于页） | 回顾当初为什么这么做 |
 | [`publishing.md`](publishing.md) | 发布到 GitHub、演示站 Pages workflow、分支部署策略、备份建议 | 首次发布、改 CI |
 | [`maintenance.md`](maintenance.md) | 内部目录结构、改颜色(token)、外观面板取舍、字体更新、KaTeX 版本对齐 | 需要维护资产 / 精简面板 / 排查公式时 |
 

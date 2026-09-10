@@ -11,10 +11,15 @@
 | JetBrains Mono | `static/fonts/jbm/` + `assets/fonts/jbm/` | SIL OFL 1.1 |
 | KaTeX（只用到样式表） | `static/katex/` | MIT |
 | Material Design 图标 path | 模板内联（`header.html` / `footer.html` 等） | Apache-2.0 |
+| Simple Icons 品牌 path | 模板内联（`about.html` 的 GitHub / Bilibili） | CC0 1.0 |
 | **Plyr 3.8.3**（视频播放器） | `assets/vendor/plyr/` + `static/vendor/plyr.svg` | MIT © Sam Potts |
 | **APlayer 1.10.1**（音频播放器） | `assets/vendor/aplayer/` | MIT © DIYgod |
 
-图标取自 `@material-design-icons/svg`。
+一般图标取自 `@material-design-icons/svg`（Apache-2.0）。
+
+**品牌标识是例外**：GitHub、Bilibili 这类 logo 不在 Google 那套里，只能另找源——
+关于页的联系图标取自 [Simple Icons](https://simpleicons.org/)（CC0 1.0，无署名义务）。
+CC0 虽不要求署名，但**出处仍要记在这里**，否则下次换图标的人不知道该去哪儿核对。
 
 > OFL 字体允许随任何软件打包分发，但**必须保留各自的版权与许可声明**，也不得单独改标协议。
 

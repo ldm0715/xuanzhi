@@ -98,3 +98,13 @@ countVolumes: 只
 sealbookNote: 钤印
 countSeals: 枚
 stampedHere: 钤于此页
+
+# ---- 关于页（shortcode: social）----
+# 只放联系行的链接文案。页面的分节标题、项目、版权页小字都是内容，
+# 写在 content/about.md 里，不进 i18n。
+# 前三个是专名，一般不用改；「Email」想改成「邮箱」就在站点自己的
+# i18n/zh-cn.yaml 里写同名 key 覆盖（站点优先于主题）。
+socialGithub: GitHub
+socialBilibili: Bilibili
+socialEmail: Email
+socialRss: RSS

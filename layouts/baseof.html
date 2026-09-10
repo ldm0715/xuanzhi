@@ -30,7 +30,11 @@
 <head>
   {{ partial "head.html" . }}
 </head>
-<body data-layout="{{ .Kind }}">
+{{- /* data-layout 只有两个消费者：框架宽度档位（main.css 的 1150px 那条），
+       以及 ≤900px 时隐去飞鸟水印层。两者判据不同，所以窄档要单独标记：
+       「内容页 = 文章页」在 Hugo 里并不成立——.Kind 对 about 这类独立单页同样是 "page"。
+       front matter 写 frame: "narrow" 即收回窄档（800px），飞鸟那条不受影响。 */ -}}
+<body data-layout="{{ .Kind }}"{{ if eq .Params.frame "narrow" }} data-frame="narrow"{{ end }}>
   {{ partial "header.html" . }}
   <main>
     {{ block "main" . }}{{ end }}

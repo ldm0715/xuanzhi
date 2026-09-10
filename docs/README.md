@@ -8,7 +8,7 @@
 |---|---|
 | [installation.md](installation.md) | 安装、引入方式、本地演示 |
 | [configuration.md](configuration.md) | `hugo.toml` 配置参考（含「功能 → 配置 → 不配的后果」） |
-| [writing.md](writing.md) | 写作约定：图片 / 公式 / 短代码 / **媒体嵌入** / 封面印记 |
+| [writing.md](writing.md) | 写作约定：图片 / 公式 / 短代码 / **媒体嵌入** / **关于页** / 封面印记 |
 | [customization.md](customization.md) | 菜单、界面文案、头栏图标按钮等自定义 |
 | [licenses.md](licenses.md) | 主题与第三方资产许可 |
 

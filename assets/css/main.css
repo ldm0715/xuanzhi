@@ -146,8 +146,11 @@ a:hover { color: var(--color-accent-hover); text-decoration-color: currentColor;
    起步宽度由 header 末尾的内联脚本在首帧前设置：仅当上一页档位与当前不同
    （窄 800 ↔ 宽 1150）时头栏从上一档过渡而来；同档导航（文章→文章）与刷新不重播。
    页脚只变档不动画——导航时它在视口外，宽度过渡只会白付每帧布局开销 */
-body[data-layout="page"] .header-inner,
-body[data-layout="page"] .site-footer .container {
+/* 注意 :not([data-frame="narrow"])：正文的 .container 用的是 --content-width（800px），
+   只有头栏与页脚会被这条撑到 1150。所以独立单页（about 这类）若不收回窄档，
+   就会头栏页脚宽、正文窄，两边对不齐——判据别退回裸的 data-layout="page" */
+body[data-layout="page"]:not([data-frame="narrow"]) .header-inner,
+body[data-layout="page"]:not([data-frame="narrow"]) .site-footer .container {
   max-width: 1150px;
 }
 
@@ -1180,9 +1183,23 @@ details[open]::details-content {
 .post-content h3 { font-size: 1.16rem; }
 .post-content h4 { font-size: 1.02rem; }
 
-/* 标题评点符号：h2 毛笔朱砂圈，h3/h4 毛笔顿点（SVG 笔触），悬停时被"圈红" */
+/* 标题评点符号：h2 毛笔朱砂圈，h3/h4 毛笔顿点（SVG 笔触），悬停时被"圈红"。
+
+   记号的**横向占位**抽成变量：记号宽 + 与标题文字之间的间距。
+   这不只影响标题本身——记号的锚点是内联元素，它把标题的**文字**顶右了这么多，
+   而标题的**盒子**仍在版心左缘，段落、列表都从盒子起排。分节内容要缩进同样的
+   距离才能对齐在标题文字之下（见「分节内容对齐标题文字」段）。
+   抽成变量是为了改一处两边同步；写死数值的话，改记号宽度会让两处悄悄错开。
+
+   var() 一律带终值兜底：这几个变量值正是 SVG 的尺寸，一旦解析失败，
+   内联 SVG 会退回替换元素的默认 300×150 撑开（踩过，很难看）。 */
+.post-content {
+  --heading-mark-w: 17px;
+  --heading-mark-gap: 10px;
+  --heading-mark-advance: calc(var(--heading-mark-w) + var(--heading-mark-gap));
+}
 .post-content .heading-anchor {
-  margin-right: 10px;
+  margin-right: var(--heading-mark-gap, 10px);
   text-decoration: none;
   opacity: 0.75;
   vertical-align: 0.1em;
@@ -1190,8 +1207,8 @@ details[open]::details-content {
 .post-content .mark-circle {
   display: inline-block;
   color: var(--color-zhu);
-  width: 17px;
-  height: 17px;
+  width: var(--heading-mark-w, 17px);
+  height: var(--heading-mark-w, 17px);
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
 .post-content .heading-l3 .mark-circle { width: 12px; height: 12px; }
@@ -3838,6 +3855,308 @@ html::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radiu
   border-radius: 5px;
 }
 
+/* ============ 关于页（layouts/about.html）与它的四个短代码 ============
+ * about 页的 markdown 由短代码产出结构件（xz- 前缀），模板本身很薄：
+ * 结构在短代码里，样式在这里，内容在 content/about.md。
+ *
+ * 三段作用域，别混：
+ * ① .post-content .xz-*  —— 四个短代码的样式，**任何正文里都能用**
+ *    （它们只是普通短代码，不是关于页专属；在文章里演示它们也得有样式）。
+ *    带两层的写法不是啰嗦：主题的正文规则如 `.post-content > p`
+ *    特异性是 (0,1,1)，单写 `.xz-social` (0,1,0) 会被它压掉 margin，
+ *    加上 .post-content 前缀才是 (0,2,0)，压得过。去掉前缀会静默失效。
+ * ② .about .about-content —— 只对关于页生效的两条：分节间距、首字下沉抑制。
+ * ③ .about —— 页面外壳的内边距。
+ *
+ * 正文容器同时挂 .post-content 与 .about-content：前者是主题的正文排版层
+ * （标题字号层级、毛笔记号、段落间距、图片与图注），挂着它 about 页的
+ * markdown 输出才和文章页逐字一致；少了它，渲染钩子给 h2 的 SVG 记号
+ * 一条尺寸规则都吃不到，替换元素按默认 300×150 撑开跑到标题外面去（踩过）。
+ *
+ * 朱色用量：引首印、在做项目的状态印（朱文）、两处节标题的毛笔朱砂圈
+ * （那是主题给每个 h2 的标配，文章页同样有）。已归档的状态印是白文。
+ * 加新的朱色元素之前先看这一条。
+ */
+
+.about { padding: 2.6rem 0 6rem; }
+
+/* ---- 分节标题 ----
+   形制（字号 1.35rem、宋体栈、毛笔朱砂圈 + 悬停锚点）全部由 .post-content h2
+   与渲染钩子提供，与文章页同源，本文件不再另写。
+   只补一条间距：节与节之间比文章内小节拉开更多，因为这里是成块的内容
+   （项目列表、版权页小字），不是连续段落。 */
+.about .about-content > h2:not(:first-child) { margin-top: 4.2rem; }
+
+/* ---- 分节内容对齐标题文字 ----
+   标题的**文字**被那枚毛笔记号（内联）顶右了 --heading-mark-advance，
+   而标题的**盒子**仍在版心左缘。紧接着标题的分节块若不缩进，左缘就会比
+   标题文字探出这一截——这正是"版权页超出了标题范围"的成因。
+
+   只缩进「由 h2 直接统领的整块」：项目列表与版权页。正文段落不缩——
+   段落与标题共享版心左缘是主题一贯的排法（文章页同理），改了反而破规矩。
+
+   注意这里用 h2 的记号线宽（17px）。若某节改用 h3 统领，记号是 12px，
+   对应 --heading-mark-advance 要另算。 */
+.about .about-content > h2 ~ .xz-project,
+.about .about-content > h2 ~ .xz-colophon {
+  margin-left: var(--heading-mark-advance, 27px);
+}
+
+/* ---- 首字下沉的抑制（不改主题那条规则） ----
+   .post-content > p:first-of-type::first-letter 是给文章「导语」用的 3em 下沉。
+   关于页没有导语：第一个 <p> 要么是身份行、要么是两行短自述，3em 会吃掉三分之一。
+   这里逐条复位而不是去改主题规则——那条是全站共用的，动它就有连累文章页的风险。
+   复位要列全原作设过的属性，漏一个就会漏出来。 */
+.about .about-content > p:first-of-type::first-letter {
+  float: none;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  margin: 0;
+  padding: 0;
+  color: inherit;
+  background: none;
+  border-radius: 0;
+}
+
+/* ---- 引首（shortcode: nameplate） ---- */
+.post-content .xz-nameplate {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+/* 50px 方印。不用 --tex-mask-paste 毛边蒙版（那是 96px 以上大印用的，
+   50px 上噪声会跟字抢对比），也不用投影 */
+.post-content .xz-nameplate-seal {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  border: 1px solid var(--color-zhu);
+  border-radius: 3px;
+  background-color: var(--color-zhu);
+  color: var(--color-bg);
+  font-family: var(--font-title);
+  font-size: 1.3rem;
+  transform: rotate(-2deg);
+}
+/* 内衬细边：与页面其余印面同源的形制 */
+.post-content .xz-nameplate-seal::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1px solid color-mix(in srgb, var(--color-bg) 26%, transparent);
+  border-radius: 2px;
+  pointer-events: none;
+}
+/* 名号是 h2，会吃到 .post-content h2（1.35rem / 2.1em 上边距）。
+   .about 前缀把它压回来——这里要的是页面的开场大字，不是小节标题。 */
+.post-content .xz-nameplate-name {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--color-title);
+}
+.post-content .xz-nameplate-role {
+  margin: 14px 0 0;
+  font-size: 0.88rem;
+  letter-spacing: 0.22em;
+  color: var(--color-text-secondary);
+}
+
+/* ---- 联系行（shortcode: social） ---- */
+.post-content .xz-social {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 20px;
+  margin: 22px 0 0;
+}
+.post-content .xz-social a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.88rem;
+  letter-spacing: 0.1em;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+.post-content .xz-social a:hover { color: var(--color-accent-hover); }
+/* 图标跟文字同色，悬停时一起变；平时压淡一档，别跟名号抢读 */
+.post-content .xz-social svg {
+  flex-shrink: 0;
+  opacity: 0.72;
+  transition: opacity 0.2s ease;
+}
+.post-content .xz-social a:hover svg { opacity: 1; }
+
+/* ---- 项目条目（shortcode: project） ----
+   题录式：左栏 12.5rem 固定宽放名与代码名，右栏放描述与落款行。
+   多条连着写就是一个列表，外面不用包容器。
+
+   分隔线画在**相邻条目之间**（.xz-project + .xz-project），不是每一条的下缘。
+   曾经画在下缘，结果最后一条的收口线正好落在下一个分节标题上方，读起来
+   像一道多余的横线（踩过）。画在相邻兄弟上，末尾天然不会多出线来，
+   也不用 :has() / :last-of-type 去猜谁是最后一条。 */
+.post-content .xz-project {
+  display: grid;
+  grid-template-columns: 12.5rem 1fr;
+  gap: 4px 32px;
+  padding: 20px 0;
+}
+.post-content .xz-project + .xz-project { border-top: 1px solid var(--color-border-light); }
+.post-content .xz-project-id { min-width: 0; }
+.post-content .xz-project-name {
+  font-family: var(--font-title);
+  font-size: 1.04rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--color-title);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.post-content a.xz-project-name:hover { color: var(--color-accent); }
+/* 代码名另起一行的等宽小字，给左栏一个"条目编号"的观感 */
+.post-content .xz-project-code {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: var(--color-ink-weak);
+}
+/* 描述不卡 max-width，右端与上下的横线齐平 —— 横线铺的是元素宽度，
+   只给文字加 max-width 会让两者右端各停各的（早期版本踩过） */
+.post-content .xz-project-desc {
+  font-size: 0.94rem;
+  line-height: 1.85;
+  color: var(--color-text-note);
+}
+.post-content .xz-project-desc p { margin: 0; }
+.post-content .xz-project-desc p + p { margin-top: 0.8em; }
+
+/* 状态印：朱文=在做，白文=已归档。形制取自主题的印章语言。
+   放在落款行最前——它是这一项最该被一眼看到的字，排头比排在年份之后更醒目；
+   也因此不会吃到下面那条「相邻 span 加竖线」的分隔规则。 */
+.post-content .xz-project-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  border: 1px solid var(--color-zhu-soft);
+  border-radius: 2px;
+  color: var(--color-zhu-strong);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  line-height: 1.65;
+  white-space: nowrap;
+}
+.post-content .xz-project-status.is-off {
+  border-color: var(--color-border);
+  color: var(--color-text-note);
+}
+/* 落款行：状态 · 年份 · 技术标签，墨阶最浅一档，竖细线分隔 */
+.post-content .xz-project-meta {
+  grid-column: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 10px 0 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-weak);
+}
+.post-content .xz-project-meta > span { display: inline-flex; align-items: center; }
+.post-content .xz-project-meta > span + span::before {
+  content: "";
+  width: 1px;
+  height: 0.85em;
+  margin: 0 9px;
+  background-color: var(--color-border);
+}
+
+/* ---- 版权页小字（shortcode: colophon） ----
+   排成比正文小一档的注脚字：字号 0.84rem、行距拉开、列表去圆点、
+   行首加粗词对齐成标签列。层次从结构里长出来，不用文字体手动空格。
+
+   刻意不做成器物（试过藏书票，撤了）：这一节就是顺手交代几句出处，
+   不值得替文字体规定印面用哪个字、站语用哪一句。这里只做一件事——
+   把它从正文体量（17px 楷体）压低到注脚体量。 */
+.post-content .xz-colophon {
+  font-size: 0.84rem;
+  letter-spacing: 0.1em;
+  line-height: 2.05;
+  color: var(--color-text-note);
+}
+.post-content .xz-colophon p { margin: 0; }
+/* 顶层列表在这里承担的是「一行一条」，不是「并列项」——去点、去缩进。
+   嵌套列表保留圆点，那是真的并列项。
+
+   ⚠️ 光写 list-style: none 是**去不掉**主题那个圆点的：它不是列表标记，
+   是 .post-content ul > li::before 上的一枚 5px 朱砂墨点（还带一圈印泥晕），
+   挂在 left:-1.02em 处、top 按正文行高定死。版心左缘那截"探出去"的东西、
+   以及墨点歪在文字左上方，都是它——版权页字号更小、行距更松，
+   .68em 与 -1.02em 这两个按正文推出来的值在这里全是错的。
+   必须显式 content: none 关掉伪元素。嵌套层的点保留（主题另有白文样式）。 */
+.post-content .xz-colophon > ul,
+.post-content .xz-colophon > ol { margin: 0; padding-left: 0; list-style: none; }
+.post-content .xz-colophon > ul > li::before,
+.post-content .xz-colophon > ol > li::before { content: none; }
+.post-content .xz-colophon ul ul,
+.post-content .xz-colophon ol ol { padding-left: 1.3em; }
+.post-content .xz-colophon p + p,
+.post-content .xz-colophon p + ul,
+.post-content .xz-colophon ul + p { margin-top: 0.5em; }
+.post-content .xz-colophon p > strong:first-child,
+.post-content .xz-colophon li > strong:first-child {
+  display: inline-block;
+  min-width: 3.5em;
+  color: var(--color-title);
+  font-weight: 600;
+}
+.post-content .xz-colophon code { font-family: var(--font-mono); font-size: 0.9em; }
+
+/* 版权页里的链接：**字守墨、线着色**。
+   版权页一写就会塞进七八个外部链接（引擎、字体、播放器、搜索、公式、许可）。
+   按主题默认渲染的话，每个链接都是点缀色字 + 下划线，连成一片会让这块小字
+   比上面的正文还响，失去注脚该有的低声量。这里改成链接的字与谱录同色，
+   只有下划线是彩色；悬停整块转点缀色。
+
+   这和主题处理外链 ↗ 的思路是同一条：平时只是软色提示，悬停才转实色。 */
+.post-content .xz-colophon a {
+  color: inherit;
+  text-decoration-color: var(--color-accent-soft);
+  /* 下划线偏移不在这里覆写 —— 用站点全局那条 a{text-underline-offset:3px}。
+     覆写成 2px 试过，小字上贴得太紧；继承全局既拉开了距离，也让版权页的链接
+     和站内别处的链接一致。真要更远，在这里写死 text-underline-offset: 4px。 */
+  text-decoration-thickness: 1px;
+}
+.post-content .xz-colophon a:hover {
+  color: var(--color-accent-hover);
+  text-decoration-color: currentColor;
+}
+
+/* 版权页里不要外链那枚 ↗。
+   彩色下划线已经说明"可点"，再叠一个记号是重复的——这块小字密度本来就高。
+   代价要认：**新标签页打开这件事没有提示了**（target/rel 仍由渲染钩子照加）。
+   想留箭头就把这条删掉。 */
+.post-content .xz-colophon .link-external::after { content: none; }
+
+@media (max-width: 640px) {
+  .about { padding: 1.6rem 0 4rem; }
+  .about .about-content > h2:not(:first-child) { margin-top: 3.6rem; }
+  .post-content .xz-nameplate { gap: 14px; }
+  .post-content .xz-nameplate-seal { width: 42px; height: 42px; font-size: 1.1rem; }
+  .post-content .xz-nameplate-name { font-size: 1.8rem; }
+  /* 题录式退化为上下堆叠 */
+  .post-content .xz-project { grid-template-columns: 1fr; gap: 8px; padding: 18px 0; }
+  .post-content .xz-project-meta { grid-column: 1; }
+}
+
 /* ============ 打印 ============
  * 全站唯一刻意不用 token 的地方：打印必须是黑白，宣纸底和夜墨底都要还原成纸。
  * 目标只有一个——打印出来是一篇能读的文章：去掉所有界面元素，图/表/代码别跨页断。
@@ -3862,7 +4181,8 @@ html::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radiu
   .post-toolbar,
   .post-sign-seal,
   .xz-player--video,
-  .xz-player--audio { display: none !important; }
+  .xz-player--audio,
+  .xz-nameplate-seal { display: none !important; }
 
   /* 暗角是 body::after 的固定遮罩，上面那条 background:#fff 管不到它——
      不显式关掉，打印出来四周一圈灰晕 */
@@ -3871,6 +4191,10 @@ html::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radiu
   .post-content a { color: #000; }
   /* 外链把地址印出来——纸上点不了 */
   .post-content a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; }
+
+  /* 关于页：正文容器就是 .post-content，上面那两条与标题的 break-after 都已覆盖，
+     这里只需要补项目条目——题录式断在中间会读不出是哪一项 */
+  .about .xz-project { break-inside: avoid; }
 
   .post-content img,
   .post-content figure,

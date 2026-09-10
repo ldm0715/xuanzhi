@@ -1,0 +1,52 @@
+{{- /*
+  题录式的一个项目条目：左栏名号与代码名，右栏一句话描述（内容体）与落款行。
+
+  为什么是短代码：见 nameplate.html 的说明。多条连着写就是一个条目列表——
+  条目之间那条细线由 CSS 用相邻兄弟选择器画，所以不需要外面再包一层容器。
+
+  参数：
+    name      必需，项目名
+    code      可选，仓库名 / 代号，等宽小字另起一行
+    year      可选，年份
+    status    可选，状态词（维护中 / 使用中 / 已归档…）
+    tags      可选，逗号分隔，写成 tags="Hugo, CSS, Go"
+    url       可选，给了才渲染成链接；没给就是纯文字 —— 已归档、没入口的
+              项目不该给一个点不进去的入口
+    archived  可选，写成 archived="true" 时状态印换成白文（墨色描边）
+
+  必须闭合：这个模板引用了 .Inner。写成 {{< project … >}} 而不闭合，
+  Hugo 会判成「must be closed or self-closed」直接构建失败。
+*/ -}}
+{{- $name := .Get "name" }}
+{{- $code := .Get "code" }}
+{{- $year := .Get "year" }}
+{{- $status := .Get "status" }}
+{{- $url := .Get "url" }}
+{{- $archived := in (slice "true" "1" "yes") (.Get "archived") }}
+{{- $inner := strings.TrimSpace .Inner }}
+{{- /* 逗号分隔的标签，逐个 trim —— 写成 "Hugo, CSS" 不该带出前导空格 */ -}}
+{{- $tags := slice }}
+{{- with .Get "tags" }}
+	{{- range split . "," }}{{ $tags = $tags | append (strings.TrimSpace .) }}{{ end }}
+{{- end }}
+{{- if not $name }}
+	{{- errorf "The %q shortcode requires a %q argument. See %s" .Name "name" .Position }}
+{{- else }}
+<div class="xz-project">
+	<div class="xz-project-id">
+		{{- with $url }}<a class="xz-project-name" href="{{ . }}">{{ $name }}</a>
+		{{- else }}<span class="xz-project-name">{{ $name }}</span>{{ end }}
+		{{- with $code }}<span class="xz-project-code">{{ . }}</span>{{ end }}
+	</div>
+	{{- with $inner }}
+	<div class="xz-project-desc">{{ $.Page.RenderString (dict "display" "block") . }}</div>
+	{{- end }}
+	{{- if or $status $year $tags }}
+	<p class="xz-project-meta">
+		{{- with $status }}<span class="xz-project-status{{ if $archived }} is-off{{ end }}">{{ . }}</span>{{ end }}
+		{{- with $year }}<span>{{ . }}</span>{{ end }}
+		{{- with $tags }}<span>{{ delimit . " · " }}</span>{{ end }}
+	</p>
+	{{- end }}
+</div>
+{{- end -}}

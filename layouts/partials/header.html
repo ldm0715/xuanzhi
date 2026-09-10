@@ -82,7 +82,11 @@
     var KEY = 'xuanzhi-frame-wide';
     var inner = document.querySelector('.header-inner');
     if (!inner) return;
-    var cur = document.body.getAttribute('data-layout') === 'page' ? '1' : '0';
+    /* 档位判据必须与 main.css 那条 :not([data-frame="narrow"]) 完全一致，
+       否则独立单页会从宽档起步再被 CSS 拽回窄档，白播一次收缩动画 */
+    var b = document.body;
+    var cur = (b.getAttribute('data-layout') === 'page' &&
+               b.getAttribute('data-frame') !== 'narrow') ? '1' : '0';
     var prev = null;
     try { prev = sessionStorage.getItem(KEY); } catch (e) { /* 隐私模式忽略 */ }
     try { sessionStorage.setItem(KEY, cur); } catch (e) { /* 同上 */ }

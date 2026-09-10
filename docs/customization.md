@@ -80,6 +80,6 @@ unitPosts: 则
 - 根元素挂 **`class="header-extra"`**，文字包在 **`<span class="header-extra-label">`** 里——主题靠这两个 class 做两套样式。只想显示图标就省略那个 span
 - ≤640px 时 `.site-nav` 里除明暗按钮外一律隐藏，所以插槽内容**不会挤进手机头栏**，只出现在 ☰ 面板里——不用额外处理
 
-> **图标从哪来**：通用图标（邮件 / 链接 / RSS…）取 `@material-design-icons/svg` 官方包；品牌图标（GitHub / Bilibili / 微博）用 Simple Icons 之类的包取 `<path>`。**别凭记忆手写**——主题所有图标都是这么来的。
+> **图标从哪来**：通用图标（邮件 / 链接 / RSS…）取 `@material-design-icons/svg` 官方包；**品牌图标（GitHub / Bilibili / 微博）那套里没有**，取 Simple Icons（CC0）之类的包。主题自己的 [`social` 短代码](writing.md)就是这么做的，许可记录见 [`licenses.md`](licenses.md)。**别凭记忆手写 path**——主题所有图标都是这么来的。
 >
 > 新建 / 删除 partial 文件后如果页面没变化，**重启 `hugo server`**：Hugo 的 watcher 对文件增删的响应不可靠，改已有文件才一定热重建。

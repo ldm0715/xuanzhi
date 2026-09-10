@@ -13,6 +13,7 @@
 | 公式**构建期**渲染 | `markup.goldmark.extensions.passthrough.enable = true` + delimiters | 公式不被识别，页面上是原始 LaTeX（客户端渲染已移除，没有回落） |
 | 正文手写 HTML | `markup.goldmark.renderer.unsafe = true` | `<mark>` / `<kbd>` / `<figure>` / 语义标签被转义成文本 |
 | 头栏菜单 | `[[menus.main]]` | **退回自动导航**（主内容段 + 分类法页）——不是坏，但加页面就得改模板 |
+| 关于页 | `content/about.md` 里写 `layout = "about"` + `frame = "narrow"`，再往 `[[menus.main]]` 加一条入口 | 不写 `layout` 就落到普通文章模板（带日期、字数、上下篇导航）；不写 `frame` 头栏页脚会展开到 1150px、比 800px 的正文宽出一截；不写菜单条目则建了也不出现在头栏 |
 | 站内搜索（Pagefind） | 构建后跑一步 `npx pagefind --site public`（见下文「能力与边界」） | 没跑这步时，面板提示「索引未生成」 |
 | 绝对地址正确 | `baseURL`（末尾带 `/`） | sitemap / canonical / og:url / og:image / JSON-LD / RSS 全指向 `example.org` |
 | 首页欢迎语 | `params.hero.greeting` | 用主题默认（i18n 的 `greeting`） |
@@ -65,7 +66,15 @@ enableEmoji = true
   name = '标签'
   pageRef = '/tags'
   weight = 30
+[[menus.main]]
+  name = '关于'
+  pageRef = '/about'
+  weight = 40      # 需要先有 content/about.md；页面配置见 writing.md「关于页」
 ```
+
+> **页面级开关不走 `hugo.toml`。** 有些东西是写在**那一页的 front matter** 上的，
+> 比如关于页的 `layout = "about"` 与 `frame = "narrow"`。哪些是站点级、哪些是页面级，
+> 上面那张表和 [writing.md](writing.md) 分头写清楚了。
 
 > `passthrough` 的键是 **`enable`**，写成 `enabled` 不报错但静默失效。
 > 文章页的目录层级可用 `[markup.tableOfContents]` 的 `startLevel` / `endLevel` 调（示例站点用 2–4）。

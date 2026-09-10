@@ -57,15 +57,150 @@ func main() { fmt.Println("hello") }
 
 ### 内容类
 
-- **`details` 书函折叠块**（可折叠内容）：默认标签是「展卷」，可用 `title=` 改：
+- **`details` 书函折叠块**（可折叠内容）：默认标签是「展卷」，用 **`summary=`** 改：
 
   ```markdown
-  {{< details title="答案" >}}
+  {{< details summary="答案" >}}
   折叠起来的内容……
   {{< /details >}}
   ```
 
-- **`qr`**：包装 Hugo 内置二维码，`{{< qr "https://example.com" >}}`，默认 `alt` 已设为编码文本
+  > **别用 `title=`。** 那是 HTML 的 `title` 提示属性，写了会让可见标题消失、只剩悬停提示。
+  > 主题为了兼容旧内容仍然认它（`summary` 缺席时把 `title` 当标题用），但新内容一律写 `summary`。
+
+- **`qr`**：包装 Hugo 内置二维码。**文字体用 `text=` 传，并且要自闭合**：
+
+  ```markdown
+  {{< qr text="https://example.com" level="high" />}}
+  ```
+
+  默认 `alt` 已设为编码文本，另有 `level`（容错级别）/ `scale`（尺寸，默认 4）。
+  > 这里有两个会直接让构建失败的坑：① 写成 `{{< qr "https://…" >}}`（位置参数）**取不到值**——
+  > 短代码只读 `.Get "text"` 与 `.Inner`，位置参数不在其中；② 它引用了 `.Inner`，
+  > 所以**必须闭合或自闭合**，漏了会报 `must be closed or self-closed`。
+
+### 关于页
+
+关于页不是普通文章。**三件事要配，都在你自己仓库里，主题不用改。**
+
+**① 建 `content/about.md`**，front matter 至少写这两行：
+
+```yaml
+---
+title: "关于"
+layout: "about"    # 不写就落到普通文章模板，会带上日期、字数、上下篇导航
+frame: "narrow"    # 不写，头栏与页脚会按文章页展开到 1150px，比 800px 的正文宽出一截
+---
+```
+
+> `frame` 是主题认的页面级开关，只对这一页生效。文章页不需要写（它们本来就该宽）。
+> 页面级开关与站点级配置的分工见 [configuration.md](configuration.md)。
+
+**② 加进头栏**——导航只认 `hugo.toml` 的菜单，不写这条，页面建好了也不出现在头栏：
+
+```toml
+[[menus.main]]
+  name = '关于'
+  pageRef = '/about'
+  weight = 40
+```
+
+**③ 正文写普通 markdown**——分节标题自己写 `##`，结构件用下面四颗短代码。
+**不存在私有的 front matter schema**：那一版做不出层次，换个人用也对不上字段。
+
+完整的样子：
+
+```markdown
+---
+title: "关于"
+layout: "about"
+frame: "narrow"
+---
+
+{{< nameplate name="宫城楠木" seal="宫" role="独立开发者 · 居杭州" >}}
+
+写代码，也写字。……
+
+{{< social github="https://github.com/…" bilibili="https://…" email="mailto:…" rss="/index.xml" >}}
+
+## 在做的事
+
+{{< project name="宣纸" code="xuanzhi" year="二〇二五" status="维护中" tags="Hugo, CSS, Go" url="https://…" >}}
+一句话描述，可以用 markdown。
+{{< /project >}}
+
+## 关于本站
+
+{{< colophon >}}
+- **本站** 引擎 `Hugo` · 主题 **宣纸 xuanzhi**（原创）
+- **许可** 主题 MIT
+{{< /colophon >}}
+```
+
+| 短代码 | 用途 | 必填 | 可选 | 是否需闭合 |
+|---|---|---|---|---|
+| `nameplate` | 引首印 + 名号 + 身份 | `name` | `seal` `role` | 否 |
+| `social` | 带图标的联系行 | — | `github` `bilibili` `email` `rss` | 否 |
+| `project` | 一个项目条目（题录式） | `name` | `code` `year` `status` `tags` `url` `archived` | **是** |
+| `colophon` | 页尾版权页小字 | — | *（无参数）* | **是** |
+
+**`nameplate`** —— `seal` 是印面字，缺省取名号首字；`role` 是身份那一行：
+
+```markdown
+{{< nameplate name="宫城楠木" seal="宫" role="独立开发者 · 居杭州" >}}
+```
+
+**`social`** —— 四项都可选，**至少给一个**，只渲染传了值的；`email` 写 `mailto:`，`rss` 一般写 `/index.xml`：
+
+```markdown
+{{< social github="https://github.com/…" bilibili="https://…" email="mailto:…" rss="/index.xml" >}}
+```
+
+标签文案走 i18n（`socialGithub` 等），想改「Email」为「邮箱」就在站点自己的 `i18n/zh-cn.yaml` 里覆盖。
+图标里 github / bilibili 是品牌标识，取自 Simple Icons（CC0），不在 Material 那套里——出处见 [licenses.md](licenses.md)。
+
+**`project`** —— `tags` 用逗号分隔（`"Hugo, CSS, Go"`，会自动 trim）；`archived="true"` 时状态印从朱文换成白文：
+
+```markdown
+{{< project name="宣纸" code="xuanzhi" year="二〇二五" status="维护中" tags="Hugo, CSS, Go" url="https://…" >}}
+一句话描述，可以用 markdown。
+{{< /project >}}
+```
+
+**没给 `url` 就渲染成纯文字**——已归档、没入口的项目不该给一个点不进去的链接。
+多条连着写就是一个条目列表，外面不用包容器（分隔线由 CSS 画在相邻两条之间）。
+
+**`colophon`** —— 内容体是普通 markdown，一行一条写成无序列表：
+
+```markdown
+{{< colophon >}}
+- **本站** 引擎 [Hugo](https://gohugo.io) · 主题 **宣纸 xuanzhi**（原创）
+- **许可** 主题 MIT · 旧文与代码见 GitHub
+{{< /colophon >}}
+```
+
+这颗短代码只做一件事：**把内容从正文体量压低到注脚体量**——字号 0.84rem、行距拉开、
+列表去圆点、行首加粗词对齐成标签列。
+
+为什么需要这一层：正文默认字号（17px 楷体）是给阅读用的，而版权页是
+"顺手交代几句出处"的注脚，不压一档就会和上一段正文字对字地抢读。
+去掉这颗短代码、直接写 markdown 的话，它就会退回正文体量——**试过，很难看。**
+
+试过另一条岔路也撤了：把它做成一枚藏书票（双线朱框 + 白文站名印 + 站语）。
+那套形制要成立，就得替文字体决定印面取哪个字、站语用哪一句——可这一节
+不值得为它规定这么多。**不是每节都非得是件器物。**
+
+一行一条**要写成无序列表**——连续几行普通文本会被 markdown 并成一个段落，
+软换行在 HTML 里塌成空格，几条会挤成一行。顶层列表的圆点已由 CSS 去掉
+（注意：主题的列表圆点是 `li::before` 伪元素画的，不是 `list-style`，
+所以这里必须显式 `content: none`，光写 `list-style: none` 去不掉）。
+
+**这一节里的链接是特殊待遇**：字与谱录同色，只有下划线是点缀色，悬停整块转色，
+外链那枚 `↗` 也去掉了。版权页一写就是七八个外部链接，全按主题默认渲染会让这块
+小字比上面的正文还响。写法不用变（照写 `[Hugo](https://gohugo.io)`），样式自己接上。
+
+四颗都遵循主题的短代码约定：不引用 `.Inner` 的可以自闭合，引用了的（`project` / `colophon`）必须闭合，
+否则 Hugo 会报 `must be closed or self-closed`。
 
 Hugo 内置的 `highlight` 等短代码同样可用；`relref` 适合站内互链。详见 `exampleSite/content/posts/shortcode-demo.md`。
 

@@ -1,0 +1,30 @@
+{{- /* 关于页：只提供「一个版心 + 正文」。
+
+   结构和样式都由短代码（nameplate / social / project / colophon）与 markdown 提供，
+   模板刻意保持很薄——这一页写什么、分几节、怎么分层，属于内容，不属于模板。
+
+   为什么不再用 front matter schema（曾经有过 self / projects / colophon 三个数组）：
+   主题里凡「用户要填结构」的地方一律走短代码（video / audio / playlist / details），
+   私有的 front matter schema 既不可组合，也没法承接层次——那正是之前
+   「版权页小字一行一标签、看不出主次」的病根。
+
+   框架宽度由 front matter 的 frame: "narrow" 控制（见 baseof.html）：
+   内容页默认走文章页的宽档 1150px，但正文版心仍是 --content-width，
+   不收回窄档就会头栏页脚比正文宽出一截。
+
+   页面无可见页题，h1 用 .sr-only 视觉隐藏（同 term-tag.html 的做法）。 */ -}}
+{{ define "main" -}}
+<div class="about">
+  <div class="container">
+    <h1 class="sr-only">{{ .Title }}</h1>
+    {{- /* 正文容器必须是 .post-content，不是另起的类：
+           主题把"正文排版"整层挂在 .post-content 上——标题字号层级、毛笔记号
+           （.heading-anchor / .mark-circle，含它们的尺寸与朱色）、段落间距、
+           图片与图注。少了这个类，markdown 出来的 <h2> 会带着渲染钩子的 SVG
+           却一条尺寸规则都吃不到，替换元素按默认 300×150 撑开，记号就跑到
+           标题外面去了（踩过）。
+           .about-content 是给本页组件样式做作用域用的，与 .post-content 并存。 */ -}}
+    <div class="post-content about-content">{{ .Content }}</div>
+  </div>
+</div>
+{{- end }}

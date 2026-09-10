@@ -1,0 +1,34 @@
+{{- /*
+  关于页的引首：一枚方印 + 名号并排成一行 lockup（书画里"引首章"的位置），
+  下面跟一行身份。
+
+  为什么是短代码而不是 front matter：主题里凡「用户要填结构」的地方一律走短代码
+  （video / audio / playlist / details / qr），不发明私有的 front matter schema ——
+  那种 schema 既不可组合，换个人用也对不上字段。
+
+  参数：
+    name  必需，名号
+    seal  可选，印面字；缺省取名号首字（逐字取，别用 substr —— 它按字节切，汉字会碎）
+    role  可选，身份一行
+
+  自闭合：这个模板不引用 .Inner，所以 {{< nameplate … >}} 不写闭合标签是对的。
+  反过来，一旦这里加了 .Inner，所有既有写法都会判成「未闭合」而构建失败。
+*/ -}}
+{{- $name := .Get "name" }}
+{{- $role := .Get "role" }}
+{{- if not $name }}
+	{{- errorf "The %q shortcode requires a %q argument. See %s" .Name "name" .Position }}
+{{- else }}
+	{{- $seal := .Get "seal" }}
+	{{- if not $seal }}
+		{{- $chars := split $name "" }}
+		{{- $seal = cond (gt (len $chars) 0) (index $chars 0) "印" }}
+	{{- end }}
+<div class="xz-nameplate">
+	<span class="xz-nameplate-seal" aria-hidden="true">{{ $seal }}</span>
+	<h2 class="xz-nameplate-name">{{ $name }}</h2>
+</div>
+	{{- with $role }}
+<p class="xz-nameplate-role">{{ . }}</p>
+	{{- end }}
+{{- end -}}

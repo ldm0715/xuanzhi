@@ -10,5 +10,6 @@
 | `04-math-formula-subsuper-and-subpath-fixes.md` | 公式上下标 + 子路径部署 404 修复记录 | ✅ 已修复 |
 | `05-vignette-feibai-and-reading-progress.md` | 暗角几何、飞白墨色、朱印阅读进度、牛皮纸色收口 token | ✅ 已实施 |
 | `06-self-hosted-media-player.md` | 自托管媒体播放器：短代码、Plyr + APlayer 引入、皮肤覆写 | ✅ 已实施 |
+| `07-about-page.md` | 关于页：短代码 + 普通 markdown、页面级 `frame` 开关、样式作用域与踩过的坑 | ✅ 已实施 |
 
 流程约定：功能完成后先把约定与坑并入根 `CLAUDE.md`；若当时单独立了成篇文档，再整篇归档到这里。归档工作流见 `dev/planning/README.md` 的「怎么用这份文档」。

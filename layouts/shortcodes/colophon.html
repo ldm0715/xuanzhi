@@ -1,0 +1,23 @@
+{{- /*
+  版权页小字：排成比正文小一档的注脚字，列表去掉圆点，行首加粗词对齐成标签列。
+
+  为什么需要这颗短代码（而不是让文字体直接写 markdown）：
+  正文的默认字号是给阅读用的（17px 楷体），而版权页是"顺手交代几句出处"的注脚，
+  该低一档、收一收。不套这层的话，它就退回正文体量，和上一段正文字对字地抢读。
+
+  试过两条岔路，都撤了，记在这儿免得再绕：
+  · 做成藏书票（双线朱框 + 白文站名印 + 站语）——要成立就得替文字体决定
+    印面取哪个字、站语用哪一句，可这一节不值得为它规定这么多。
+  · 干脆不套任何样式——就是上面那条问题：它退回正文体量。
+  现在这版是"只把它排成注脚"：不改文字体的写法，只管字号、缩进与对齐。
+
+  内容体是普通 markdown；一行一条写成无序列表即可。
+
+  必须闭合：引用了 .Inner。
+*/ -}}
+{{- $inner := strings.TrimSpace .Inner }}
+{{- if not $inner }}
+	{{- errorf "The %q shortcode needs content between the tags. See %s" .Name .Position }}
+{{- else }}
+<div class="xz-colophon">{{ $.Page.RenderString (dict "display" "block") $inner }}</div>
+{{- end -}}
