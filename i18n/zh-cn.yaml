@@ -75,6 +75,17 @@ toolbarToc: 目录
 toolbarProgress: 进度
 shareCopied: 已复制到剪贴板
 
+# ---- 媒体播放器（Plyr 的控件文案；APlayer 自带中文界面，不走这里） ----
+playerPlay: 播放
+playerPause: 暂停
+playerMute: 静音
+playerUnmute: 取消静音
+playerFullscreen: 全屏
+playerExitFullscreen: 退出全屏
+playerRestart: 重播
+playerRewind: 后退 {seektime} 秒
+playerFastForward: 快进 {seektime} 秒
+
 # ---- 归档页 ----
 yearNote: 岁在
 monthUnit: 月

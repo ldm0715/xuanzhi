@@ -1083,4 +1083,103 @@
     };
     pick();
   })();
+
+  /* 播放器：视频交给 Plyr、音频交给 APlayer（都在 assets/vendor/，见那里的 README）。
+     短代码只出标记与数据，控件与播放逻辑都在两个库里——这里只做初始化胶水。
+
+     选它们的着眼点是媒体播放器真正的难点：seek 节流、缓冲状态机、移动端自动播放
+     策略。这三样在真实浏览器环境里的打磨，正是这两个库的价值所在。
+
+     两个静默失效点，都会让人以为是别的问题：
+     1. Plyr 的 iconUrl 默认指向 cdn.plyr.io——不指到自托管的 svg，图标全空；
+     2. APlayer 的 lrcType 默认是 0（不显示歌词），传了 lrc 也不会有歌词，且不报错。 */
+  (function () {
+    var D = document.documentElement.dataset;
+
+    function each(scope, sel, fn) {
+      Array.prototype.forEach.call(scope.querySelectorAll(sel), fn);
+    }
+
+    var plyrs = [];
+    var aplayers = [];
+
+    /* 视频与音频之间也要互斥。APlayer 的 mutex 只管它自己那几个实例，
+       管不到 Plyr；一篇同时有视频和播放列表的文章会两个一起响。 */
+    function pauseOthers(kind, self) {
+      var mine = kind === 'plyr' ? plyrs : aplayers;
+      var theirs = kind === 'plyr' ? aplayers : plyrs;
+      for (var i = 0; i < theirs.length; i++) theirs[i].pause();
+      for (var j = 0; j < mine.length; j++) {
+        if (mine[j] !== self) mine[j].pause();
+      }
+    }
+
+    /* ---- 视频：Plyr ---- */
+    each(document, '[data-xz-video]', function (host) {
+      var media = host.querySelector('video');
+      if (!media || !window.Plyr) return;
+
+      var start = parseFloat(host.dataset.xzStart || '0');
+      if (isFinite(start) && start > 0) {
+        media.addEventListener('loadedmetadata', function () {
+          media.currentTime = Math.min(start, media.duration || start);
+        }, { once: true });
+      }
+      if (host.dataset.xzLoop) media.loop = true;
+
+      var player = new window.Plyr(media, {
+        controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
+        iconUrl: D.plyrIcon || '',
+        i18n: {
+          play: D.playerPlay || '播放',
+          pause: D.playerPause || '暂停',
+          mute: D.playerMute || '静音',
+          unmute: D.playerUnmute || '取消静音',
+          enterFullscreen: D.playerFullscreen || '全屏',
+          exitFullscreen: D.playerExitFullscreen || '退出全屏',
+          restart: D.playerRestart || '重播',
+          rewind: D.playerRewind || '后退 {seektime} 秒',
+          fastForward: D.playerFastForward || '快进 {seektime} 秒'
+        },
+        tooltips: { controls: true, seek: true },
+        clickToPlay: true,
+        resetOnEnd: false
+      });
+      player.on('play', function () { pauseOthers('plyr', player); });
+      plyrs.push(player);
+    });
+
+    /* ---- 音频：APlayer ---- */
+    each(document, '[data-xz-aplayer]', function (host) {
+      if (!window.APlayer) return;
+      var el = host.querySelector('script[data-xz-tracks]');
+      if (!el) return;
+
+      var tracks;
+      try {
+        tracks = JSON.parse(el.textContent);
+      } catch (err) {
+        return;   /* JSON 坏了就整块不渲染，别抛到控制台 */
+      }
+      if (!tracks || !tracks.length) return;
+
+      var player = new window.APlayer({
+        container: host,
+        audio: tracks,
+        /* 主题色给 CSS 变量而不是死色值：APlayer 只是把它写进 style.backgroundColor，
+           不做颜色运算，所以运行时切明暗 / 点缀色会实时跟着变 */
+        theme: 'var(--color-accent)',
+        /* 3 = 歌词是文件 URL。默认 0 是不显示歌词，传了 lrc 也不会出现 */
+        lrcType: parseInt(host.dataset.xzLrctype, 10) || 0,
+        /* 默认是 auto，会把每一首都预载；博客场景没必要 */
+        preload: 'metadata',
+        volume: 0.7,
+        listFolded: true,
+        listMaxHeight: '220px',
+        mutex: true
+      });
+      player.on('play', function () { pauseOthers('aplayer', player); });
+      aplayers.push(player);
+    });
+  })();
 })();

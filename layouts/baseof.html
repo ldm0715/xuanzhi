@@ -10,7 +10,23 @@
       data-search-error="{{ i18n "searchError" }}"
       data-search-unindexed="{{ i18n "searchUnindexed" }}"
       data-menu-open="{{ i18n "menuOpen" }}"
-      data-menu-close="{{ i18n "menuClose" }}">
+      data-menu-close="{{ i18n "menuClose" }}"
+      {{- /* 播放器文案：Plyr 的控件由 JS 初始化，拿不到 Hugo 的 i18n，
+             只能由模板写到 <html> 上（同 data-copy 的做法）。
+             连字符会映射成 camelCase：data-player-exit-fullscreen
+             → dataset.playerExitFullscreen，site.js 那边按这个读。 */}}
+      data-player-play="{{ i18n "playerPlay" }}"
+      data-player-pause="{{ i18n "playerPause" }}"
+      data-player-mute="{{ i18n "playerMute" }}"
+      data-player-unmute="{{ i18n "playerUnmute" }}"
+      data-player-fullscreen="{{ i18n "playerFullscreen" }}"
+      data-player-exit-fullscreen="{{ i18n "playerExitFullscreen" }}"
+      data-player-restart="{{ i18n "playerRestart" }}"
+      data-player-rewind="{{ i18n "playerRewind" }}"
+      data-player-fast-forward="{{ i18n "playerFastForward" }}"
+      {{- /* Plyr 的图标 sprite：它默认从 cdn.plyr.io 取，不指到自托管的那份
+             就是一片空白。static/vendor/plyr.svg 原样发布，所以用 relURL。 */}}
+      data-plyr-icon="{{ "vendor/plyr.svg" | relURL }}">
 <head>
   {{ partial "head.html" . }}
 </head>

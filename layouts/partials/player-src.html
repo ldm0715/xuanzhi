@@ -1,0 +1,15 @@
+{{- /*
+  播放器资源路径归一化：把短代码里写的路径转成站点相对 URL。
+
+  为什么要它：`relURL` 对已经带协议的绝对地址行为不明确，直接套用有把
+  `https://…` 改成相对路径的风险。这里先认出四类「原样放行」的前缀，
+  其余一律走 relURL——这样 /media/x.mp4、media/x.mp4、子路径部署都能对。
+
+  传入：字符串。返回：归一化后的字符串（partial 用 return，不渲染东西）。
+*/ -}}
+{{- $u := . -}}
+{{- $out := $u -}}
+{{- if not (or (hasPrefix $u "http://") (hasPrefix $u "https://") (hasPrefix $u "//") (hasPrefix $u "data:")) -}}
+	{{- $out = $u | relURL -}}
+{{- end -}}
+{{- return $out -}}

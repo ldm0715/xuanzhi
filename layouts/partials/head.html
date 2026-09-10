@@ -96,12 +96,32 @@
 })();
 </script>
 
-{{- $token := resources.Get "css/token.css" | minify | fingerprint -}}
-{{- $chroma := resources.Get "css/chroma.css" | minify | fingerprint -}}
-{{- $main := resources.Get "css/main.css" | minify | fingerprint -}}
-<link rel="stylesheet" href="{{ $token.RelPermalink }}">
-<link rel="stylesheet" href="{{ $chroma.RelPermalink }}">
-<link rel="stylesheet" href="{{ $main.RelPermalink }}">
+{{- /* 播放器依赖只在真正嵌了媒体的页面上拼进来。
+       Plyr + APlayer 的 CSS 与 JS 合计约 175KB，而绝大多数页面根本不放媒体——
+       无脑全站打包等于让每个页面都白下两个播放器。Hugo 的 .HasShortcode 正好
+       能在构建期判断，所以这里按页面分流，而不是放进全站产物。
+
+       顺序有讲究：vendor 的 CSS 必须排在 main.css **之前**。宣纸皮肤的覆写
+       大多和库的默认规则同特异性，只能靠源码顺序取胜。 */ -}}
+{{- $hasPlayer := or (.HasShortcode "video") (.HasShortcode "audio") (.HasShortcode "playlist") -}}
+{{- $hasPlayer := or (.HasShortcode "video") (.HasShortcode "audio") (.HasShortcode "playlist") -}}
+
+{{- $css := slice (resources.Get "css/token.css" | minify) (resources.Get "css/chroma.css" | minify) -}}
+{{- if $hasPlayer -}}
+  {{- range slice "vendor/plyr/plyr.css" "vendor/aplayer/APlayer.min.css" -}}
+    {{- with resources.Get . }}{{ $css = $css | append . }}{{ end -}}
+  {{- end -}}
+{{- end -}}
+{{- $css = $css | append (resources.Get "css/main.css" | minify) -}}
+{{- /* 只 minify 自家 CSS：vendor 那份已经压过，重复压没有收益，还多一分
+       把已压缩代码压坏的风险 */ -}}
+{{- /* 两个变体必须给**不同**的目标名。resources.Concat 是按目标路径缓存的：
+   两处都写 "css/xuanzhi.css" 的话，先算出来的那份会被复用给所有页面——
+   于是有没有 vendor 全看构建顺序，是个会随时序漂移的不确定性 bug。 */ -}}
+{{- $cssTarget := "css/xuanzhi.css" -}}
+{{- if $hasPlayer }}{{ $cssTarget = "css/xuanzhi-player.css" }}{{ end -}}
+{{- $cssBundle := $css | resources.Concat $cssTarget | fingerprint -}}
+<link rel="stylesheet" href="{{ $cssBundle.RelPermalink }}">
 
 {{- /* 自托管字体：CSS 放在 assets/ 下（module-aware——主题目录改名、用 Hugo Modules 安装
        都找得到，不像 fileExists 只认站点根目录下的真实路径），二进制切片留在 static/fonts/
@@ -119,8 +139,20 @@
 {{- end -}}
 {{- end -}}
 
-{{- $js := resources.Get "js/site.js" | minify | fingerprint -}}
-<script defer src="{{ $js.RelPermalink }}"></script>
+{{- /* 同上：先 vendor 后 site.js。库必须在使用它们的代码之前定义。
+       同样不重复 minify vendor 那两份。 */ -}}
+{{- $js := slice -}}
+{{- if $hasPlayer -}}
+  {{- range slice "vendor/plyr/plyr.min.js" "vendor/aplayer/APlayer.min.js" -}}
+    {{- with resources.Get . }}{{ $js = $js | append . }}{{ end -}}
+  {{- end -}}
+{{- end -}}
+{{- $js = $js | append (resources.Get "js/site.js" | minify) -}}
+{{- /* 同 CSS：目标名必须区分两个变体，否则 Concat 的按路径缓存会让结果随构建顺序漂移 */ -}}
+{{- $jsTarget := "js/xuanzhi.js" -}}
+{{- if $hasPlayer }}{{ $jsTarget = "js/xuanzhi-player.js" }}{{ end -}}
+{{- $jsBundle := $js | resources.Concat $jsTarget | fingerprint -}}
+<script defer src="{{ $jsBundle.RelPermalink }}"></script>
 
 {{- /* 公式样式：公式已在构建期由 _markup/render-passthrough.html 用 transform.ToMath
    渲染成静态 HTML，这里只需要 KaTeX 的样式表（自托管）。

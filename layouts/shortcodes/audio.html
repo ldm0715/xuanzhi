@@ -1,0 +1,29 @@
+{{- /*
+  自托管音频播放器 · 单曲（APlayer）。
+
+  用法：
+    {{< audio src="/media/nocturne.mp3" title="夜曲" artist="肖邦" >}}
+    {{< audio src="/media/x.m4a" title="朗读" cover="/media/x.jpg" lrc="/media/x.lrc" >}}
+
+  参数：src（必需）、title、artist、cover、lrc（同目录 .lrc 歌词）、start（起播秒数）。
+
+  多曲目请用 playlist 短代码，别在这里塞。
+
+  这颗短代码**故意不引用 .Inner**：Hugo 是据此判断短代码要不要闭合的——
+  一旦引用了 .Inner，`{{< audio src="…" >}}` 就会被判成「未闭合」而构建失败。
+  渲染交给 partials/player-audio.html。
+*/ -}}
+{{- $src := .Get "src" -}}
+{{- if not $src -}}
+	{{- errorf "audio 短代码缺少必需参数 src；多曲目请改用 playlist 短代码（%s）" .Position -}}
+{{- end -}}
+{{- partial "player-audio.html" (dict
+	"tracks" (slice (dict
+		"src" $src
+		"title" (.Get "title")
+		"artist" (.Get "artist")
+		"cover" (.Get "cover")
+		"lrc" (.Get "lrc")
+	))
+	"pos" .Position
+) -}}

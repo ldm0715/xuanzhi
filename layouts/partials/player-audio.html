@@ -1,0 +1,51 @@
+{{- /*
+  音频播放器的容器：归一化曲目 → 交给 APlayer 渲染。
+
+  audio.html（单曲）与 playlist.html（多曲）共用这一份。
+
+  参数（dict）：
+    tracks  曲目列表（[]map），字段 src / title / artist / cover / lrc
+    pos     短代码位置，出错时报出来（.Position）
+
+  为什么这里只出一个空容器 + 一段 JSON：APlayer 会把封面、标题、控制条、
+  播放列表、歌词**整套 UI 自己渲染进容器**。我这边再出一份 markup 就是
+  同一份数据的第二个来源，两边还会打架。
+
+  曲目数据走 <script type="application/json"> 而不是 data-* 属性：
+  曲目一多，属性会变得又长又难读；而且标题里的引号要逐个转义。
+  Hugo 的 jsonify 用的是 Go 的 encoding/json，默认把 < > & 转成 < 之类，
+  所以 `</script>` 这种注入不可能出现，放进 script 标签里是安全的。
+*/ -}}
+{{- $tracks := .tracks -}}
+{{- $pos := .pos -}}
+
+{{- $out := slice -}}
+{{- $hasLrc := false -}}
+{{- range $tracks -}}
+	{{- $s := or .src "" -}}
+	{{- if not $s -}}{{- errorf "音频短代码里有曲目缺 src（%s）" $pos -}}{{- end -}}
+	{{- $item := dict
+		"url" (partial "player-src.html" $s)
+		"name" (or .title "")
+		"artist" (or .artist "")
+	-}}
+	{{- with .cover }}{{ $item = merge $item (dict "cover" (partial "player-src.html" .)) }}{{ end -}}
+	{{- with .lrc }}
+		{{- $item = merge $item (dict "lrc" (partial "player-src.html" .)) -}}
+		{{- $hasLrc = true -}}
+	{{- end -}}
+	{{- $out = $out | append $item -}}
+{{- end -}}
+
+{{- /* lrcType：0 不显示歌词、1 歌词在 lrc 字段里、3 歌词是文件 URL。
+       APlayer 默认 0——不显式给 3 的话，传了 lrc 也不会显示任何歌词，
+       而且它不报错，纯静默。 */ -}}
+<div class="xz-player--audio" data-xz-player data-xz-aplayer
+     data-xz-lrctype="{{ if $hasLrc }}3{{ else }}0{{ end }}">
+	{{- /* 必须过 safeJS：jsonify 返回的是普通字符串，而 <script> 里是 JS 上下文，
+	       html/template 会把它当 JS 字符串字面量转义成 "[{\"url\":…}]" 这种带引号
+	       的形式，JSON.parse 拿到的是字符串而不是数组。safeJS 关掉这层转义。
+	       安全性由 jsonify 自身保证——它走 Go 的 encoding/json，默认把 < > &
+	       转成 < 之类，所以 </script> 不可能出现。 */ -}}
+	<script type="application/json" data-xz-tracks>{{ $out | jsonify | safeJS }}</script>
+</div>

@@ -1,0 +1,64 @@
+{{- /*
+  自托管视频播放器（Plyr）。
+
+  用法：
+    {{< video src="/media/demo.mp4" >}}
+    {{< video src="/media/demo.mp4" poster="/media/cover.jpg" caption="片头三十秒" >}}
+    {{< video src="/media/demo.mp4" start="12" loop="true" >}}
+
+  参数：
+    src      必需。视频地址。站内相对路径会被 relURL 归一化（见 player-src.html）
+    poster   可选。封面图
+    caption  可选。图注，走 RenderString，里面可以写 Markdown
+    start    可选。起播秒数（正数）
+    loop     可选。true 时循环
+
+  为什么只管自托管媒体：bilibili / YouTube 没有可直链的媒体文件，仍然只能裸
+  iframe（见主题 docs/writing.md 与站内 media-embeds 一文）。两条路分工明确，
+  这颗短代码不去假装能包住 iframe。
+
+  这里只出标记，控件由 Plyr 接管（site.js 初始化）。样式见 main.css「播放器」一节。
+*/ -}}
+{{- $src := .Get "src" -}}
+{{- if not $src -}}
+	{{- errorf "video 短代码缺少必需参数 src（%s）" .Position -}}
+{{- end -}}
+
+{{- /* 从扩展名推 MIME。带 ?query 或 #fragment 的先切掉再取扩展名，
+       否则 path.Ext 会连查询串一起吃进去。推不出来就不写 type 属性，
+       交给浏览器自己嗅探，比写错一个 MIME 好。 */ -}}
+{{- $clean := $src -}}
+{{- if in $clean "?" }}{{ $clean = index (split $clean "?") 0 }}{{ end -}}
+{{- if in $clean "#" }}{{ $clean = index (split $clean "#") 0 }}{{ end -}}
+{{- $ext := lower (strings.TrimPrefix "." (path.Ext $clean)) -}}
+{{- $mimes := dict
+	"mp4" "video/mp4"
+	"m4v" "video/mp4"
+	"webm" "video/webm"
+	"ogv" "video/ogg"
+	"ogg" "video/ogg"
+	"mov" "video/quicktime"
+-}}
+{{- $type := index $mimes $ext -}}
+
+{{- $poster := "" -}}
+{{- with .Get "poster" }}{{ $poster = partial "player-src.html" . }}{{ end -}}
+
+{{- $start := 0 -}}
+{{- with .Get "start" }}{{ $start = int . }}{{ end -}}
+
+{{- $loop := false -}}
+{{- if in (slice "true" true 1 "1") (.Get "loop") }}{{ $loop = true }}{{ end -}}
+
+<figure class="xz-player--video" data-xz-player data-xz-video
+        {{- if gt $start 0 }} data-xz-start="{{ $start }}"{{ end }}
+        {{- if $loop }} data-xz-loop="1"{{ end }}>
+	<video class="xz-media" playsinline preload="metadata"
+		{{- with $poster }} poster="{{ . }}"{{ end }}>
+		<source src="{{ partial "player-src.html" $src }}"{{ with $type }} type="{{ . }}"{{ end }}>
+		你的浏览器不支持内嵌视频，可以直接下载：<a href="{{ partial "player-src.html" $src }}">下载视频</a>
+	</video>
+	{{- with .Get "caption" }}
+	<figcaption class="xz-caption">{{ . | $.Page.RenderString }}</figcaption>
+	{{- end }}
+</figure>

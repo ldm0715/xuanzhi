@@ -1807,6 +1807,173 @@ html[data-hr="feibai"] .post-content hr {
   margin: 1.2em 0;
 }
 
+/* ============ 播放器（video / audio / playlist 短代码） ============
+ * 视频走 Plyr，音频走 APlayer。两个库都在 assets/vendor/，见那里的 README
+ * （出处、许可、以及升级时必须重做的改动）。
+ *
+ * 这里只管两件事：
+ * 1. 把播放器摆进「牛皮纸签条」那套外观——与浮动工具条、分享卡片同源，
+ *    共用 --paper-tool / --paper-tool-ink / --paper-tool-line 三个 token；
+ * 2. 把两个库的默认配色覆写成主题 token，跟着明暗与点缀色走。
+ *
+ * 库的 CSS 在 head.html 里排在 main.css **之前**，同特异性的规则靠源码
+ * 顺序取胜；但库内部大量用多级选择器，所以下面一律带 .xz-player--* 前缀
+ * 把特异性抬上去，不赌顺序。
+ */
+.xz-player--video,
+.xz-player--audio {
+  margin: 1.6em 0;
+  border: 1px solid var(--paper-tool-line);
+  border-radius: 2px;
+  background-color: var(--paper-tool);
+  background-image: var(--tex-noise);
+  background-size: 90px 90px;
+  box-shadow: 0 1px 2px rgba(60, 45, 20, 0.12), 0 6px 18px rgba(60, 45, 20, 0.10);
+  overflow: hidden;
+}
+html[data-theme="dark"] .xz-player--video,
+html[data-theme="dark"] .xz-player--audio {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.40), 0 6px 18px rgba(0, 0, 0, 0.34);
+}
+
+/* 视频那支是 <figure>，.post-content figure 的 text-align:center 与
+   .post-content video 的圆角/外边距都比裸类名高一级，这里一并压掉 */
+figure.xz-player--video { text-align: left; }
+.xz-player--video video,
+.xz-player--video .plyr {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  border-radius: 0;
+  background: #000;
+}
+
+/* ---- Plyr 皮肤：官方支持压 CSS 变量，不用跟选择器打架 ----
+ * 控件条压在**视频画面**上，Plyr 给它铺的是深色渐变（#0000 → #000000bf），
+ * 默认字色是白色。所以这里的字色一律用 --on-video（常亮），**不能**用
+ * --paper-tool-ink——那是给牛皮纸底的，深棕压近黑等于看不见。
+ * --plyr-video-background 不写：Plyr 默认就是 #000（信箱边），写了是冗余。 */
+.xz-player--video {
+  --plyr-color-main: var(--color-accent);
+  --plyr-font-family: var(--font-sans);
+  --plyr-control-radius: 2px;
+  --plyr-video-control-color: var(--on-video);
+  --plyr-video-control-color-hover: var(--color-bg);
+  --plyr-video-control-background-hover: var(--color-accent);
+  --plyr-range-thumb-background: var(--color-accent);
+  --plyr-range-fill-background: var(--color-accent);
+  --plyr-video-progress-buffered-background: color-mix(in srgb, var(--on-video) 30%, transparent);
+}
+
+/* 遮罩大播放按钮单独处理：Plyr 让它复用 --plyr-video-control-color，而那个值
+   上面已经为控件条改成常亮的了——压在浅色点缀色（暗色象限的 accent）上会糊。
+   改成深色遮罩 + 亮字，四象限都成立；悬停再回点缀色。 */
+.xz-player--video .plyr__control--overlaid {
+  background: var(--on-video-veil);
+  color: var(--on-video);
+}
+.xz-player--video .plyr__control--overlaid:hover {
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+
+/* 图注。必须带 .xz-player--video 前缀：.post-content figcaption 是「古籍题跋」
+   式的 flex 容器（居中 + 两侧引线），那是配照片的，套在播放器上排布不对 */
+.xz-player--video .xz-caption {
+  display: block;
+  justify-content: flex-start;
+  margin: 0;
+  padding: 8px 12px 10px;
+  border-top: 1px solid var(--paper-tool-line);
+  font-size: 0.82rem;
+  line-height: 1.7;
+  letter-spacing: normal;
+  text-align: left;
+  color: inherit;
+  opacity: 0.82;
+}
+.xz-player--video .xz-caption::before,
+.xz-player--video .xz-caption::after { content: none; }
+
+/* ---- APlayer 皮肤 ----
+ * APlayer 的主题色是**行内样式**（theme() 直接写 style.backgroundColor），
+ * 选择器压不过，所以下面几处只能上 !important。这是选它的真实成本。
+ * 其余外观靠 .xz-player--audio 前缀抬高特异性即可。
+ */
+.xz-player--audio .aplayer {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  font-family: var(--font-sans);
+  color: var(--paper-tool-ink);
+}
+.xz-player--audio .aplayer .aplayer-body { background: transparent; }
+.xz-player--audio .aplayer .aplayer-pic { border-radius: 0; }
+/* 封面上的播放按钮：APlayer 默认是 opacity .8 的白三角压在 rgba(0,0,0,.2) 圆上，
+   封面一偏亮就糊。加深遮罩、去掉那档透明度，任何封面下都看得清
+   （.aplayer-button path 的 fill:#fff 是 APlayer 自带的，够用） */
+.xz-player--audio .aplayer .aplayer-pic .aplayer-button {
+  background: var(--on-video-veil);
+  opacity: 1;
+}
+.xz-player--audio .aplayer .aplayer-info {
+  border-bottom-color: var(--paper-tool-line);
+}
+.xz-player--audio .aplayer .aplayer-info .aplayer-music .aplayer-title {
+  font-family: var(--font-title);
+  font-weight: 700;
+}
+.xz-player--audio .aplayer .aplayer-info .aplayer-music .aplayer-title,
+.xz-player--audio .aplayer .aplayer-info .aplayer-music .aplayer-author,
+.xz-player--audio .aplayer .aplayer-info .aplayer-controller .aplayer-time {
+  color: var(--paper-tool-ink);
+}
+.xz-player--audio .aplayer .aplayer-info .aplayer-music .aplayer-author { opacity: 0.72; }
+.xz-player--audio .aplayer .aplayer-info .aplayer-controller .aplayer-time .aplayer-icon path { fill: var(--paper-tool-ink); }
+.xz-player--audio .aplayer .aplayer-icon path { fill: var(--paper-tool-ink); }
+.xz-player--audio .aplayer .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar {
+  background: color-mix(in srgb, var(--paper-tool-ink) 24%, transparent);
+}
+.xz-player--audio .aplayer .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-loaded {
+  background: color-mix(in srgb, var(--paper-tool-ink) 14%, transparent);
+}
+/* 主题色是行内样式，只能 !important */
+.xz-player--audio .aplayer .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-played,
+.xz-player--audio .aplayer .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-played .aplayer-thumb,
+.xz-player--audio .aplayer .aplayer-info .aplayer-controller .aplayer-volume-wrap .aplayer-volume-bar-wrap .aplayer-volume-bar .aplayer-volume {
+  background: var(--color-accent) !important;
+}
+.xz-player--audio .aplayer .aplayer-list {
+  border-top-color: var(--paper-tool-line);
+  background: transparent;
+}
+.xz-player--audio .aplayer .aplayer-list ol { background: transparent; }
+.xz-player--audio .aplayer .aplayer-list ol li {
+  border-top-color: color-mix(in srgb, var(--paper-tool-line) 60%, transparent);
+  color: var(--paper-tool-ink);
+}
+.xz-player--audio .aplayer .aplayer-list ol li .aplayer-list-index,
+.xz-player--audio .aplayer .aplayer-list ol li .aplayer-list-author { opacity: 0.6; }
+.xz-player--audio .aplayer .aplayer-list ol li.aplayer-list-light {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+.xz-player--audio .aplayer .aplayer-list ol li:hover { background: var(--color-accent-soft); }
+.xz-player--audio .aplayer .aplayer-lrc { background: transparent; }
+.xz-player--audio .aplayer .aplayer-lrc p { color: var(--paper-tool-ink); opacity: 0.55; }
+.xz-player--audio .aplayer .aplayer-lrc p.aplayer-lrc-current { color: var(--color-accent); opacity: 1; }
+
+/* APlayer 有列表时会给容器加 aplayer-withlist；单曲时不会，高度自然收紧 */
+.xz-player--audio .aplayer .aplayer-info { padding: 10px 12px; }
+
+@media (max-width: 520px) {
+  .xz-player--audio .aplayer .aplayer-info { padding: 8px 10px; }
+  .xz-player--video .xz-caption { padding: 6px 10px 8px; }
+}
+
 /* 行内代码与代码块：行内代码取印章深色，随点缀色朱/青互换 */
 .post-content :not(pre) > code {
   background: var(--color-code-bg);
@@ -3693,7 +3860,9 @@ html::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radiu
   .hero,
   .pagination,
   .post-toolbar,
-  .post-sign-seal { display: none !important; }
+  .post-sign-seal,
+  .xz-player--video,
+  .xz-player--audio { display: none !important; }
 
   /* 暗角是 body::after 的固定遮罩，上面那条 background:#fff 管不到它——
      不显式关掉，打印出来四周一圈灰晕 */

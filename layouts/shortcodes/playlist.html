@@ -1,0 +1,32 @@
+{{- /*
+  自托管音频播放器 · 播放列表（APlayer）。
+
+  用法（内容体是 YAML 列表）：
+    {{< playlist >}}
+    - title: 夜曲
+      artist: 肖邦
+      src: /media/nocturne.mp3
+      cover: /media/nocturne.jpg
+      lrc: /media/nocturne.lrc
+    - title: 雨滴
+      artist: 肖邦
+      src: /media/raindrop.mp3
+    {{< /playlist >}}
+
+  曲目字段：src（必需）、title、artist、cover、lrc。
+
+  为什么用 YAML 而不是管道分隔的一行一曲：标题里出现分隔符就崩；YAML 不用猜，
+  还能往后加字段。transform.Unmarshal 直接吃，不需要额外依赖。
+
+  单曲请用 audio 短代码——这颗必须闭合（模板引用了 .Inner），
+  拿它写单曲会多一对 {{< /playlist >}}，没必要。
+*/ -}}
+{{- $raw := trim .Inner " \n\r\t" -}}
+{{- if not $raw -}}
+	{{- errorf "playlist 短代码的内容体是空的，至少要有一条曲目；单曲请改用 audio 短代码（%s）" .Position -}}
+{{- end -}}
+{{- $parsed := $raw | transform.Unmarshal -}}
+{{- if not (reflect.IsSlice $parsed) -}}
+	{{- errorf "playlist 的内容体要写成 YAML 列表（每项一个 `- title:`），当前解析出来不是列表。常见原因是缩进没对齐（%s）" .Position -}}
+{{- end -}}
+{{- partial "player-audio.html" (dict "tracks" $parsed "pos" .Position) -}}
