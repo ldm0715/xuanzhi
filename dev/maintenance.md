@@ -34,7 +34,6 @@ static/images/me.jpg     # 关于页自述块的**默认人像**（站点放同�
 static/images/og-default.png  # 分享卡片默认图（同样靠站点同名覆盖）
 static/images/covers/    # 八式水墨小品定妆预览稿（页面按题哈希内联渲染）
 static/vendor/plyr.svg   # Plyr 图标 sprite（运行时取，必须放 static，不能放 assets）
-scripts/                 # 开发辅助脚本
 ```
 
 ## 想改颜色？

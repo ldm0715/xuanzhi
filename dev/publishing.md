@@ -1,10 +1,82 @@
 # Xuanzhi 主题 · 发布与维护运行手册
 
-本文件是主题仓库的**作者向**手册：发布到 GitHub、托管演示站、备份。使用者不需要读。
+本文件是主题仓库的**作者向**手册：发新版本、首次发布（已完成，存档）、托管演示站、备份。使用者不需要读。
 
-## 把主题推到 GitHub（首次发布）
+## 发新版本
 
-主题是独立 Git 仓库，当前远端为 `https://github.com/ldm0715/xuanzhi.git`（`git remote -v` 查看）。若尚未推过，首次发布按四步走：
+**版本号的唯一出处是仓库根的 `CHANGELOG.md`。** 不要在别处另记一份版本号——发版 workflow 会拿 tag 和它核对，对不上直接失败，所以两者不可能各说各话。
+
+### 1. 在 `CHANGELOG.md` 加一段
+
+位置在 `## [Unreleased]` 之后、上一个版本段之前：
+
+```markdown
+## [1.0.1] - 2026-09-20
+
+### 修复
+- ……
+```
+
+格式**必须是** `## [x.y.z] - YYYY-MM-DD`（方括号 + 一个空格 + 日期）。写成 `[v1.0.1]`、`[1.0.1]`（少了空格）、或者用 `###` 当标题，都会让 workflow 判定「CHANGELOG 里没有这个版本」而拒绝发布。
+
+### 2. 提交并推送
+
+```bash
+cd F:/hugo_theme
+git add -A
+git commit -m 'docs: release v1.0.1'
+git push
+```
+
+### 3. 打 tag 推送
+
+```bash
+git tag v1.0.1
+git push --tags
+```
+
+tag 必须带 `v` 前缀，版本号部分与 CHANGELOG 里那个完全一致。
+
+### 4. 看 Actions
+
+`.github/workflows/release.yml` 依次做四件事，任一步失败都不发：
+
+1. **校验** `CHANGELOG.md` 里有 `1.0.1` 这一段——这是 tag 与 CHANGELOG 不漂移的唯一保证
+2. **预检构建**：用 Hugo 0.165.0 extended 跑一次 `hugo --source exampleSite`——打出去的 tag 必须是一个**能构建的提交**
+3. **打包**：`git archive` 出 `xuanzhi-v1.0.1.zip`，顶层目录名是 `xuanzhi/`
+4. **建 Release**：release notes 直接取 CHANGELOG 里那一段（不用 GitHub 自动生成的那份）
+
+### 5. 确认
+
+去 Releases 页看一眼 zip 在不在、notes 是不是 CHANGELOG 里那段。
+
+### 包里放什么
+
+由仓库根 **`.gitattributes` 的 `export-ignore`** 决定，**不是** workflow 里写死的：
+
+- 排除（作者向）：`dev/`、`exampleSite/`、`.github/`、`CLAUDE.md`、`AGENTS.md`、`.gitignore`、`.gitattributes`
+- 进包（使用者要的）：`layouts/`、`assets/`、`static/`、`i18n/`、`docs/`、`theme.toml`、`LICENSE`、`README.md`、`CHANGELOG.md`
+
+要改包内容就去改 `.gitattributes`。
+
+### 发版前的本地演练
+
+不打 tag 也能先把打包跑一遍，看看包里到底有什么：
+
+```bash
+git archive --format=zip --prefix=xuanzhi/ -o /tmp/xuanzhi-test.zip HEAD
+unzip -l /tmp/xuanzhi-test.zip
+```
+
+想验证这个包能不能直接用：解压到任意站点的 `themes/` 下，`hugo server` 应该直接跑得起来——顶层目录名就是 `xuanzhi`，与 `theme = 'xuanzhi'` 对得上。
+
+> **tag 推送不会触发演示站部署**：`demo.yml` 监听的是分支，两边不打架。
+
+## 把主题推到 GitHub（首次发布——已完成，存档备查）
+
+主题是独立 Git 仓库，远端为 `https://github.com/ldm0715/xuanzhi.git`（`git remote -v` 查看）。
+
+**下面四步已于 2026-09-10 全部完成**，留在这里仅供换仓库名 / 重建时参考。日常发版走上面那节「发新版本」。
 
 ### 1. 在 GitHub 建一个空仓库
 
@@ -40,19 +112,15 @@ https://<你的用户名>.github.io/xuanzhi/
 
 ### 4. 回填 `theme.toml` 的 homepage
 
-确认已填上仓库地址（Hugo 主题站提交表单会读这一项）：
+已填好（Hugo 主题站提交表单会读这一项）：
 
 ```toml
 homepage = 'https://github.com/ldm0715/xuanzhi'
 ```
 
-```powershell
-git add theme.toml
-git commit -m 'docs: fill theme homepage'
-git push
-```
-
 ### 之后每次改动
+
+改完代码照常提交推送即可。**发版是另一回事**，走上面那节「发新版本」——加了 CHANGELOG 版本段并提交之后，才打 tag。
 
 ```powershell
 cd F:\hugo_theme
@@ -63,7 +131,7 @@ git push
 
 ## 演示站（exampleSite + GitHub Pages）
 
-仓库里的 `exampleSite/` 是主题演示站——内容用主题的测试稿（代码高亮、数学公式、图片管线、短代码、长文排版…），用来展示主题在各种内容形态下的样子。它同时是**回归测试面**（见 `planning/uncovered-paths.md` 的哲学）。
+仓库里的 `exampleSite/` 是主题演示站——**正文就是用户手册 `docs/`**（`exampleSite/hugo.toml` 用 module mount 把它挂成 `content/posts`），外加几篇文章撑起归档、分类书架与标签印谱。手册里的每种内容形态都是真实渲染着的，所以它同时是**回归测试面**（见 `planning/uncovered-paths.md` 的哲学）。
 
 本地预览：
 

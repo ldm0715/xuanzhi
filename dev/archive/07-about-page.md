@@ -2,7 +2,7 @@
 
 关于页 = `layouts/about.html` + 四颗短代码（`nameplate` / `social` / `project` / `colophon`），页面主体是短代码加普通 markdown。另附一个页面级宽度开关 `frame: "narrow"`。
 
-这一篇记**当初为什么这么做**，以及走到这一步推翻过的两版。操作说明在 [`../../docs/writing.md`](../../docs/writing.md)「关于页」，实现约定在根 `CLAUDE.md`。
+这一篇记**当初为什么这么做**，以及走到这一步推翻过的两版。操作说明在 [`../../docs/shortcodes.md`](../../docs/shortcodes.md)「关于页的四颗短代码」，实现约定在根 `CLAUDE.md`。
 
 ## 一、形制：这一页不做成器物
 

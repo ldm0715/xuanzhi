@@ -36,10 +36,21 @@ enableEmoji = true
   author = 'gcnanmu'
   description = '宣纸——暖纸底、稿纸格纹、霞鹜文楷、墨阶排版的极简中文博客主题，明暗双模式，陶土橘/黛青双点缀色'
 
+  # 首页卡片与 RSS 只收这个栏目。现在演示站所有内容都在 posts（手册就是 posts），
+  # 不写这行 Hugo 也能自己算出 ['posts']——它是「保险丝」：哪天在 posts 之外又加了
+  # 一个页数更多的栏目，没有它会静默地把首页卡片占满、文章一篇都上不去。
+  # 留着它，也给抄这份配置的人立个规矩。详见「站点配置」文档的
+  # 「首页卡片与 RSS 收哪些栏目」。
+  mainSections = ['posts']
+
   [params.hero]
     greeting = '一纸短笺，见字如面'
 
 # 头栏导航：加页面只改这里，不用动模板
+[[menus.main]]
+  name = '快速开始'
+  pageRef = '/posts/quick-start'
+  weight = 5
 [[menus.main]]
   name = '归档'
   pageRef = '/posts'
@@ -67,6 +78,18 @@ enableEmoji = true
 #
 # 注意：TOML 里 [module] 一旦开始，后面的键就全归它了——所以这段必须放在文件最后。
 [module]
+  # 演示站自己的 content/ 也必须**显式挂一次**——理由同下面 static 那条：
+  # 给某个 target 加了 mount，该 target 的默认 mount 就被顶掉。少了这一条，
+  # 下面的 '../docs' 会把演示站自己的 posts / about.md 一起遮蔽掉。
+  [[module.mounts]]
+    source = 'content'
+    target = 'content'
+  # 用户手册（仓库根的 docs/）**就是演示站的正文**：挂成 content/posts，手册各篇
+  # 和普通文章一起进归档、上首页卡片。手册只有这一份源文件：读它在 docs/，
+  # 上线在 /posts/，不存在两份要同步的副本。
+  [[module.mounts]]
+    source = '../docs'
+    target = 'content/posts'
   # 演示站自己的 static/ 必须**显式挂一次**：Hugo 的规则是「给某个 target 加了
   # mount，该 target 的默认 mount 就被顶掉」——下面那条 '../static' 会连带把
   # 演示站自己的 static/ 一起遮蔽，media/demo.lrc 就发不出去。

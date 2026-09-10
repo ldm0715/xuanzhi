@@ -1,8 +1,42 @@
-# 站点配置（hugo.toml）
+---
+title: "三、站点配置"
+date: 2026-09-10T10:00:00+08:00
+weight: 30
+description: "hugo.toml 逐项：哪一行管什么功能，不配会怎样"
+tags:
+  - 配置
+categories:
+  - 文档
+---
 
-主题有一批功能是**模板在主题、开关在站点**——不配就是没有。下面是全清单，按「不配会怎样」排。
+{{< details summary="手册目录" >}}
+- [一、快速开始](quick-start.md)
+- [二、安装与升级](installation.md)
+- **三、站点配置**（当前篇）
+- [四、写作](writing/index.md)
+- [五、短代码参考](shortcodes.md)
+- [六、自定义](customization.md)
+- [七、部署](deployment.md)
+- [八、常见问题](troubleshooting.md)
+- [九、设计理念](design.md)
+- [十、许可](licenses.md)
+{{< /details >}}
 
-## 功能 → 需要的配置 → 不配的后果
+主题有一批功能是**模板在主题、开关在站点**——不配就是没有。这一篇把 `hugo.toml` 里所有要写的东西列全，按「不配会怎样」排。
+
+## 最小可用配置
+
+先确认站点的 `hugo.toml` 至少有这三行：
+
+```toml
+baseURL = 'https://你的域名/'    # 末尾必须带 /
+title = '站点名'
+theme = 'xuanzhi'
+```
+
+能跑起来，但只有骨架。下面这些不补，主题的功能会**静默消失**——不报错，就是没有。
+
+## 功能 → 配置 → 不配的后果
 
 | 主题功能 | 需要的配置 | 不配会怎样 |
 |---|---|---|
@@ -14,16 +48,19 @@
 | 正文手写 HTML | `markup.goldmark.renderer.unsafe = true` | `<mark>` / `<kbd>` / `<figure>` / 语义标签被转义成文本 |
 | 头栏菜单 | `[[menus.main]]` | **退回自动导航**（主内容段 + 分类法页）——不是坏，但加页面就得改模板 |
 | 关于页 | `content/about.md` 里写 `layout = "about"` + `frame = "narrow"`，再往 `[[menus.main]]` 加一条入口 | 不写 `layout` 就落到普通文章模板（带日期、字数、上下篇导航）；不写 `frame` 头栏页脚会展开到 1150px、比 800px 的正文宽出一截；不写菜单条目则建了也不出现在头栏 |
-| 站内搜索（Pagefind） | 构建后跑一步 `npx pagefind --site public`（见下文「能力与边界」） | 没跑这步时，面板提示「索引未生成」 |
+| 首页卡片与 RSS 收哪些栏目 | `params.mainSections = ['posts']` | Hugo 会自己挑**页数最多的顶层栏目**。站点里有一个页数比文章多的栏目（文档、笔记、周刊…）时，首页卡片会被它占满，你的文章一篇都上不去。见下方「首页卡片为什么全是文档」 |
+| 站内搜索（Pagefind） | 构建后跑一步 `npx pagefind --site public` | 没跑这步时，面板提示「索引未生成」。详见[部署](deployment.md#站内搜索) |
 | 绝对地址正确 | `baseURL`（末尾带 `/`） | sitemap / canonical / og:url / og:image / JSON-LD / RSS 全指向 `example.org` |
 | 首页欢迎语 | `params.hero.greeting` | 用主题默认（i18n 的 `greeting`） |
 | 默认点缀色 | `params.accent` | `terracotta`（访客仍可在外观面板自行切换） |
 | JSON-LD 作者 | `params.author` | 回落成站点 `title` |
 | 站点描述（meta description） | `params.description`（站点级兜底）；单篇可用 front matter `description` 优先 | 单篇没写描述时，`<meta name="description">` 用该页自动摘要（压平到 160 字）；站点级兜底缺失 |
 
-> 不走 `hugo.toml` 的自定义还有两处——**界面文案**和**头栏图标按钮**，改的是站点仓库里的文件，见 [customization.md](customization.md)。
+> 不走 `hugo.toml` 的自定义还有两处——**界面文案**和**头栏图标按钮**，改的是站点仓库里的文件，见[自定义](customization.md)。
 
 ## 复制粘贴
+
+一份完整可用的样板。**改成你自己的域名、站名、作者，其余照抄**：
 
 ```toml
 baseURL = 'https://你的域名/'
@@ -36,6 +73,9 @@ enableEmoji = true
 [markup]
   [markup.highlight]
     noClasses = false
+  [markup.tableOfContents]
+    startLevel = 2
+    endLevel = 4
   [markup.goldmark.parser]
     attribute.block = true
   [markup.goldmark.extensions.passthrough]
@@ -50,6 +90,7 @@ enableEmoji = true
   accent = 'terracotta'   # terracotta（陶土橘）/ indigo（黛青）
   author = '你的名字'      # 可省；省略则回落成站点 title
   description = '一句话介绍你的博客'   # 可省；站点级 meta description 兜底
+  mainSections = ['posts']   # 首页卡片与 RSS 只收这个栏目，理由见下
   [params.hero]
     greeting = '一纸短笺，见字如面'
 
@@ -69,15 +110,43 @@ enableEmoji = true
 [[menus.main]]
   name = '关于'
   pageRef = '/about'
-  weight = 40      # 需要先有 content/about.md；页面配置见 writing.md「关于页」
+  weight = 40      # 需要先有 content/about.md；页面配置见短代码参考「关于页的四颗短代码」
 ```
 
-> **页面级开关不走 `hugo.toml`。** 有些东西是写在**那一页的 front matter** 上的，
-> 比如关于页的 `layout = "about"` 与 `frame = "narrow"`。哪些是站点级、哪些是页面级，
-> 上面那张表和 [writing.md](writing.md) 分头写清楚了。
+> **TOML 有两个地方特别容易写错**：
+> ① `passthrough` 的键是 **`enable`**，写成 `enabled` 不报错但静默失效；
+> ② `enableEmoji` 是**顶层**键，塞进 `[markup.goldmark.extensions]` 里同样不报错、同样静默失效。
+> 另外 TOML 里 `[table]` 一旦开始，后面的键就全归它了——所以**带 `[params]`、`[module]` 这类段的东西一律写在文件末尾**。
 
-> `passthrough` 的键是 **`enable`**，写成 `enabled` 不报错但静默失效。
-> 文章页的目录层级可用 `[markup.tableOfContents]` 的 `startLevel` / `endLevel` 调（示例站点用 2–4）。
+## 首页卡片与 RSS 收哪些栏目
+
+首页卡片和 RSS 收的是 `site.MainSections` 里的页面。而 Hugo 在**没有显式配置**时的规则是：`MainSections` = **页数最多的那（几）个顶层栏目**。
+
+平时这没问题——站点里只有一个文章栏目，它就是页数最多的。但只要多出一个页数更多的栏目（文档、笔记、周刊、手记…），首页立刻被它占满，你的文章一篇都上不去，而且**不报任何错**。
+
+修法是一行，写在 `[params]` 里：
+
+```toml
+[params]
+  mainSections = ['posts']     # 你的文章放在哪个栏目就写哪个
+```
+
+> 这一行同时会改掉**没配菜单时**的自动导航兜底（`nav-links.html` 也读 `site.MainSections`）。配了 `[[menus.main]]` 的站点不受影响。
+>
+> 演示站的 `exampleSite/hugo.toml` 里也配了这行，注释讲清了来龙去脉，可对着看。
+
+## 页面级开关（不写在 hugo.toml）
+
+有些开关属于**某一页**，写在那一页的 front matter 上，站点级配置管不着：
+
+| 写在哪 | 字段 | 作用 |
+|---|---|---|
+| `content/about.md` | `layout: "about"` | 用关于页模板，而不是文章模板 |
+| 任意页 | `frame: "narrow"` | 把这一页的框架收窄到版心宽（否则走文章页的 1150px 宽档） |
+| 任意页 | `cover: "cover.jpg"` | 首页卡片右下角的印记换成自己的图，同时作为分享卡片的 `og:image` |
+| 任意页 | `description: "…"` | 覆盖该页的 meta description；没写时首页卡片用正文摘要 |
+
+哪些是站点级、哪些是页面级，上面那张表和[写作](writing/index.md)分头写清楚了。
 
 ## 不用配（Hugo 默认已开，主题直接吃）
 
@@ -93,37 +162,11 @@ enableEmoji = true
 - **歌词**是标准 `.lrc`，与音频放一起即可
 - **封面要单独给一张图**——Hugo 读不了音频文件里内嵌的元数据，`cover=` 必须显式写。很多音频自带封面，抽出来就行：`ffmpeg -i x.flac -an -c:v copy -frames:v 1 cover.jpg`
 
-写法与参数见 [writing.md](writing.md)。
+写法与参数见[短代码参考](shortcodes.md)。
 
-## 容易踩的
+## 另一个容易踩的：`public/` 里的地址
 
-- **`public/` 里看到的 URL 依赖 `baseURL`**。开发服务器运行时 Hugo 会把 baseURL 覆盖成 `http://localhost:1314/`，所以别在 `hugo server` 开着的时候去 `public/` 检查绝对地址——那会儿看什么都是 localhost。跑一次 `hugo` 再看。
-
-## 站内搜索：能力与边界
-
-头栏放大镜 → 素纸面板的搜索由 **Pagefind** 驱动，**中文分词原生支持**（搜「排版设计」也能命中「排版与设计」）。注意：索引不是 Hugo 生成的，而是在构建**之后**单独跑一步 Pagefind：
-
-```bash
-hugo
-npx pagefind --site public        # 在 public/ 里生成 pagefind/ 索引
-```
-
-这一步要由**你的构建 / 部署流程**执行（GitHub Actions 就在 `hugo` 之后加这一行），主题不会替你自动跑。两点要知道的：
-
-- **本地 `hugo server` 预览时搜索不可用**——它不生成索引，面板会提示「索引未生成——发布前请运行 pagefind」。要看效果，本地按上面的命令先构建 + 索引，再用 `npx serve public` 之类的静态服务器打开。
-- 子路径部署（如 GitHub Pages 项目站点）无需额外处理：`pagefind/` 目录随 `public/` 一起发布即可；主题读索引用 `relURL`、结果链接会带上站点前缀。
-
-**GitHub Actions 示例**：在你的部署 workflow 里，`hugo` 构建之后、上传产物之前加这一步（按你的目录/分支改）：
-
-```yaml
-      - name: Hugo
-        run: hugo --minify --baseURL "https://${{ github.repository_owner }}.github.io/<repo>/"
-
-      - name: Pagefind index
-        run: npx --yes pagefind@latest --site public
-```
-
-> 主题自带的演示站 workflow（`.github/workflows/demo.yml`）已经内置了这一步，可照着抄。
+**`public/` 里看到的 URL 依赖 `baseURL`。** 开发服务器运行时 Hugo 会把 baseURL 覆盖成 `http://localhost:1313/`，所以**别在 `hugo server` 开着的时候去 `public/` 检查绝对地址**——那会儿看什么都是 localhost。跑一次 `hugo` 再看。
 
 ## 一些值得知道的行为
 

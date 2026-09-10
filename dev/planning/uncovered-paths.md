@@ -9,15 +9,17 @@
 **现状**：
 - `layouts/partials/post-card-cover.html:10` 读 `.Params.cover`，没填就按标题哈希生成八式水墨小品
 - `layouts/partials/head.html` 读 `.Description`（P0 改造后优先级：`description` → 自动摘要 → 站点描述）
-- 但**全站 13 个内容文件没有一个设过 `cover` 或 `description`**
+- **`description` 已不是未覆盖路径**（2026-09-10）：`exampleSite/content/` 与 `docs/` 下每一篇都填了它，演示站的文档索引页还直接拿它当条目说明
+- **但 `cover` 仍然全站零使用**——`post-card-cover.html` 那条自定义图分支从未被真实数据跑过
 
-**为什么要关注**：这两条路径**从未被真实数据跑过**。风险在于：
-- 自定义 `cover` 会走 Hugo 图片管线（`.Resize`），如果 `cover` 指向的是 SVG 或尺寸异常的图，`post-card-cover.html` 可能报错——而这个错误只有在第一篇文章填了 `cover` 时才会暴露
-- `description` 只在 `head.html` 里用，长文本/含引号/含换行的边界情况没试过
+**为什么要关注**：自定义 `cover` 会走 Hugo 图片管线（`.Resize`），如果 `cover` 指向 SVG 或尺寸异常的图，`post-card-cover.html` 可能报错——而这个错误只有在第一篇文章填了 `cover` 时才会暴露。
 
-**怎么修**：不是改代码，是**给一篇文章真的填上这两项**，当作回归测试。填完看一眼首页卡片和 `<head>`。
+**怎么修**：给**一篇文章**（不是文档页——只有文章会进首页卡片）真的填上 `cover`。`cover` 要么是 page bundle 里的资源、要么是以 `/` 开头的静态路径，所以：
 
-**验证**：给 `content/posts/with-images/index.md` 加 `cover: "paper-test.png"` 和一段 `description`，构建后确认卡片换图、meta 用的是手写描述。
+- 简单做法：把 `exampleSite/content/posts/ink-gradation.md` 改成 bundle（`ink-gradation/index.md` + 一张图），front matter 写 `cover: "那张图.png"`
+- 或者先拿静态路径试：`cover: "/images/covers/…png"`
+
+**验证**：构建后确认卡片右下角的印记换成了自己的图，且 `<head>` 里的 `og:image` 指向按 `1200x630` 裁好的版本。
 
 ---
 
@@ -35,7 +37,7 @@
 
 **为什么要关注**：这些都是"一用就可能踩"的地方。尤其 `{.class}` 属性——它是 P0 那个重复 `id` 的成因，说明**开了的语法如果没有测试内容兜底，就会在第一次真用时暴露**。
 
-**怎么修**：在 `content/posts/markdown-elements.md` 里逐条加一小段演示（那篇的定位就是"功能总览 + 视觉回归"）。成本很低，收益是**下次改主题时有一页能跑回归**。
+**怎么修**：在 `docs/writing/index.md` 里逐条加一小段演示。那一篇的定位正是「写作约定 + 各类元素的版式」，而且**它就是演示站的正文**——加进去既当文档又当回归面，成本很低。
 
 **验证**：加完后构建，确认 `public/` 里出现 `<dl>`、h5、引用式链接等标签。
 

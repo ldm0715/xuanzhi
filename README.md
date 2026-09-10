@@ -3,6 +3,7 @@
 [![license: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 [![Hugo](https://img.shields.io/badge/Hugo-%E2%89%A50.146%20extended-ff4088)](https://gohugo.io/)
 [![lang](https://img.shields.io/badge/lang-zh--CN-blue)]()
+[![release](https://img.shields.io/github/v/release/ldm0715/xuanzhi)](https://github.com/ldm0715/xuanzhi/releases)
 
 > 暖纸底 · 稿纸格纹 · 霞鹜文楷 · 墨阶排版 —— 一个把博客装进一张宣纸里的极简中文博客主题。
 
@@ -12,14 +13,16 @@
 
 ## 演示站
 
-- 在线演示：`https://ldm0715.github.io/xuanzhi/`（主题仓库推上 GitHub Pages 后可用）
-- 本地预览：仓库自带 `exampleSite/` 演示站（每种内容形态都有一篇测试稿）
+- 在线演示：<https://ldm0715.github.io/xuanzhi/>
+- 本地预览：仓库自带 `exampleSite/` 演示站
 
 ```bash
-git clone <本仓库>
+git clone https://github.com/ldm0715/xuanzhi.git
 cd xuanzhi
 hugo server --source exampleSite      # http://localhost:1313/
 ```
+
+演示站的正文就是这本手册——手册各篇就是文章，首页第一张卡是「一、快速开始」，外加几篇示例文章展示归档、分类书架与标签印谱。**它同时是主题的回归测试面**——每种内容形态都在手册里真实渲染着。
 
 ## 特性
 
@@ -47,8 +50,8 @@ hugo server --source exampleSite      # http://localhost:1313/
 ## 快速开始
 
 ```bash
-# 1. 把主题放进站点（submodule 方式；或下载解压到 themes/xuanzhi）
-git submodule add <你的主题仓库地址> themes/xuanzhi
+# 1. 把主题放进站点（submodule 方式；或下载 Releases 里的 zip 解压到 themes/）
+git submodule add https://github.com/ldm0715/xuanzhi.git themes/xuanzhi
 
 # 2. hugo.toml 声明主题
 theme = 'xuanzhi'
@@ -57,31 +60,45 @@ theme = 'xuanzhi'
 hugo server
 ```
 
-> 环境要求：**Hugo extended ≥ 0.146**（图片管线需要 extended）。站内搜索是可选增强，想用的话在部署时于 `hugo` 后多跑一步 `npx pagefind --site public`（详见下方「搜索」与配置文档）。
+> 环境要求：**Hugo extended ≥ 0.146**（图片管线需要 extended）。
+>
+> 这三步只是骨架——`hugo.toml` 里还有一批开关不配就没有（公式不渲染、代码块不跟明暗、robots.txt 不生成）。照[快速开始](docs/quick-start.md)把配置补齐。完整步骤与三种引入方式的取舍见[安装与升级](docs/installation.md)。
 
 ## 使用
 
+完整手册在 [`docs/`](docs/)，**同一份内容就是演示站的正文**——手册各篇就是演示站的文章，从「一、快速开始」读起。手册只有一份源文件，不是副本。
+
 | 想做什么 | 看这里 |
 |---|---|
-| 安装、引入方式、junction → submodule | [docs/installation.md](docs/installation.md) |
-| `hugo.toml` 全量配置（含「功能 → 配置 → 不配的后果」与复制粘贴样板） | [docs/configuration.md](docs/configuration.md) |
-| 写作约定：图片 / 公式 / 短代码 / **媒体嵌入** / 封面印记 | [docs/writing.md](docs/writing.md) |
-| 自定义：菜单、界面文案、头栏图标按钮 | [docs/customization.md](docs/customization.md) |
-| 设计理念：这套视觉语言为什么长这样 | [docs/design.md](docs/design.md) |
-| 主题与第三方资产许可 | [docs/licenses.md](docs/licenses.md) |
+| 五分钟先跑起来 | [快速开始](docs/quick-start.md) |
+| 引入方式、升级与回退 | [安装与升级](docs/installation.md) |
+| `hugo.toml` 全量配置（含「功能 → 配置 → 不配的后果」与复制粘贴样板） | [站点配置](docs/configuration.md) |
+| 写作：front matter / 图片 / 公式 / 代码块 / 首页封面 | [写作](docs/writing/index.md) |
+| 短代码参数表：折叠块 / 二维码 / 视频音频 / 关于页 | [短代码参考](docs/shortcodes.md) |
+| 自定义：菜单、界面文案、头栏图标按钮、改颜色 | [自定义](docs/customization.md) |
+| 部署、站内搜索索引、GitHub Actions | [部署](docs/deployment.md) |
+| 页面不对劲 | [常见问题](docs/troubleshooting.md) |
+| 设计理念：这套视觉语言为什么长这样 | [设计理念](docs/design.md) |
+| 主题与第三方资产许可 | [许可](docs/licenses.md) |
 
-**站内搜索（可选，Pagefind）**：头栏放大镜 → 素纸面板，中文分词原生支持。索引不在 Hugo 构建里生成，需要在你的构建流程里多跑一步：
+**站内搜索**由 Pagefind 驱动（中文分词原生支持），索引不在 Hugo 构建里生成，需要在你的构建流程里多跑一步：
 
 ```bash
 hugo
 npx pagefind --site public
 ```
 
-本地 `hugo server` 预览时搜索会提示「索引未生成」，这属预期——只有构建后跑过 pagefind 才有索引。GitHub Actions 写法与更多说明见 [docs/configuration.md「站内搜索：能力与边界」](docs/configuration.md#站内搜索能力与边界)。
+本地 `hugo server` 预览时搜索会提示「索引未生成」，这属预期。完整写法见[部署](docs/deployment.md#站内搜索)。
+
+## 版本
+
+更新日志见 [CHANGELOG.md](CHANGELOG.md)——**版本号以它为准**，每次发版都会在里面加一段。发布产物（主题包 zip）在 [Releases](https://github.com/ldm0715/xuanzhi/releases)。
 
 ## 开发
 
-维护者与 AI 编码的完整指引在仓库根 [`CLAUDE.md`](CLAUDE.md)（与 `AGENTS.md` 逐字相同），发布 / 维护运行手册、待办台账与决策记录在 [`dev/`](dev/README.md)。主题仓库尚未正式发布，首次发布流程见 [`dev/publishing.md`](dev/publishing.md)。
+维护者与 AI 编码的完整指引在仓库根 [`CLAUDE.md`](CLAUDE.md)（与 `AGENTS.md` 逐字相同），发布 / 维护运行手册、待办台账与决策记录在 [`dev/`](dev/README.md)。
+
+发版流程：在 `CHANGELOG.md` 顶部加一段 `## [x.y.z] - YYYY-MM-DD`，提交后打 tag 推送（`git tag vx.y.z && git push --tags`）。`.github/workflows/release.yml` 会校验 CHANGELOG 里确实有这个版本、跑一次演示站预检构建，然后打出主题包并建 Release。详见 [`dev/publishing.md`](dev/publishing.md)。
 
 ## 许可
 

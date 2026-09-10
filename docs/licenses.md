@@ -1,4 +1,27 @@
-# 主题与第三方资产许可
+---
+title: "十、许可"
+date: 2026-09-10T10:00:00+08:00
+weight: 100
+description: "主题本体与随附第三方资产各自的许可，以及各自要保留什么"
+tags:
+  - 许可
+  - 第三方资产
+categories:
+  - 文档
+---
+
+{{< details summary="手册目录" >}}
+- [一、快速开始](quick-start.md)
+- [二、安装与升级](installation.md)
+- [三、站点配置](configuration.md)
+- [四、写作](writing/index.md)
+- [五、短代码参考](shortcodes.md)
+- [六、自定义](customization.md)
+- [七、部署](deployment.md)
+- [八、常见问题](troubleshooting.md)
+- [九、设计理念](design.md)
+- **十、许可**（当前篇）
+{{< /details >}}
 
 主题本体（模板 / CSS / JS）是 **MIT**，见仓库根目录的 `LICENSE`。
 
@@ -33,14 +56,14 @@ CC0 虽不要求署名，但**出处仍要记在这里**，否则下次换图标
 | `covers/` | 首页卡片印记的八式水墨小品定妆预览稿 |
 | `me.jpg` | 关于页自述块的**默认人像**，AI 生成 |
 
-站点想换掉其中任意一张，在自己的 `static/images/` 放一张同名同路径的即可，不用改配置（见 [writing.md](writing.md) 关于页一节）。
+站点想换掉其中任意一张，在自己的 `static/images/` 放一张同名同路径的即可，不用改配置（见[自定义](customization.md#换掉主题自带的默认图)）。
 
 ### 播放器两个库的说明
 
-只在你**真正嵌了媒体**的页面上才会被加载（`head.html` 用 `.HasShortcode` 判断），没有媒体的页面一个字节都不带。两者的升级方式、以及升级时必须重做的改动（删掉末行的 `sourceMappingURL`、把 Plyr 的图标 sprite 放到 `static/`）记在 [`assets/vendor/README.md`](../assets/vendor/README.md)。
+只在你**真正嵌了媒体**的页面上才会被加载（`head.html` 用 `.HasShortcode` 判断），没有媒体的页面一个字节都不带。两者的升级方式、以及升级时必须重做的改动（删掉末行的 `sourceMappingURL`、把 Plyr 的图标 sprite 放到 `static/`）记在 [`assets/vendor/README.md`](https://github.com/ldm0715/xuanzhi/blob/master/assets/vendor/README.md)。
 
 > **版权声明保留在哪**：这两个库的 min 版**都把 MIT 版权头剥掉了**，所以那份 `assets/vendor/README.md` 同时充当它们的许可声明——里头写了上游仓库地址、版本与版权人。删它等于丢掉署名。
 
-想换掉字体（比如改用自己的）：删掉 `static/fonts/` 与 `assets/fonts/` 下对应的目录即可——主题会探测到文件不在就自动不输出那几个 `<link>`，不会 404。关于字体版本的更新方法见主题仓库 `dev/maintenance.md`。
+想换掉字体（比如改用自己的）：删掉 `static/fonts/` 与 `assets/fonts/` 下对应的目录即可——主题会探测到文件不在就自动不输出那几个 `<link>`，不会 404。
 
 **Pagefind**（MIT）：不随主题仓库分发。它是可选构建工具——用站内搜索时在你的部署里跑 `npx pagefind`，生成的 `pagefind/` 索引与运行时进入你自己的站点产物；不用搜索就不需要它。

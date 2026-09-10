@@ -17,8 +17,6 @@
 hugo server --source F:/hugo_gcnanmu --bind 127.0.0.1 --port 1314
 # 构建
 hugo --source F:/hugo_gcnanmu --gc
-# 测试图生成（PowerShell 脚本，勿用 bash 内联传 $ 变量——会被吞）
-powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-test-image.ps1
 ```
 
 ## 结构与规则
@@ -56,7 +54,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 - **导航走 Hugo 菜单**：`partials/nav-links.html` 读 `site.Menus.main`（站点在 `hugo.toml` 配 `[[menus.main]] name/pageRef/weight`），加页面只改配置；站点没配菜单时兜底成「`site.MainSections` + 分类法页」的旧算法，所以主题单独拿去也能用。**桌面 `.site-nav` 与移动端 `.nav-panel-links` 共用这一份 partial**，改一处两处都变
 - **移动端头栏收起**（≤640px）：头栏只留 `☰ · 站名 · #theme-toggle`，导航链接 / 搜索 / 外观收进 `#nav-panel`（挂在 `.site-header` 内、`position:absolute; top:100%`，所以打印隐藏 `.site-header` 时它跟着消失，不必单独加进 `@media print` 清单）。三条硬约束：① 隐藏规则是**黑名单** `.site-nav > *:not(#theme-toggle){display:none}`——退回点名式白名单的话，站点往 `.site-nav` 加任何东西都会重新把窄屏挤爆；② 面板自己写了 `display`，必须显式补 `.nav-panel[hidden]{display:none}` 压过 UA 规则；③ 面板比矮屏视口高，它是绝对定位在吸顶头栏上的、页面滚动带不出下缘，必须 `max-height: calc(100dvh - 56px)` + `overflow-y:auto`
 - **头栏扩展插槽**：`partials/header-extra.html` 主题里是空的（只有一段注释），站点在**自己仓库**建同名 partial 即可覆盖（Hugo 查找顺序站点先于主题）。同一份 markup 在 `.site-nav` 渲染成 30×30 圆形图标按钮（`.header-extra-label` 隐藏）、在 `.nav-panel` 渲染成整宽一行。**纯文字链接不必走这里**——加 `[[menus.main]]` 就会两处都出现；插槽是给图标按钮用的
-- **关于页** = `layouts/about.html` + `shortcodes/{nameplate,social,project,colophon}.html`，整页是**短代码 + 普通 markdown**，**没有私有的 front matter schema**（试过 `self` / `projects` / `colophon` 三个数组，撤了——做不出层次，换个人用也对不上字段）。四颗短代码的样式在 main.css「关于页」段，作用域是 **`.post-content .xz-*` 而不是 `.about`**：它们是通用短代码，文章正文里也能用；带 `.post-content` 前缀是为了压过 `.post-content > p` 那类正文规则的特异性，去掉前缀会静默失效。页面级开关 `frame: "narrow"` 由 `baseof.html` 写成 `data-frame`（不写就按文章页展开到 1150px，头栏页脚会比 800px 的正文宽出一截），消费方有三处必须同步：`baseof.html`、main.css 那条 `:not([data-frame="narrow"])`、`header.html` 末尾内联脚本。写作说明见 `docs/writing.md`
+- **用户手册 `docs/` 就是演示站的正文**：`exampleSite/hugo.toml` 用 module mount 把仓库根的 `docs/` 挂成 `content/posts`，手册各篇（一、快速开始 … 十、许可）和示例文章一起进归档、上首页卡片。手册**只有这一份源文件**，不存在副本。硬约束：① 挂载**必须同时补一条 `content → content`**——Hugo 的规则是「给某个 target 加了 mount，该 target 的默认 mount 就被顶掉」，少了它演示站自己的 `posts` / `about.md` 会被 `../docs` 那条遮蔽（同 `static` 那条的理由，`hugo.toml` 里有注释）；② 手册各篇要有 front matter 的 `title` / `date` / `weight` / `description`——`date` 让归档页按真实日期分组，`weight` 决定首页卡片与归档的顺序（示例文章 weight 110+，排在手册后面），`description` 被首页卡片当摘要。**正文一律从 `##` 起，不写 H1**（页题由 front matter 的 `title` 经 `single.html` 渲染，正文再写一个 H1 就重复了）
+- 手册篇与篇之间**照常写相对 `.md` 链接**（`[写作](writing/index.md)`）。`_markup/render-link.html` 对非绝对链接会走 `PageInner.GetPage → Resources.Get → resources.Get` 回退链，站点上解析成带 baseURL 前缀的 `RelPermalink`（子路径部署也对），GitHub 上也照样能点。**指向仓库根文件（`CHANGELOG.md`、`assets/vendor/README.md` 这类不在 content 里的）时用完整 GitHub 地址**——相对路径过不了 `GetPage`，会原样输出成 404
+- **关于页** = `layouts/about.html` + `shortcodes/{nameplate,social,project,colophon}.html`，整页是**短代码 + 普通 markdown**，**没有私有的 front matter schema**（试过 `self` / `projects` / `colophon` 三个数组，撤了——做不出层次，换个人用也对不上字段）。四颗短代码的样式在 main.css「关于页」段，作用域是 **`.post-content .xz-*` 而不是 `.about`**：它们是通用短代码，文章正文里也能用；带 `.post-content` 前缀是为了压过 `.post-content > p` 那类正文规则的特异性，去掉前缀会静默失效。页面级开关 `frame: "narrow"` 由 `baseof.html` 写成 `data-frame`（不写就按文章页展开到 1150px，头栏页脚会比 800px 的正文宽出一截），消费方有三处必须同步：`baseof.html`、main.css 那条 `:not([data-frame="narrow"])`、`header.html` 末尾内联脚本。写作说明见 `docs/shortcodes.md`
 - **自述块（`nameplate`）是闭合短代码，别改成自闭合**：它要把名号 / 身份与内容体（自述、联系）同处右栏，而这些在 DOM 里是平级兄弟，CSS 排不了，必须有个盒子包住。左栏固定 132px 放方形人像——这个数是量出来的：50px 的印撑不住一栏（右栏文字比它高 100px 出头，重心整个偏右，那一版因此被推翻），132px 才两栏齐平。人像三级取值：`image=` 参数 → 主题自带 `static/images/me.jpg`（站点同名同路径覆盖，同 `og-default.png` 的套路）→ 朱印（**只在前面都拿不到时出现，是错误提示不是常态**）。改这颗短代码的闭合方式等于改它的写法约定，站点内容 / 文档 / 示例必须同一次改完
 - **界面文案全在 `i18n/zh-cn.yaml`**：模板里禁止硬编码中文界面词。**key 必须扁平**——`i18n "posts.other"` 这种点号访问嵌套 key 会**静默返回空串**（踩过，归档页的「篇」消失）。JS 拿不到 i18n，复制按钮文案由 `baseof.html` 写到 `<html data-copy/data-copied>`，`site.js` 读 dataset 并留中文兜底
 - **滚动条**：滑块走 `--scrollbar-thumb`（token.css 里由 `color-mix(in srgb, var(--color-zhu) 55%, transparent)` 派生，随点缀色换朱砂/黛青，派生式写法不必补四象限）。作用域是 `html`（窗口那根竖向滚动条）+ 内容里**四个**横向滚动容器：`pre`、`.lntable`（chroma 带行号代码块，定义在 chroma.css，最容易漏）、`.table-wrap`、`.katex-display`
@@ -96,13 +96,18 @@ powershell -NoProfile -ExecutionPolicy Bypass -File F:/hugo_theme/scripts/make-t
 - **`i18n` 不认嵌套 key 的点号写法**：`i18n/zh-cn.yaml` 里写 `posts:\n  other: 篇`，模板里 `{{ i18n "posts.other" }}` 不报错、**返回空串**，页面上的字直接消失（归档页的「七篇」变成「七」）。一律用扁平 key（`unitPosts: 篇`）
 - PowerShell 5.1 把**无 BOM 的 UTF-8 `.ps1` 按 GBK 读**：脚本里写中文字面量（连注释也算）会让解析器报 `MissingEndParenthesisInMethodCall`。生成 OG 图的脚本踩过，改成全 ASCII + `[char]0x5BA3` 取字形才通
 - **新建 / 删除 partial 文件后 Hugo 的 watcher 不一定重建**：实测删掉站点侧 `layouts/partials/header-extra.html` 后页面仍是旧的（插槽还在、footer 还是老 markup），改已有文件才一定热重建。加删模板文件后没生效就重启 `hugo server`
+- **`site.MainSections` 在没配 `params.mainSections` 时是「页数最多的顶层栏目」，不是「所有顶层栏目」**：`home.html` 和 `nav-links.html` 的兜底都读它。站点里出现一个页数比文章多的栏目（文档 / 笔记 / 周刊）时，文章会从**首页卡片和 RSS 里整个消失**，**不报任何错**。修法是站点侧一行 `[params] mainSections = ['posts']`（演示站的 `hugo.toml` 里也配了，注释写明理由）。**任何新增的、页数可能超过文章的栏目都要回头检查这一条**——这是主题层面「静默失效」的典型，排查时容易去怀疑排序而不是来源筛选
+- **`layouts/list.html` 是归档专用，不渲染 `.Content`**：它把 `.Pages` 按年 / 月分组、且完全不输出段索引正文。**非文章段落（文档 / 笔记这类无日期内容）直接套它，会掉进「0001 年」那一组，输出一个空壳**。现在演示站没有这种段落（手册就是 posts），但站点建任何独立栏目都要给它单独一个索引模板或 `layout`——这是主题已知的缺口
+- **`resources.Get` 是「站点先于主题」的**，所以站点只要在自己的 `assets/` 下放一份同名文件就能覆盖主题的（用户文档里「改颜色」一节就是靠这个——复制一份 `token.css` 到站点改，而不是改主题目录）。`head.html` 的 CSS / JS 都走这条路，包括字体 `@font-face` 的 `resources.Get` 探测
 
 ## 相关文档
 
-- 用户文档：`README.md`（简要介绍）+ `docs/`（使用手册与设计理念）——面向使用者
+- 用户文档：`README.md`（简要介绍）+ `docs/`（使用手册与设计理念）——面向使用者。**`docs/` 同时是演示站的正文**（见「结构与规则」里那条）
+- `CHANGELOG.md`：**版本号的唯一出处**。发版 workflow 会校验 tag 与它的版本段是否对得上，对不上直接失败
 - `AGENTS.md`：与本文逐字相同，供其他 agent 读取
 - `dev/README.md`：开发入口（目录关系、常用命令、文档导航）
-- `dev/publishing.md` / `dev/maintenance.md`：发布与维护运行手册
+- `dev/publishing.md`：发布与维护运行手册（首次发布、演示站 Pages、**发新版本**、备份）
 - `dev/planning/`：**待办**台账与未完成项（`README.md` 封面 + `structure.md` 备查 + `uncovered-paths.md`）
 - `dev/archive/`：**已完成**的实现/修复档案（P1 决策记录 + 历史修复，`README.md` 封面）
+- `.github/workflows/release.yml`：发版（tag 触发 → 校验 CHANGELOG → 演示站预检构建 → `git archive` 打包 → 建 Release）。**包里放什么由根目录 `.gitattributes` 的 `export-ignore` 决定**，改包内容去改那里，不是改 workflow
 - git stash 里有失败的书桌场景实验（`desk scene experiment`），仅作参考，未验收
