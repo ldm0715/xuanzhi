@@ -52,6 +52,10 @@ enableEmoji = true
   name = '标签'
   pageRef = '/tags'
   weight = 30
+[[menus.main]]
+  name = '关于'
+  pageRef = '/about'
+  weight = 40
 
 # ---- 主题本体怎么接进来（只影响这个演示站，用户站点不用抄这段）----
 #
