@@ -411,9 +411,55 @@
       }
     } catch (err) { /* 隐私模式 / 脏数据，忽略 */ }
 
+    /* ---- 阅读进度：朱印外圈那一环 ----
+       以正文为界算，不用整页——页脚和上下篇导航不该计入进度。 */
+    var content = document.querySelector('.post-content');
+    var spanMax = 0;
+    var lastPct = -1;
+    var ticking = false;
+
+    function measure() {
+      if (!content) return;
+      var top = content.getBoundingClientRect().top + window.scrollY;
+      /* 正文里的图没有固定尺寸，offsetHeight 会随解码变化，
+         所以 resize / load 都得重量一次，不是冗余 */
+      spanMax = Math.max(0, top + content.offsetHeight - window.innerHeight);
+    }
+
+    function syncProgress() {
+      ticking = false;
+      if (!content) return;
+      var pct = spanMax <= 0
+        ? 100                                              /* 不足一屏的短笺，直接算读完 */
+        : Math.round(Math.min(100, Math.max(0, window.scrollY / spanMax * 100)));
+      /* 只在整数百分比变化时写 DOM——每帧改样式会招来无谓的重排 */
+      if (pct === lastPct) return;
+      lastPct = pct;
+      bar.style.setProperty('--seal-progress', String(pct));
+      /* 按钮栈里那一格的读数（百分号是 CSS 画的，这里只写数字） */
+      var out = bar.querySelector('[data-xz="pct"]');
+      if (out) out.textContent = pct;
+    }
+
+    window.addEventListener('scroll', function () {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(syncProgress);
+    }, { passive: true });
+    window.addEventListener('load', function () {
+      measure();
+      lastPct = -1;
+      syncProgress();
+    });
+    measure();
+    syncProgress();
+
     window.addEventListener('resize', function () {
       if (bar.classList.contains('is-moved')) apply(parseFloat(bar.style.left), parseFloat(bar.style.bottom));
       else syncStackSide();
+      measure();
+      lastPct = -1;
+      syncProgress();
     });
 
     /* ---- 拖动 ---- */
@@ -454,12 +500,18 @@
     seal.addEventListener('pointerup', endDrag);
     seal.addEventListener('pointercancel', endDrag);
 
-    /* ---- 分享卡片：亮出来 + 6 秒后自动收起 ---- */
-    var card = document.getElementById('post-share-card');
+    /* ---- 分享卡片：亮出来 + 6 秒后自动收起 ----
+       --card-lift 让开按钮栈的高度，上方放不下就翻到下方。
+       数组形态是之前有两张卡片时留下的，现在只剩分享这一张；
+       留着是为了收/放仍走同一条路径，以后再加卡片不用重写。 */
+    var shareCard = document.getElementById('post-share-card');
+    var cards = [shareCard].filter(Boolean);
     var cardTimer = null;
+    var openCard = null;
 
-    function showCard() {
+    function showCard(card) {
       if (!card) return;
+      hideCards();
       /* 按钮栈朝上展开时，卡片要让开一整个栈的高度，否则会压在按钮上 */
       var lift = (!stack.hasAttribute('hidden') && !bar.classList.contains('stack-below'))
         ? stack.offsetHeight + 8
@@ -469,12 +521,15 @@
       /* 上方放不下就翻到下方 */
       var cardTop = bar.getBoundingClientRect().top - 8 - lift - card.offsetHeight;
       bar.classList.toggle('card-below', cardTop < headerOffset());
+      openCard = card;
       window.clearTimeout(cardTimer);
-      cardTimer = window.setTimeout(hideCard, 6000);
+      cardTimer = window.setTimeout(hideCards, 6000);
     }
 
-    function hideCard() {
-      if (card) card.setAttribute('hidden', '');
+    function hideCards() {
+      window.clearTimeout(cardTimer);
+      openCard = null;
+      cards.forEach(function (c) { c.setAttribute('hidden', ''); });
     }
 
     /* 目录浮层统一开关：改 <html> 的 xz-toc-open，并同步窄屏触发条的 aria */
@@ -497,6 +552,8 @@
         if (open) stack.removeAttribute('hidden');
         else stack.setAttribute('hidden', '');
         btn.setAttribute('aria-expanded', String(open));
+        /* is-open 让 CSS 把进度方框隐去——展开后印面回到纯朱印 */
+        bar.classList.toggle('is-open', open);
         syncStackSide();
         return;
       }
@@ -513,7 +570,7 @@
         var flash = function () {
           btn.classList.add('is-copied');
           window.setTimeout(function () { btn.classList.remove('is-copied'); }, 1500);
-          showCard();
+          showCard(shareCard);
         };
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(text).then(flash, flash);
@@ -552,12 +609,12 @@
 
     /* 分享卡片：点它外面或按 Esc 收起 */
     document.addEventListener('click', function (e) {
-      if (!card || card.hasAttribute('hidden')) return;
+      if (!openCard) return;
       if (e.target.closest('.post-share-card') || e.target.closest('[data-act="share"]')) return;
-      hideCard();
+      hideCards();
     });
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') hideCard();
+      if (e.key === 'Escape') hideCards();
     });
   })();
 

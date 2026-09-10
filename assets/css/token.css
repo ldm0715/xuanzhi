@@ -60,7 +60,11 @@
 
   /* 微噪点：feTurbulence 随机颗粒（淡墨色，tile 平铺） */
   --tex-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.30 0 0 0 0 0.27 0 0 0 0 0.21 0 0 0 0.055 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
-  --vignette: rgba(56, 46, 28, 0.06);
+  /* 暗角：页面实际浓度。注意与 main.css 里的椭圆几何是一对——
+     椭圆要小到整个视口都落进渐变过渡区，否则四角压根不着色（见 main.css 的说明） */
+  --vignette: rgba(56, 46, 28, 0.18);
+  /* 面板样张用：有意放大，44px 见方的样张用页面浓度等于看不见 */
+  --vignette-swatch: rgba(56, 46, 28, 0.38);
 
   /* 飞鸟淡墨：页面顶缘的一行雁阵水印（亮色墨 / 暗色纸墨） */
   --tex-birds: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 260 140' fill='none' stroke='%234A4438' stroke-linecap='round'%3E%3Cpath d='M26 44 q 10 -13 20 0 q 10 -13 20 0' stroke-width='2.4' stroke-opacity='.16'/%3E%3Cpath d='M120 22 q 8 -10 16 0 q 8 -10 16 0' stroke-width='2' stroke-opacity='.13'/%3E%3Cpath d='M196 60 q 6 -8 12 0 q 6 -8 12 0' stroke-width='1.7' stroke-opacity='.11'/%3E%3Cpath d='M84 84 q 5 -6 10 0 q 5 -6 10 0' stroke-width='1.4' stroke-opacity='.08'/%3E%3C/svg%3E");
@@ -69,6 +73,8 @@
   --hr-ink-strong: rgba(90, 75, 50, 0.8);
   --hr-ink-mid: rgba(90, 75, 50, 0.5);
   --hr-ink-soft: rgba(90, 75, 50, 0.3);
+  /* 飞白是枯笔，落墨最少——四式里最淡的一条，不能跟着 --hr-ink-strong 走 */
+  --hr-ink-feibai: rgba(90, 75, 50, 0.38);
   --hr-zhu: rgba(178, 90, 70, 0.5);
   --hr-zhu-soft: rgba(178, 90, 70, 0.3);
 
@@ -86,6 +92,13 @@
 
   /* 信封纸：比面板纸面略暖一度的旧纸 */
   --envelope-paper: #FAF4E4;
+
+  /* 牛皮纸签条：浮动工具条 / 分享卡片 / 媒体播放器共用一套面与墨。
+     工具栏与卡片原先各自硬编码这几个色值，现在收到这里，
+     播放器直接用同一组，不再出现第二份字面量 */
+  --paper-tool: #F0E5CC;
+  --paper-tool-ink: #4A3A22;
+  --paper-tool-line: rgba(140, 100, 45, 0.30);
 
   /* 邮戳底托：覆在封面画上的半透明纸 */
   --cover-wash: rgba(252, 250, 244, 0.85);
@@ -171,7 +184,8 @@ html[data-theme="dark"] {
 
   /* 暗色噪点颗粒（纸色）与更深的暗角 */
   --tex-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.88 0 0 0 0 0.85 0 0 0 0 0.78 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
-  --vignette: rgba(0, 0, 0, 0.16);
+  --vignette: rgba(0, 0, 0, 0.40);
+  --vignette-swatch: rgba(0, 0, 0, 0.55);
 
   --tex-birds: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 260 140' fill='none' stroke='%23E7E1D2' stroke-linecap='round'%3E%3Cpath d='M26 44 q 10 -13 20 0 q 10 -13 20 0' stroke-width='2.4' stroke-opacity='.13'/%3E%3Cpath d='M120 22 q 8 -10 16 0 q 8 -10 16 0' stroke-width='2' stroke-opacity='.10'/%3E%3Cpath d='M196 60 q 6 -8 12 0 q 6 -8 12 0' stroke-width='1.7' stroke-opacity='.08'/%3E%3Cpath d='M84 84 q 5 -6 10 0 q 5 -6 10 0' stroke-width='1.4' stroke-opacity='.06'/%3E%3C/svg%3E");
 
@@ -179,6 +193,7 @@ html[data-theme="dark"] {
   --hr-ink-strong: rgba(220, 210, 188, 0.7);
   --hr-ink-mid: rgba(220, 210, 188, 0.42);
   --hr-ink-soft: rgba(220, 210, 188, 0.26);
+  --hr-ink-feibai: rgba(220, 210, 188, 0.34);
   --hr-zhu: rgba(205, 120, 95, 0.5);
   --hr-zhu-soft: rgba(205, 120, 95, 0.3);
 
@@ -189,6 +204,10 @@ html[data-theme="dark"] {
   --color-seal: #D0483C;
 
   --envelope-paper: #383026;
+
+  --paper-tool: #3E3425;
+  --paper-tool-ink: #CDBB92;
+  --paper-tool-line: rgba(190, 100, 75, 0.18);
 
   --cover-wash: rgba(56, 48, 39, 0.85);
 

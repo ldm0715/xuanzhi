@@ -95,8 +95,25 @@
       {{/* filled/list */}}
       <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
     </button>
+    {{- /* 进度读数：直接显示数字，不用点。
+           是**指示**不是**控件**——没有可点的动作，所以用 <span> 而不是 <button>，
+           CSS 那边把光标和悬停浮起一并关掉，免得给出可点的暗示。
+           数字由 site.js 按滚动写进来（[data-xz="pct"]），百分号是纯装饰，走 CSS。 */ -}}
+    <span class="post-tool-btn post-tool-btn--num" data-tip="{{ i18n "toolbarProgress" }}">
+      <span class="post-tool-num" data-xz="pct">0</span>
+    </span>
   </div>
-  <button type="button" class="post-seal" data-act="expand" aria-expanded="false" aria-controls="post-toolbar-stack" data-tip="{{ i18n "toolbarMore" }}" aria-label="{{ i18n "toolbarMore" }}"><span>{{ substr site.Title 0 1 | default "印" }}</span></button>
+  {{- /* 朱印：印面是站名首字，外圈一圈**方框**进度。
+        用方不用圆——印本来就是方的（方印），圆环跟形制不对路。
+        stroke-dashoffset 由 --seal-progress 驱动（site.js 滚动时写）。
+        展开后 .is-open 把方框隐去，印面回到纯朱印。 */ -}}
+  <button type="button" class="post-seal" data-act="expand" aria-expanded="false" aria-controls="post-toolbar-stack" data-tip="{{ i18n "toolbarMore" }}" aria-label="{{ i18n "toolbarMore" }}">
+    <svg class="post-seal-ring" viewBox="0 0 56 56" aria-hidden="true">
+      <rect class="post-seal-ring-track" x="4" y="4" width="48" height="48" rx="1.5"/>
+      <rect class="post-seal-ring-bar" x="4" y="4" width="48" height="48" rx="1.5"/>
+    </svg>
+    <span>{{ substr site.Title 0 1 | default "印" }}</span>
+  </button>
 </div>
 </div>
 {{- end }}
