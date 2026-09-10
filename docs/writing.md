@@ -117,11 +117,11 @@ layout: "about"
 frame: "narrow"
 ---
 
-{{< nameplate name="宫城楠木" seal="宫" role="独立开发者 · 居杭州" >}}
-
+{{< nameplate name="宫城楠木" role="独立开发者 · 居杭州" image="avatar.jpg" >}}
 写代码，也写字。……
 
 {{< social github="https://github.com/…" bilibili="https://…" email="mailto:…" rss="/index.xml" >}}
+{{< /nameplate >}}
 
 ## 在做的事
 
@@ -139,16 +139,38 @@ frame: "narrow"
 
 | 短代码 | 用途 | 必填 | 可选 | 是否需闭合 |
 |---|---|---|---|---|
-| `nameplate` | 引首印 + 名号 + 身份 | `name` | `seal` `role` | 否 |
+| `nameplate` | 自述块：左像 + 右文 | `name` | `role` `image` `seal` `alt` | **是** |
 | `social` | 带图标的联系行 | — | `github` `bilibili` `email` `rss` | 否 |
 | `project` | 一个项目条目（题录式） | `name` | `code` `year` `status` `tags` `url` `archived` | **是** |
 | `colophon` | 页尾版权页小字 | — | *（无参数）* | **是** |
 
-**`nameplate`** —— `seal` 是印面字，缺省取名号首字；`role` 是身份那一行：
+**`nameplate`** —— 自述块。左栏 132px 放一张方像，右栏是名号 / 身份 / 内容体。
+**这是闭合短代码**：名号要和自述同处右栏，而它们与内容体在 DOM 里是平级兄弟，
+CSS 排不了，必须有个盒子包住。
 
 ```markdown
-{{< nameplate name="宫城楠木" seal="宫" role="独立开发者 · 居杭州" >}}
+{{< nameplate name="宫城楠木" role="独立开发者 · 居杭州" image="avatar.jpg" >}}
+写代码，也写字。……
+
+{{< social github="https://…" >}}
+{{< /nameplate >}}
 ```
+
+- `role` 是身份那一行
+- `image` 是方形人像：page bundle 内的文件名，或以 `/` 开头的静态路径。
+  **不传就用主题自带的默认人像** `static/images/me.jpg`——站点想换，在自己的
+  `static/images/` 放一张同名 `me.jpg` 即可顶掉（与 `og-default.png` 同一个套路：主题带默认、站点同名覆盖）。
+  指向 bundle 资源时走图片管线压 WebP（按 2× 出 264px），SVG 与静态路径原样引用。
+  **传了却找不到** → `warnf` 并落到朱印，那时朱印是错误提示、不是常态
+- `seal` 是回退印的印文，**只在人像拿不到时才出现**。只认四字（田字格）或一字——
+  132px 见方里 2/3 字的印章撑不住。缺省：名号正好四字就用整个名号（`宫城楠木` → 田字格），否则取首字
+- `alt` 是人像的 alt，缺省用名号
+
+> **左栏为什么是 132px**：早先左栏只放一枚 50px 的印，右栏文字块比它高 100px 出头，
+> 重心整个偏右，那一版因此被推翻。像放大到 132px 后两栏大致齐平——
+> 不是骨架变了，是变量的量级变了。
+>
+> **`social` 放里面就落在右栏，写在外面就落在自述下面整宽**，两种都行。
 
 **`social`** —— 四项都可选，**至少给一个**，只渲染传了值的；`email` 写 `mailto:`，`rss` 一般写 `/index.xml`：
 

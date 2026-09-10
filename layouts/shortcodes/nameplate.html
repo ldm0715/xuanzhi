@@ -1,34 +1,86 @@
 {{- /*
-  关于页的引首：一枚方印 + 名号并排成一行 lockup（书画里"引首章"的位置），
-  下面跟一行身份。
+  自述块：左栏一张方像（没图时回退成朱印），右栏名号 / 身份 / 自述 / 联系。
 
-  为什么是短代码而不是 front matter：主题里凡「用户要填结构」的地方一律走短代码
-  （video / audio / playlist / details / qr），不发明私有的 front matter schema ——
-  那种 schema 既不可组合，换个人用也对不上字段。
+  为什么从自闭合改成了闭合：名号与身份要和内容体（自述、联系）同处右栏，
+  而它们在 DOM 里与内容体是**平级兄弟**——CSS 没法把平级兄弟排进同一栏，
+  必须有一个盒子把它们包住。这是这次唯一动到写法的地方。
+
+  方像为什么是 132px 见 main.css 的注释：左栏要有实打实的体量，右栏承载文字
+  才不失衡。早先那版左栏只有一枚 50px 的印，同一个骨架就是空的。
 
   参数：
-    name  必需，名号
-    seal  可选，印面字；缺省取名号首字（逐字取，别用 substr —— 它按字节切，汉字会碎）
-    role  可选，身份一行
+    name   必需，名号
+    role   可选，身份一行
+    image  可选，方形人像。page bundle 内的文件名，或以 / 开头的静态路径。
+           不给、或找不到，就回退成朱印
+    seal   可选，回退印的印文，1–4 字。四字排成田字格（同标签索引那套形制）；
+           缺省取名号首字
+    alt    可选，人像的 alt。缺省用名号
 
-  自闭合：这个模板不引用 .Inner，所以 {{< nameplate … >}} 不写闭合标签是对的。
-  反过来，一旦这里加了 .Inner，所有既有写法都会判成「未闭合」而构建失败。
+  必须闭合：引用了 .Inner。
 */ -}}
 {{- $name := .Get "name" }}
 {{- $role := .Get "role" }}
+{{- $inner := strings.TrimSpace .Inner }}
 {{- if not $name }}
 	{{- errorf "The %q shortcode requires a %q argument. See %s" .Name "name" .Position }}
 {{- else }}
+	{{- /* 人像：三级。
+	       ① 传了 image= —— page bundle 资源过图片管线压成 WebP（按 2× 出 264px），
+	          SVG 与 / 开头的静态路径原样引用（同 head.html 处理 cover 的思路）。
+	          传了却找不到 → warnf + 落到朱印，此时朱印是**错误提示**不是常态。
+	       ② 没传 —— 用主题自带的默认人像 static/images/me.jpg。
+	          站点想换，在自己的 static/images/ 放一张同名 me.jpg 即可顶掉
+	          （与 og-default.png 同一个套路：主题带默认，站点同名覆盖）。
+	       ③ 上面两条都拿不到 —— 朱印。只在主题删掉默认图、或 image= 指错时出现。 */ -}}
+	{{- $img := "" }}
+	{{- with .Get "image" }}
+		{{- if hasPrefix . "/" }}
+			{{- $img = . | relURL }}
+		{{- else }}
+			{{- with $.Page.Resources.GetMatch . }}
+				{{- if ne .MediaType.SubType "svg" }}
+					{{- $img = (.Fill "264x264 Center webp q85").RelPermalink }}
+				{{- else }}
+					{{- $img = .RelPermalink }}
+				{{- end }}
+			{{- else }}
+				{{- warnf "nameplate: 人像 %q 在 %s 里找不到，改用朱印。See %s" . $.Page.File.Path $.Position }}
+			{{- end }}
+		{{- end }}
+	{{- else }}
+		{{- $img = "images/me.jpg" | relURL }}
+	{{- end }}
+	{{- /* 回退印的印文。只认两种长度：**四字**排田字格，**一字**单印——
+	       132px 见方里 2/3 字的印章撑不住（要么被挤扁，要么溢框），
+	       所以非四字一律取首字，别让它落到一个排不下的长度上。
+	       缺省规则：名号正好四字就用整个名号（宫城楠木 → 田字格），否则取首字。 */ -}}
 	{{- $seal := .Get "seal" }}
 	{{- if not $seal }}
 		{{- $chars := split $name "" }}
-		{{- $seal = cond (gt (len $chars) 0) (index $chars 0) "印" }}
+		{{- if eq (len $chars) 4 }}
+			{{- $seal = $name }}
+		{{- else }}
+			{{- $seal = cond (gt (len $chars) 0) (index $chars 0) "印" }}
+		{{- end }}
 	{{- end }}
+	{{- $sealChars := split $seal "" }}
+	{{- $isGrid := eq (len $sealChars) 4 }}
+	{{- if not $isGrid }}{{ $seal = index $sealChars 0 }}{{ end }}
 <div class="xz-nameplate">
-	<span class="xz-nameplate-seal" aria-hidden="true">{{ $seal }}</span>
-	<h2 class="xz-nameplate-name">{{ $name }}</h2>
+	<div class="xz-nameplate-face">
+		{{- if $img }}
+		<img class="xz-nameplate-img" src="{{ $img }}" alt="{{ or (.Get "alt") $name }}" width="264" height="264" loading="lazy">
+		{{- else if $isGrid }}
+		<span class="xz-nameplate-seal is-grid" aria-hidden="true">{{ range $sealChars }}<span>{{ . }}</span>{{ end }}</span>
+		{{- else }}
+		<span class="xz-nameplate-seal" aria-hidden="true">{{ $seal }}</span>
+		{{- end }}
+	</div>
+	<div class="xz-nameplate-body">
+		<h2 class="xz-nameplate-name">{{ $name }}</h2>
+		{{- with $role }}<p class="xz-nameplate-role">{{ . }}</p>{{ end }}
+		{{- with $inner }}<div class="xz-nameplate-bio">{{ $.Page.RenderString (dict "display" "block") . }}</div>{{ end }}
+	</div>
 </div>
-	{{- with $role }}
-<p class="xz-nameplate-role">{{ . }}</p>
-	{{- end }}
 {{- end -}}

@@ -3919,54 +3919,99 @@ html::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radiu
   border-radius: 0;
 }
 
-/* ---- 引首（shortcode: nameplate） ---- */
+/* ---- 自述块（shortcode: nameplate） ----
+   左栏 132px 定宽放方像（没图时回退成朱印），右栏名号 / 身份 / 自述 / 联系。
+   左栏**定宽**是关键：像与右栏的左缘都不随名号长短变化，整块不会左右晃。
+
+   132px 这个数是量出来的，不是拍脑袋：早先左栏只放一枚 50px 的印，右栏文字块
+   比它高 100px 出头，重心整个偏右（当时量到两栏差 146px），于是那一版被推翻。
+   像放大到 132px 后两栏大致齐平，**同一个骨架就立住了——不是骨架变了，
+   是变量的量级变了**。改这个数之前先回看 v15/v17 两版稿板。
+
+   垂直居中：像对齐右栏那一整块文字的中线（不是像顶齐名号顶）。 */
 .post-content .xz-nameplate {
-  display: flex;
+  display: grid;
+  grid-template-columns: 132px 1fr;
+  gap: 0 40px;
   align-items: center;
-  gap: 18px;
 }
-/* 50px 方印。不用 --tex-mask-paste 毛边蒙版（那是 96px 以上大印用的，
-   50px 上噪声会跟字抢对比），也不用投影 */
+.post-content .xz-nameplate-body { min-width: 0; }
+
+/* 人脸与人像共用一个 footprint：相纸留边 + 极细浅褐框 + 柔散暖影 ——
+   同正文图片那套（.post-content img），不另发明一种「头像」形制 */
+.post-content .xz-nameplate-img,
+.post-content .xz-nameplate-seal {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 6px;
+  background-color: var(--color-mat);
+  border: 1px solid var(--color-frame);
+  border-radius: 2px;
+  box-shadow: var(--pic-shadow);
+}
+.post-content .xz-nameplate-img { object-fit: cover; }
+
+/* 回退：把「相纸」换成「朱色底」，其余同 footprint */
 .post-content .xz-nameplate-seal {
   position: relative;
-  display: inline-grid;
+  display: grid;
   place-items: center;
-  flex-shrink: 0;
-  width: 50px;
-  height: 50px;
-  border: 1px solid var(--color-zhu);
-  border-radius: 3px;
+  padding: 0;
   background-color: var(--color-zhu);
+  border-color: var(--color-zhu);
+  border-radius: 4px;
   color: var(--color-bg);
   font-family: var(--font-title);
-  font-size: 1.3rem;
+  font-size: 3.4rem;
   transform: rotate(-2deg);
 }
 /* 内衬细边：与页面其余印面同源的形制 */
 .post-content .xz-nameplate-seal::after {
   content: "";
   position: absolute;
-  inset: 3px;
+  inset: 6px;
   border: 1px solid color-mix(in srgb, var(--color-bg) 26%, transparent);
   border-radius: 2px;
   pointer-events: none;
 }
+/* 四字印排田字格（同标签索引那套形制）。132px 见方、去掉 14px 内边距后
+   一格约 50px，字 2rem 出头刚好撑住 */
+.post-content .xz-nameplate-seal.is-grid {
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 14px;
+  font-size: 2rem;
+}
+.post-content .xz-nameplate-seal.is-grid > span { display: grid; place-items: center; }
+
 /* 名号是 h2，会吃到 .post-content h2（1.35rem / 2.1em 上边距）。
-   .about 前缀把它压回来——这里要的是页面的开场大字，不是小节标题。 */
+   这里要的是页面开场，不是小节标题，所以显式压回来。
+   1.5rem 而不是原来的 2.2rem：它现在上面没有别的东西，配一行身份已经立得住。 */
 .post-content .xz-nameplate-name {
   margin: 0;
   font-family: var(--font-title);
-  font-size: 2.2rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
+  line-height: 1.35;
   color: var(--color-title);
 }
 .post-content .xz-nameplate-role {
-  margin: 14px 0 0;
-  font-size: 0.88rem;
-  letter-spacing: 0.22em;
+  margin: 9px 0 0;
+  font-size: 0.82rem;
+  letter-spacing: 0.16em;
   color: var(--color-text-secondary);
 }
+/* 自述正文：与名号之间拉开一段，让「抬头」与「正文」分开。
+   不卡 max-width —— 行宽由右栏自己定（见文件头那条右边界纪律） */
+.post-content .xz-nameplate-bio {
+  margin-top: 22px;
+  color: var(--color-text);
+  font-size: 0.98rem;
+}
+.post-content .xz-nameplate-bio p { margin: 0; }
+.post-content .xz-nameplate-bio p + p { margin-top: 1.1em; }
 
 /* ---- 联系行（shortcode: social） ---- */
 .post-content .xz-social {
@@ -4149,9 +4194,10 @@ html::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radiu
 @media (max-width: 640px) {
   .about { padding: 1.6rem 0 4rem; }
   .about .about-content > h2:not(:first-child) { margin-top: 3.6rem; }
-  .post-content .xz-nameplate { gap: 14px; }
-  .post-content .xz-nameplate-seal { width: 42px; height: 42px; font-size: 1.1rem; }
-  .post-content .xz-nameplate-name { font-size: 1.8rem; }
+  /* 自述块退化为上下堆叠。左栏定宽 132px 在这里失效，所以要给 face 显式宽度——
+     否则 img/印的 width:100% 会撑满整行 */
+  .post-content .xz-nameplate { grid-template-columns: 1fr; gap: 20px; }
+  .post-content .xz-nameplate-face { width: 132px; }
   /* 题录式退化为上下堆叠 */
   .post-content .xz-project { grid-template-columns: 1fr; gap: 8px; padding: 18px 0; }
   .post-content .xz-project-meta { grid-column: 1; }
@@ -4181,8 +4227,7 @@ html::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radiu
   .post-toolbar,
   .post-sign-seal,
   .xz-player--video,
-  .xz-player--audio,
-  .xz-nameplate-seal { display: none !important; }
+  .xz-player--audio { display: none !important; }
 
   /* 暗角是 body::after 的固定遮罩，上面那条 background:#fff 管不到它——
      不显式关掉，打印出来四周一圈灰晕 */
@@ -4195,6 +4240,12 @@ html::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radiu
   /* 关于页：正文容器就是 .post-content，上面那两条与标题的 break-after 都已覆盖，
      这里只需要补项目条目——题录式断在中间会读不出是哪一项 */
   .about .xz-project { break-inside: avoid; }
+
+  /* 自述块的左栏整栏不打印。回退印是实心朱底，黑白下就是一整块黑；人像也不是
+     「一篇能读的文章」的必要部分。文字照印，版式收成单栏——左栏隐去后
+     那 132px 会空着，所以 grid 也要一并解掉 */
+  .xz-nameplate { display: block !important; }
+  .xz-nameplate-face { display: none !important; }
 
   .post-content img,
   .post-content figure,

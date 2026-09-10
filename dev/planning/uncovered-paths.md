@@ -51,6 +51,8 @@
 | ≤640px 窄屏 | 题录式退化为单列、引首与联系行的折行，都没看过 |
 | `@media print` | 只加了 `.xz-nameplate-seal` 的隐藏与 `.xz-project` 的 `break-inside`，没真打印过 |
 | 分节内容与标题文字的对齐 | 那条 27px 缩进是按公式推出来的，实际视觉是否对齐未经确认 |
+| `nameplate` 的 **page bundle 人像**分支 | **默认人像**（`static/images/me.jpg`）与**静态路径**两条都已实测。但指向 bundle 资源时会走 `.Fill "264x264 Center webp q85"` 的图片管线，**这段从未执行过**——而 `content/about.md` 是单个 `.md`、不是 bundle，要用本地图得先改成 `content/about/index.md` + 图片同目录，否则 `Resources.GetMatch` 找不到（会 `warnf` 并落到朱印，不会静默） |
+| `static/images/me.jpg` 的体积 | 940×940 的 JPG **84KB**，而它显示出来只有 132px（2× 也就 264px），等于按 3.5× 出图。它在 `static/` 下**不走图片管线**（static 不是 resource），原样发布；同目录 `og-default.png` 只有 20KB。挪进 `assets/` 用 `resources.Get` + `.Fill` 能压到十几 KB，但那就失去"站点同名覆盖"的便利。**折中**：用工具重编码成 400×400 放回原处，代码一个字不用动 |
 
 **为什么要关注**：这个主题的历史一再表明，**构建通过离「看起来对」很远**——列表墨点歪在文字左上方、内联 SVG 被撑成 300×150、右下横线与文字右端各停各的，全都是构建零报错、肉眼一眼就看出来的问题。关于页目前一次浏览器检验都没有。
 

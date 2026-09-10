@@ -23,6 +23,18 @@ CC0 虽不要求署名，但**出处仍要记在这里**，否则下次换图标
 
 > OFL 字体允许随任何软件打包分发，但**必须保留各自的版权与许可声明**，也不得单独改标协议。
 
+### `static/images/` 下那三套图（主题原创，不在上表）
+
+它们不是第三方资产，随主题本体走 MIT：
+
+| 图 | 说明 |
+|---|---|
+| `og-default.png` | 分享卡片默认图 |
+| `covers/` | 首页卡片印记的八式水墨小品定妆预览稿 |
+| `me.jpg` | 关于页自述块的**默认人像**，AI 生成 |
+
+站点想换掉其中任意一张，在自己的 `static/images/` 放一张同名同路径的即可，不用改配置（见 [writing.md](writing.md) 关于页一节）。
+
 ### 播放器两个库的说明
 
 只在你**真正嵌了媒体**的页面上才会被加载（`head.html` 用 `.HasShortcode` 判断），没有媒体的页面一个字节都不带。两者的升级方式、以及升级时必须重做的改动（删掉末行的 `sourceMappingURL`、把 Plyr 的图标 sprite 放到 `static/`）记在 [`assets/vendor/README.md`](../assets/vendor/README.md)。

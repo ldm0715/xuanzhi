@@ -10,9 +10,12 @@ layouts/
 ├── home.html            # 首页（诗笺欢迎区 + 红框封卡片，最近 8 篇）
 ├── list.html            # 归档（毛笔纪年 + 朱印领月）
 ├── single.html          # 文章页
+├── about.html           # 关于页：一个版心 + .Content，结构与样式全在短代码里
 ├── taxonomy.html        # 分类法索引页分发器 → 书架 / 印谱
 ├── term.html            # 单词页分发器 → 开函 / 钤印
 ├── 404.html
+├── shortcodes/          # 覆写 details / qr，自带媒体三颗（video / audio / playlist）
+│                        # 与关于页四颗（nameplate / social / project / colophon）
 ├── partials/            # head / header / footer / nav-links / appearance-tiles / header-extra
 │                        # / post-item / post-card / post-card-cover / seal-count / pagination
 │                        # / taxonomy-shelf / taxonomy-sealwall / term-category / term-tag
@@ -26,8 +29,11 @@ assets/
 ├── fonts/               # 自托管字体的 @font-face CSS（head.html 用 resources.Get 探测）
 └── js/site.js           # 明暗切换 + 外观面板 + 站内搜索(Pagefind) + 移动端下拉面板 + 复制按钮
                          # + scrollspy + 长目录折叠 + 诗笺刷新 + 图片灯箱
-static/fonts/       # 字体二进制切片（woff2），原样发布到 /fonts/... 供上面的 CSS 相对引用
+static/fonts/            # 字体二进制切片（woff2），原样发布到 /fonts/... 供上面的 CSS 相对引用
+static/images/me.jpg     # 关于页自述块的**默认人像**（站点放同名同路径即可覆盖）
+static/images/og-default.png  # 分享卡片默认图（同样靠站点同名覆盖）
 static/images/covers/    # 八式水墨小品定妆预览稿（页面按题哈希内联渲染）
+static/vendor/plyr.svg   # Plyr 图标 sprite（运行时取，必须放 static，不能放 assets）
 scripts/                 # 开发辅助脚本
 ```
 
