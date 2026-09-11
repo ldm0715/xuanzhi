@@ -82,3 +82,9 @@ jobs:
           files: xuanzhi-*.zip
           # release notes 来自 CHANGELOG，不用 GitHub 自动生成的那份
           generate_release_notes: false
+          # 带后缀的 tag（v1.0.0-rc.1 这种）一律标成预发布。
+          # 这个输入没有默认值（等于 false），不写的话 rc 会建出一个**正式** Release；
+          # 而 make_latest 又走 GitHub API 默认（true），rc 会被顶成仓库的 Latest。
+          # 两项必须成对写：GitHub 的规则是「预发布不能是 latest」。
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          make_latest: ${{ contains(github.ref_name, '-') && 'false' || 'true' }}
