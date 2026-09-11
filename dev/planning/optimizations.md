@@ -30,7 +30,7 @@
 | `content/posts/test.md` 非草稿会发布 | 占位正文 "gogogo" 会成一篇真实页面 | 删掉或转草稿/改真文。零成本 | 构建产物无「我的test」 |
 | `my-first-post.md` | Hugo scaffold 草稿残留 | 清理。零成本 | 发布列表干净 |
 | `static/` 两个 dev 预览 HTML | `header-extend-demo.html` / `mobile-nav-demo.html` 会被发布到站点根 | 移出 `static/` 或删除 | 产物根目录没有这两个文件 |
-| 真实首篇带 `cover` 的文章 | 主题 `cover` 路径从未被真实数据跑过（回归风险） | 写正式文章时填 `cover`（同时回归 §1 那条） | 首页卡片换图、OG 正常 |
+| 真实首篇带 `cover` 的文章 | 主题 `cover` 路径从未被真实数据跑过（回归风险） | 写正式文章时填 `cover: "assets/…"`（图片的新约定，同时回归 §1 那条） | 首页卡片换图、OG 正常 |
 
 ### 内容/页面候选
 

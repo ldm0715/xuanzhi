@@ -108,7 +108,7 @@ CommonMark 的强调符号有条**翼侧规则**：`**` 后面紧跟标点（「
 
 ### 引用的图片是原图，没有转 WebP、没有响应式
 
-图片管线需要 **Hugo extended**，标准版跑不了。`hugo version` 确认输出里有 `+extended`。另外图片要走管线，必须和文章放在同一个**page bundle**（`content/posts/my-post/index.md` + 图片），单独放在 `static/` 里的是原样发布、不做处理。
+图片管线需要 **Hugo extended**，标准版跑不了。`hugo version` 确认输出里有 `+extended`。另外图片要走管线，必须和文章放在同一个**page bundle**（`content/posts/my-post/index.md` + `content/posts/my-post/assets/图片`），单独放在 `static/` 里的是原样发布、不做处理。
 
 ## 文章不出现 / 显示不对
 
@@ -182,7 +182,7 @@ frame: "narrow"     # ← 少了这行，框架会按文章页展开到 1150px
 
 说明人像没找到。`nameplate` 短代码的人像取值顺序是：`image=` 参数 → 主题自带的 `static/images/me.jpg` → **朱印**。
 
-**朱印是错误提示，不是常态。** 检查 `image` 指的路径对不对（page bundle 内的文件名，或以 `/` 开头的静态路径）。用默认人像的话，确认站点或主题的 `static/images/me.jpg` 在。
+**朱印是错误提示，不是常态。** 检查 `image` 指的路径对不对（按约定写文章 `assets/` 下的文件名，或以 `/` 开头的静态路径）。用默认人像的话，确认站点或主题的 `static/images/me.jpg` 在。
 
 ### 首页卡片的印记想换成自己的图
 

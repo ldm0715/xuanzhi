@@ -190,6 +190,17 @@ html.xz-page-in main {
   font-size: 1.12rem;
   letter-spacing: 0.02em;
 }
+/* 滚过正文标题之后，这一格换成文章标题（site.js「头栏站名 → 文章标题」段）。
+   新增的只有"长标题怎么收"：占住站名到右侧导航之间的空档，超长截断。
+   导航在 space-between 里靠右，标题变宽不会把它挤走，只会吃掉中间的空隙。 */
+.site-title.is-swapped {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-right: 1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 .site-nav { display: flex; align-items: center; gap: 18px; }
 
@@ -526,6 +537,12 @@ html[data-theme="dark"] .nav-panel { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
      （扩展插槽、自定义按钮）都不会重新把窄屏挤爆——要么进下拉面板，要么不显示 */
   .site-nav > *:not(#theme-toggle) { display: none; }
   .site-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  /* 换成文章标题后，这一格是撑满 ☰ 与明暗按钮之间那一段的（.is-swapped 的 flex:1），
+     文字默认左对齐就会贴着 ☰。窄屏站名看着居中，是因为两侧两个圆钮等宽、由
+     space-between 分出来的空隙对称——换过去的那一个也得跟着居中才不突兀。
+     长标题仍按上面那行省略号截断：居中 + nowrap + overflow 会把两端一起裁，
+     露出来的是中段。取舍如此：宁可看着居中，也不要贴边。 */
+  .site-title.is-swapped { text-align: center; }
   .nav-panel { display: block; }
 }
 
@@ -970,6 +987,22 @@ ul.post-list { list-style: none; padding: 0; margin: 0; }
   background: var(--color-zhu);
   color: var(--color-bg);
 }
+/* 「+N」尾签：形制跟着标签走，但改虚线框、退到最淡的墨——它不是一枚标签，
+   是"还有几枚没摊开"的提示。悬停回到实框，与真标签一致地回应。
+   颜色全部走已有点缀色 token，明暗 × 陶土/黛青自动跟随，不必补四象限。 */
+.post-meta .tag-more {
+  border-style: dashed;
+  border-color: var(--color-ink-weak);
+  background: none;
+  color: var(--color-text-note);
+  font-variant-numeric: tabular-nums;
+}
+.post-meta .tag-more:hover {
+  border-style: solid;
+  border-color: var(--color-zhu);
+  background: var(--color-zhu);
+  color: var(--color-bg);
+}
 /* 分类：宋体墨色名 + 一撇毛笔记号（传统评点的「抹」）。
    无底无边，靠字体和颜色与「撰于」的朱印、标签的朱框分开 */
 .post-meta .meta-cats {
@@ -1060,6 +1093,17 @@ details[open] > :not(summary) {
     var(--color-surface);
   box-shadow: inset 0 0 12px color-mix(in srgb, var(--color-ink-weak) 25%, transparent);
 }
+/* 面板的间距复位：容器这层只负责纸面，内层元素的间距归它们自己。
+   改 .case-body 之前先看这条：`details[open] > :not(summary)` 的特异性是
+   (0,1,2)，而 `.post-content ul` 是 (0,1,1)——面板规则**压得过列表缩进**。
+   折叠内容一旦不包容器、直接当子元素，那条 1.7em 就会被 padding: 18px 顶掉，
+   `li::before` 挂在 left:-1.02em 的墨点随即探出纸面左缘（2026-09-11 修掉的
+   「墨点跑到框外」就是这个）。容器是 shortcode 里输出的，手写的 <details>
+   没有它，走的是上面那条面板规则，行为不变。 */
+.case-body > :first-child { margin-top: 0; }
+.case-body > :last-child { margin-bottom: 0; }
+/* .post-content > p 是直接子选择器，隔了容器这层就匹配不到，间距在这里补回 */
+.case-body > p { margin: 0 0 1.5em; }
 /* 收合动画：::details-content 伪元素（Chrome 131+/Safari 18.2+；
    不支持的浏览器回退为瞬时收合，无副作用） */
 :root { interpolate-size: allow-keywords; }
@@ -1229,8 +1273,12 @@ details[open]::details-content {
 .post-content > p { margin: 0 0 1.5em; }
 
 /* 首字下沉：开篇导语专用——只落在正文第一段，浓墨楷字沉两行，
-   垫极淡朱砂印底（随点缀色转黛青），引读者入文；中段段落不盖印 */
-.post-content > p:first-of-type::first-letter {
+   垫极淡朱砂印底（随点缀色转黛青），引读者入文；中段段落不盖印。
+   :not(.no-dropcap) 是抑制开关：首个段落铺不满两行时由 single.html 在构建期
+   挂上这个类（判据与阈值都在模板里，这里只管让开）。用 :not() 而不是再写一条
+   复位规则——复位要列全下面设过的每个属性，漏一个就漏出来（关于页在文件底部
+   那套逐条复位是历史写法，别照抄到这里）。 */
+.post-content:not(.no-dropcap) > p:first-of-type::first-letter {
   float: left;
   font-family: var(--font-sans);
   font-size: 3em;
@@ -3212,7 +3260,7 @@ html[data-theme="dark"] .post-seal::after {
   }
 
   /* 导语首字在窄屏缩小一档，下沉高度仍保持两行 */
-  .post-content > p:first-of-type::first-letter {
+  .post-content:not(.no-dropcap) > p:first-of-type::first-letter {
     font-size: 2.4em;
     line-height: 1.55;
     margin-right: 0.35em;
@@ -3749,6 +3797,14 @@ html[data-theme="dark"] .inkcard:hover {
   color: var(--color-text-note);
 }
 .inkcard-tag { display: inline-flex; align-items: center; }
+/* 卡片落款行的「+N」尾签：只是文字，不能是链接——整张卡已经是 <a>。
+   分隔细竖线由上面那条 `.inkcard-tag + .inkcard-tag::before` 照常给出。
+   字距要压回 0：容器那 0.08em 是给汉字标签的，"+2" 会被拉开。 */
+.inkcard-tag-more {
+  color: var(--color-zhu-strong);
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
 .inkcard-tag + .inkcard-tag::before {
   content: "";
   width: 1px;

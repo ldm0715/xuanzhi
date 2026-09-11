@@ -8,6 +8,13 @@
     让旧内容不至于继续错着——但新内容请一律写 summary=。
 
   渲染出的 <details> 不带类，样式由 main.css 里那套「书函折叠块」的裸元素规则接管。
+
+  内容体为什么必须包一层 .case-body：
+  main.css 的面板规则 `details[open] > :not(summary)` 特异性是 (0,1,2)，压得过
+  `.post-content ul` 的 (0,1,1)——内层元素直接当子元素的话，面板的 padding 会把
+  列表自己的 1.7em 缩进顶掉，`li::before` 那枚 left:-1.02em 的墨点就挂到纸面
+  左缘外面去了（「墨点跑到框外」，2026-09-11 修）。包一层之后面板只作用于容器，
+  内层元素回到正文那套规则。顺带：内容区有多个块时也从「每块一张纸」变成「共一张」。
 */ -}}
 {{- $class := or (.Get "class") "" }}
 {{- $name := or (.Get "name") "" }}
@@ -24,5 +31,7 @@
 	{{- with $name }} name="{{ . }}" {{- end }}
 	{{- with $open }} open {{- end -}}>
 	<summary>{{ $summary | .Page.RenderString }}</summary>
-	{{ .Inner | .Page.RenderString (dict "display" "block") -}}
+	{{- with .Inner }}
+	<div class="case-body">{{ . | $.Page.RenderString (dict "display" "block") }}</div>
+	{{- end }}
 </details>

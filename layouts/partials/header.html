@@ -8,7 +8,10 @@
         <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
       </svg>
     </button>
-    <a class="site-title" href="{{ site.Home.RelPermalink }}">{{ site.Title }}</a>
+    {{- /* 站名收进 span，并给文章页带上 data-post-title：正文标题滚过头栏后，
+           site.js 把这一格的文字换成文章标题，滚回顶部再换回来。
+           换的是 span 的文字而不是叠两个元素——叠着的话长标题的宽度会把导航挤走 */ -}}
+    <a class="site-title" href="{{ site.Home.RelPermalink }}"{{ if .IsPage }} data-post-title="{{ .Title }}"{{ end }}><span class="site-title-text">{{ site.Title }}</span></a>
     <nav class="site-nav">
       {{- partial "nav-links.html" . }}
       <div class="search">

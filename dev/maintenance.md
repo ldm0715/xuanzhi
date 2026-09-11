@@ -16,19 +16,29 @@ layouts/
 ├── 404.html
 ├── shortcodes/          # 覆写 details / qr，自带媒体三颗（video / audio / playlist）
 │                        # 与关于页四颗（nameplate / social / project / colophon）
+│                        # details 的内容体**必须**包一层 .case-body：面板规则
+│                        # details[open] > :not(summary) 的特异性会压过内层元素自己的
+│                        # margin/padding，少了这层列表缩进会被顶掉、墨点探出框外
 ├── partials/            # head / header / footer / nav-links / appearance-tiles / header-extra
-│                        # / post-item / post-card / post-card-cover / seal-count / pagination
+│                        # / post-item / post-card / post-card-cover / seal-count
+│                        # / pagination（收 dict：pager + 可选 anchor）
 │                        # / taxonomy-shelf / taxonomy-sealwall / term-category / term-tag
+│                        # / schema（JSON-LD）/ player-src / player-audio
 └── _markup/
-    ├── render-image.html   # 图片渲染钩子（WebP/srcset 管线 + 图窗触发链接）
-    └── render-heading.html # 标题毛笔圈点 + 锚点
+    ├── render-image.html       # 图片渲染钩子（page bundle 的图按约定收在文章目录
+    │                           # assets/ 下 → WebP/srcset 管线 + 图窗触发链接）
+    ├── render-heading.html     # 标题毛笔圈点 + 锚点
+    ├── render-link.html        # 外链在服务端标记（新标签 + ↗）
+    ├── render-table.html       # 宽表套一层横向滚动容器
+    └── render-passthrough.html # 公式在构建期渲染（KaTeX → 静态 HTML）
 assets/
 ├── css/token.css        # 设计 token（全部颜色/字体/版式变量在这里）
 ├── css/chroma.css       # 代码高亮（变量驱动，明暗自动跟随）
 ├── css/main.css         # 版式
 ├── fonts/               # 自托管字体的 @font-face CSS（head.html 用 resources.Get 探测）
 └── js/site.js           # 明暗切换 + 外观面板 + 站内搜索(Pagefind) + 移动端下拉面板 + 复制按钮
-                         # + scrollspy + 长目录折叠 + 诗笺刷新 + 图片灯箱
+                         # + scrollspy + 长目录折叠 + 诗笺刷新 + 图片灯箱 + 播放器初始化
+                         # + 头栏站名↔文章标题切换（文章页滚过正文标题后换）
 static/fonts/            # 字体二进制切片（woff2），原样发布到 /fonts/... 供上面的 CSS 相对引用
 static/images/me.jpg     # 关于页自述块的**默认人像**（站点放同名同路径即可覆盖）
 static/images/og-default.png  # 分享卡片默认图（同样靠站点同名覆盖）

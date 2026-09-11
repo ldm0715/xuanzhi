@@ -16,5 +16,5 @@
   {{ partial "post-item.html" . }}
   {{- end }}
 </section>
-{{ partial "pagination.html" $paginator }}
+{{ partial "pagination.html" (dict "pager" $paginator) }}
 </div>

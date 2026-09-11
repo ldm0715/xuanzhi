@@ -70,6 +70,6 @@
     {{ partial "post-card.html" . }}
     {{- end }}
   </section>
-  {{ partial "pagination.html" $paginator }}
+  {{ partial "pagination.html" (dict "pager" $paginator "anchor" "recent") }}
 </div>
 {{- end }}

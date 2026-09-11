@@ -31,9 +31,15 @@
       <span class="meta-sep" aria-hidden="true"></span>
       <span class="meta-item meta-cats">{{- range . }}<a class="cat" href="{{ .RelPermalink }}"><svg class="cat-mark" viewBox="0 0 24 24" aria-hidden="true"><use href="#cat-mark"></use></svg>{{ .Title }}</a>{{ end -}}</span>
       {{- end }}
-      {{- with .GetTerms "tags" }}
+      {{- /* 标签只挂前 4 枚，余下的收成一枚 +N 小签指向印谱墙。
+             一篇挂七八个 tag 时 meta 行会被标签铺满，把日期、字数全挤走。
+             上限改这里一处即可。 */ -}}
+      {{- $tags := .GetTerms "tags" }}
+      {{- if $tags }}
+      {{- $tagsURL := "/tags/" }}
+      {{- with site.GetPage "/tags" }}{{ $tagsURL = .RelPermalink }}{{ end }}
       <span class="meta-sep" aria-hidden="true"></span>
-      <span class="meta-item meta-tags">{{- range . }}<a class="tag" href="{{ .RelPermalink }}">{{ .Title }}</a>{{ end -}}</span>
+      <span class="meta-item meta-tags">{{- range first 4 $tags }}<a class="tag" href="{{ .RelPermalink }}">{{ .Title }}</a>{{ end -}}{{- if gt (len $tags) 4 }}<a class="tag tag-more" href="{{ $tagsURL }}" title="{{ i18n "moreTags" }}" aria-label="{{ i18n "moreTags" }}">+{{ sub (len $tags) 4 }}</a>{{ end -}}</span>
       {{- end }}
     </div>
   </header>
@@ -47,7 +53,30 @@
   </button>
   {{- end }}
 
-  <div class="post-content">
+  {{- /* 首字下沉只给真正的导语。3em 的下沉字要吃掉两行高，开篇只有一句话时
+         （customization / troubleshooting 那类页面，正文头一块还是折叠块）看着像
+         扣了一顶帽子。判据是**构建期量长度**——拿不到渲染后的行数，只能估。
+
+         量的是「显示宽度」而不是字数或字节数：一个汉字占两个西文字符的宽度，
+         而 UTF-8 里它正好 3 字节、西文 1 字节，所以
+             显示宽度 = (字节数 + 字符数) / 2
+         （汉字贡献 3+1=4 的一半即 2，西文贡献 1+1=2 的一半即 1）。中英混排的
+         开篇因此落在同一把尺上——只数字数的话，一行西文会被当成和一行中文一样长。
+
+         94 是实测校准出来的：800px 正文列一行约 47 个汉字 = 94 个显示宽。
+         本仓库全部页面的首段实测，单行的最多 88、双行的最少 100，94 正落在空档里。
+         改阈值只改这一处，改完必须按同样口径重测。
+         先剥掉 <details> / <blockquote>：它们的 <p> 不是 .post-content 的直接子元素
+         （CSS 的 p:first-of-type 本来就不会选中），留着会量错对象。 */ -}}
+  {{- $lead := .Content -}}
+  {{- $lead = replaceRE `(?s)<details\b.*?</details>` "" $lead -}}
+  {{- $lead = replaceRE `(?s)<blockquote\b.*?</blockquote>` "" $lead -}}
+  {{- $leadShort := false -}}
+  {{- with findRE `(?s)<p\b[^>]*>.*?</p>` $lead 1 -}}
+    {{- $txt := chomp (plainify (index . 0)) -}}
+    {{- if lt (div (add (len $txt) (countrunes $txt)) 2) 94 }}{{ $leadShort = true }}{{ end -}}
+  {{- end }}
+  <div class="post-content{{ if $leadShort }} no-dropcap{{ end }}">
     {{ .Content }}
     {{- with site.Title }}
     {{- $chars := split . "" -}}

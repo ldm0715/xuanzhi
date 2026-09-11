@@ -43,7 +43,7 @@ tags:
 categories:
   - 随笔
 description: "一句话摘要，会用作 meta description 与分享卡片描述"
-cover: "cover.jpg"
+cover: "assets/cover.jpg"
 draft: false
 ---
 ```
@@ -54,22 +54,24 @@ draft: false
 | `date` | 建议写 | 归档按它分年月；**不写日期或写成未来时间，文章不会出现在归档里** |
 | `tags` / `categories` | 否 | 分类法。标签渲染成印谱、分类渲染成书架，见[站点配置](configuration.md) |
 | `description` | 否 | 覆盖 meta description；不写就用正文自动摘要 |
-| `cover` | 否 | 首页卡片右下角的印记换成自己的图，同时作为分享卡片的 `og:image` |
+| `cover` | 否 | 首页卡片右下角的印记换成自己的图（写文章 `assets/` 下的文件名，如 `assets/cover.jpg`），同时作为分享卡片的 `og:image` |
 | `draft` | 否 | `true` 时不渲染，需要 `hugo server -D` 才看得到 |
 
 > **日期写成了未来时间，文章会「消失」**——Hugo 默认不渲染未来日期的内容。这是最容易自己吓自己的一条。
 
-## 图片：与文章同目录（page bundle）
+## 图片：放在文章的 assets/ 里（page bundle）
 
-一篇文章连同它的图片放进同一个文件夹，这就是 Hugo 的 **page bundle**：
+一篇文章连同它的图片放进同一个文件夹，这就是 Hugo 的 **page bundle**。图片统一收进它下面的 `assets/`——文章目录里就只剩一个 `index.md` 和一个文件夹，图多了也不会糊成一片：
 
 ```
 content/posts/my-post/
 ├── index.md
-└── photo.jpg
+└── assets/
+    ├── photo.jpg
+    └── cover.jpg
 ```
 
-正文直接写 `![说明](photo.jpg)`，构建时自动做三件事：
+正文写 `![说明](assets/photo.jpg)`，front matter 的 `cover` 也写 `assets/cover.jpg`（都是**相对文章目录**的路径）。构建时自动做三件事：
 
 - 压缩并转 **WebP**，生成三档**响应式 srcset** + 懒加载
 - 每张图包一层指向最大档的链接——点图进入**图窗**（放大镜浏览，见[设计理念](design.md)）
@@ -78,16 +80,16 @@ content/posts/my-post/
 **写法**（第一张带图注、第二张只有 alt）：
 
 ```markdown
-![宣纸色块测试图](paper-test.png "图注：宣纸底与陶土橘")
+![宣纸色块测试图](assets/paper-test.png "图注：宣纸底与陶土橘")
 
-![宣纸色块测试图](paper-test.png)
+![宣纸色块测试图](assets/paper-test.png)
 ```
 
 **效果**：
 
-![宣纸色块测试图](paper-test.png "图注：宣纸底与陶土橘")
+![宣纸色块测试图](assets/paper-test.png "图注：宣纸底与陶土橘")
 
-![宣纸色块测试图](paper-test.png)
+![宣纸色块测试图](assets/paper-test.png)
 
 **不要把图片放到外部图床**——图片和文章在同一个 Git 仓库里，是本主题和整个博客架构的根基约定（本地所见即所得、整站可镜像）。远端的图（HTTP 图）不会被压缩管线处理，只按原图展示。
 
@@ -232,6 +234,8 @@ plain block without language tag
 ## Markdown 各类元素的版式
 
 主题对 markdown 的常用元素都有专门版式，不用额外做什么。每个元素都是**先写法、后效果**。
+
+唯一一处**自动判断**的是首字下沉：正文第一段的首字会自动沉两行、垫一枚淡朱印底；但若这第一段铺不满一行（约 47 个汉字以内），构建期会自动跳过下沉——开篇只有一句话时那顶 3em 的帽子会显得很突兀。**不用手动处理**，想让它沉就多写两句。第一段若是折叠块或引用块，下沉不落在它们身上。
 
 ### 行内元素
 
@@ -420,7 +424,7 @@ plain block without language tag
 ```yaml
 ---
 title: "我的文章"
-cover: "cover.jpg"   # page bundle 内的文件名，或以 / 开头的静态图片路径
+cover: "assets/cover.jpg"   # 文章 assets/ 下的文件名，或以 / 开头的静态图片路径
 ---
 ```
 

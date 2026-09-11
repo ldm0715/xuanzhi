@@ -45,7 +45,7 @@ hugo server --source exampleSite      # http://localhost:1313/
 **可定制**
 - 头栏导航走 `hugo.toml` 菜单，加页面不改模板
 - 界面文案用 i18n 覆盖；头栏图标按钮有预留插槽
-- 首页卡片印记可用 front matter `cover` 换成自己的图
+- 首页卡片印记可用 front matter `cover` 换成自己的图（写文章 `assets/` 下的文件名，如 `assets/cover.jpg`）
 
 ## 快速开始
 

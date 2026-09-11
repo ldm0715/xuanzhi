@@ -24,6 +24,6 @@
   {{- end }}
 </section>
 {{- end }}
-{{ partial "pagination.html" $paginator }}
+{{ partial "pagination.html" (dict "pager" $paginator) }}
 </div>
 {{- end }}

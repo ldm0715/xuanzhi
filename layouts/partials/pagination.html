@@ -1,11 +1,25 @@
-{{- if gt .TotalPages 1 -}}
+{{- /*
+  分页条。收 dict：pager = .Paginate 的结果，anchor = 可选锚点名（不带 #）。
+
+  锚点用来解决「翻页后落在英雄区」：首页 hero 是 min-height: calc(100vh - 57px)，
+  翻到第 2 页时视口仍停在整屏诗笺上，得再往下滑一屏才看见卡片。传
+  anchor="recent" 后链接带上 #recent，浏览器直接落到「近期文章」——
+  #recent 的 scroll-margin-top: 84px 已让开吸顶头栏，别再重复设。
+
+  Pager 只有 .URL，没有 .RelPermalink（写 .RelPermalink 只有一页时不炸、
+  出现第二页才炸，已踩过）。传锚点请用 anchor=，不要自己拼 href。
+*/ -}}
+{{- $pager := .pager -}}
+{{- $anchor := "" -}}
+{{- with .anchor }}{{ $anchor = printf "#%s" . }}{{ end -}}
+{{- if gt $pager.TotalPages 1 -}}
 <nav class="pagination">
-  {{- with .Prev }}
-  <a class="pagination-prev" href="{{ .URL }}">← {{ i18n "prevPage" }}</a>
+  {{- with $pager.Prev }}
+  <a class="pagination-prev" href="{{ .URL }}{{ $anchor }}">← {{ i18n "prevPage" }}</a>
   {{- end }}
-  <span class="pagination-num">{{ .PageNumber }} / {{ .TotalPages }}</span>
-  {{- with .Next }}
-  <a class="pagination-next" href="{{ .URL }}">{{ i18n "nextPage" }} →</a>
+  <span class="pagination-num">{{ $pager.PageNumber }} / {{ $pager.TotalPages }}</span>
+  {{- with $pager.Next }}
+  <a class="pagination-next" href="{{ .URL }}{{ $anchor }}">{{ i18n "nextPage" }} →</a>
   {{- end }}
 </nav>
 {{- end -}}

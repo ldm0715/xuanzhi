@@ -39,6 +39,8 @@
 
 ## 2. i18n 补齐
 
+> **2026-09-11 更正**：这一条已完成，下面的「现状」是动手前的快照，**别再当现状引用**。实际结果：`i18n/zh-cn.yaml` 现在 **80 条** key；`posts.other` 已删除；`newer`/`older` 已接到上下篇、`copy`/`copied` 由 `baseof.html` 写到 `<html data-copy/data-copied>` 供 `site.js` 读；只剩 `tag` 仍闲置。此后新增的界面文案都走同一套，如 `moreTags`（标签超出 4 枚时那枚「+N」尾签的悬停提示与读屏名）。「怎么修」第 3 条同理已落地，留作历史。
+
 **现状**：`i18n/zh-cn.yaml` 定义了 15 条，**闲置 6 条**：`tag`、`posts.other`、`newer`、`older`、`copy`、`copied`。同时大量界面文案**硬编码中文**：
 
 | 位置 | 硬编码文案 |

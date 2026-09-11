@@ -66,6 +66,7 @@ searchOpen: 打开搜索
 postedAt: 撰于
 jumpToSection: 跳转到此节
 readMore: 续读
+moreTags: 更多标签    # 标签超出上限时那枚「+N」尾签的悬停提示与读屏名
 
 # ---- 浮动工具条 ----
 toolbarMore: 更多工具

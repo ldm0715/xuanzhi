@@ -30,15 +30,16 @@ categories:
 
 ## 放旁边就好了
 
-Hugo 的 **page bundle** 给了个很自然的解法：一篇文章连它的图片，放进同一个文件夹。
+Hugo 的 **page bundle** 给了个很自然的解法：一篇文章连它的图片，放进同一个文件夹——图片收在它下面的 `assets/`：
 
 ```
 content/posts/my-post/
 ├── index.md
-└── photo.jpg
+└── assets/
+    └── photo.jpg
 ```
 
-正文里写 `![说明](photo.jpg)`，就完了。构建时自动压缩、转 WebP、生成响应式 srcset、加懒加载。
+正文里写 `![说明](assets/photo.jpg)`，就完了。构建时自动压缩、转 WebP、生成响应式 srcset、加懒加载。
 
 好处不只是省事：
 

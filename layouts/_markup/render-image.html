@@ -1,6 +1,9 @@
 {{- /*
   图片渲染钩子：page bundle 内图片走 Hugo image processing（WebP + srcset + 防抖动尺寸），
   外链图片原样输出。全部 lazy 加载。
+  图片按约定收在文章目录下的 assets/，正文写 ![](assets/photo.jpg)——Destination 是
+  相对文章目录的路径，下面那句 GetMatch 直接拿它当资源名匹配（子目录里的文件同样是
+  bundle 的资源）。front matter 的 cover 同理。
   每张图再包一层 <a class="img-zoom">：href 指向最大档（1600px WebP），
   图窗（site.js「图片灯箱」段）接管点击；无 JS 时就是「点开看原图」的朴素降级。
   注意：$ 是 hook 上下文；with 块内 . 是 page resource。

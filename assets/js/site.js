@@ -678,6 +678,45 @@
     heads.forEach(function (h) { observer.observe(h); });
   })();
 
+  /* 头栏站名 → 文章标题：正文标题滚过头栏之后，头栏那一格换成文章标题，
+     省得读到一半想确认"这是哪篇"还要滚回去；滚回顶部再换回站名。
+     只认单页模板渲染的 .post-title——首页、归档、分类法页、关于页都没有它，
+     这段整段不生效。模板侧由 header.html 的 data-post-title 提供标题原文。
+
+     用 IntersectionObserver 而不是另挂 scroll 监听：与目录 scrollspy 同一套路，
+     rootMargin 顶部吃掉头栏高度，判据就落在头栏下缘（h 用实测高度，不写死 56）。 */
+  (function () {
+    var link = document.querySelector('.site-title[data-post-title]');
+    var title = document.querySelector('.post-title');
+    if (!link || !title || typeof IntersectionObserver === 'undefined') return;
+    var text = link.querySelector('.site-title-text');
+    if (!text) return;
+    var siteName = text.textContent;
+    var postName = link.getAttribute('data-post-title') || '';
+    if (!postName || postName === siteName) return;
+
+    var header = document.querySelector('.site-header');
+    var h = Math.round(header ? header.getBoundingClientRect().height : 56);
+
+    function setSwapped(on) {
+      if (link.classList.contains('is-swapped') === on) return;
+      link.classList.toggle('is-swapped', on);
+      text.textContent = on ? postName : siteName;
+      /* 视觉上只剩一个，读屏也别把两个都念出来：名字挂在 <a> 上（span 没有 role，
+         aria-label 会被忽略），始终等于当前显示的那一个 */
+      link.setAttribute('aria-label', on ? postName : siteName);
+    }
+
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        /* 判据是"标题的下边缘升到头栏下缘之上"。不能只看 !isIntersecting：
+           首屏标题在视口下方时同样不相交，那样还没滚动就会被换掉 */
+        setSwapped(en.boundingClientRect.bottom < h);
+      });
+    }, { rootMargin: '-' + h + 'px 0px 0px 0px' });
+    observer.observe(title);
+  })();
+
   /* 图片灯箱：点正文图开图窗（render-image.html 已把每张图包进 <a class="img-zoom">，
      href 指向最大档 WebP）。增强项：←→ 翻页、滚轮/双击缩放、拖动平移、双指捏合、
      窄屏左右滑动翻页；Esc / 点遮罩 / 点 ✕ 关闭。无 JS 时 .img-zoom 本身就是指向原图的

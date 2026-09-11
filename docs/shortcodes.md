@@ -31,7 +31,7 @@ categories:
 
 ### `details` · 折叠块
 
-正文里可以折起来的一段，形制是一封旧木函。
+正文里可以折起来的一段，形制是一封旧木函。里面**整体是一张纸**——放列表、多段、代码块都共用同一张纸面，不会一格一块。
 
 ```markdown
 {{</* details summary="答案" */>}}
@@ -232,7 +232,7 @@ frame: "narrow"    # 不写，头栏与页脚会按文章页展开到 1150px，�
 **③ 正文用下面四颗短代码**。完整的样子：
 
 ```markdown
-{{</* nameplate name="宫城楠木" role="独立开发者 · 居杭州" image="avatar.jpg" */>}}
+{{</* nameplate name="宫城楠木" role="独立开发者 · 居杭州" image="assets/avatar.jpg" */>}}
 写代码，也写字。……
 
 {{</* social github="https://github.com/…" email="mailto:…" */>}}
@@ -280,7 +280,7 @@ frame: "narrow"    # 不写，头栏与页脚会按文章页展开到 1150px，�
 {{< /nameplate >}}
 
 - `role` 是身份那一行
-- `image` 是方形人像：page bundle 内的文件名，或以 `/` 开头的静态路径。
+- `image` 是方形人像：文章 `assets/` 下的文件名（如 `assets/avatar.jpg`），或以 `/` 开头的静态路径。
   **不传就用主题自带的默认人像** `static/images/me.jpg`——站点想换，在自己的 `static/images/` 放一张同名 `me.jpg` 即可顶掉（与 `og-default.png` 同一个套路）。指向 bundle 资源时走图片管线压 WebP（按 2× 出 264px）
 - `seal` 是回退印的印文，**只在人像拿不到时才出现**。只认四字（田字格）或一字——132px 见方里 2/3 字的印章撑不住。缺省：名号正好四字就用整个名号，否则取首字
 - `alt` 是人像的 alt，缺省用名号

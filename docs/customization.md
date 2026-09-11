@@ -50,6 +50,7 @@ categories:
 recentPosts: 最新文章
 scrollHint: 往下翻
 unitPosts: 则
+moreTags: 更多标签      # 标签超出 4 枚时那枚「+N」尾签的悬停提示
 ```
 
 新建这个文件即可，不必复制主题那一整份。

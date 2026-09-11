@@ -13,7 +13,11 @@
     <span class="inkcard-foot">
       <span class="inkcard-tags">
         {{- range $cats }}<span class="inkcard-cat">{{ .LinkTitle }}</span>{{ end -}}
-        {{- range $tags }}<span class="inkcard-tag">{{ .LinkTitle }}</span>{{ end -}}
+        {{- /* 标签同样只出前 4 枚，余下收成一枚 +N。这里只能是 span——整张卡已经是
+               <a class="inkcard-link">，a 套 a 非法（同下面「续读」那条）。
+               上限与 single.html 保持同值，改要两处一起改。 */ -}}
+        {{- range first 4 $tags }}<span class="inkcard-tag">{{ .LinkTitle }}</span>{{ end -}}
+        {{- if gt (len $tags) 4 }}<span class="inkcard-tag inkcard-tag-more">+{{ sub (len $tags) 4 }}</span>{{ end -}}
       </span>
       {{- /* 整张卡就是链接，所以这里只能是 span 不能是 a（a 套 a 是非法 HTML），
            样式上做成"可点的样子"即可 */ -}}
