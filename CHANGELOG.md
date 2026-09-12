@@ -56,7 +56,7 @@
 
 ### 新增 · 资产自托管
 
-- 霞鹜文楷、思源宋体 700、JetBrains Mono 字体切片自托管，@font-face 走 Hugo 资源管线探测
+- 霞鹜文楷、思源宋体 700、JetBrains Mono 字体切片自托管，`@font-face` 走 Hugo 资源管线探测
 - KaTeX 样式、Material / Simple Icons 图标、Plyr 与 APlayer 全部随主题分发，无第三方 CDN 依赖
 
 ### 修复
