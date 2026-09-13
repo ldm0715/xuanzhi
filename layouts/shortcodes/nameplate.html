@@ -27,7 +27,7 @@
 {{- else }}
 	{{- /* 人像：三级。
 	       ① 传了 image= —— page bundle 资源过图片管线压成 WebP（按 2× 出 264px），
-	          SVG 与 / 开头的静态路径原样引用（同 head.html 处理 cover 的思路）。
+	          SVG 与 / 开头的静态路径原样引用（静态路径不过图片管线）。
 	          传了却找不到 → warnf + 落到朱印，此时朱印是**错误提示**不是常态。
 	       ② 没传 —— 用主题自带的默认人像 static/images/me.jpg。
 	          站点想换，在自己的 static/images/ 放一张同名 me.jpg 即可顶掉

@@ -16,29 +16,8 @@
 {{- end -}}
 <link rel="canonical" href="{{ .Permalink }}">
 
-{{- /* 社交卡片配图：优先 front matter 的 cover，裁成标准 1200×630（平台自己裁位置不可控）；
-    cover 写成以 / 开头的静态路径时不做处理，直接引用；
-    SVG 不能走图片处理，原样引用；
-    都没有就用主题默认图——站点放一张自己的 static/images/og-default.png 即可覆盖 */ -}}
-{{- $ogImage := "" -}}
-{{- if .IsPage -}}
-  {{- with .Params.cover -}}
-    {{- if hasPrefix . "/" -}}
-      {{- $ogImage = . | absURL -}}
-    {{- else -}}
-      {{- with $.Resources.GetMatch . -}}
-        {{- if ne .MediaType.SubType "svg" -}}
-          {{- $ogImage = (.Fill "1200x630 Center webp q82").Permalink -}}
-        {{- else -}}
-          {{- $ogImage = .Permalink -}}
-        {{- end -}}
-      {{- end -}}
-    {{- end -}}
-  {{- end -}}
-{{- end -}}
-{{- if not $ogImage -}}
-  {{- $ogImage = "images/og-default.png" | absURL -}}
-{{- end -}}
+{{- /* 社交卡片配图：固定用主题默认图——站点在 static/images/og-default.png 放一张同名图即可覆盖 */ -}}
+{{- $ogImage := "images/og-default.png" | absURL -}}
 
 {{- $ogType := "website" -}}
 {{- if .IsPage -}}{{- $ogType = "article" -}}{{- end -}}

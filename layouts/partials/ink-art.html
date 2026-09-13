@@ -1,9 +1,11 @@
-{{/* 主页卡片的印记：front matter 给 cover（page bundle 内文件名或图片 URL）则用自定义图；
-否则按标题哈希生成一幅横构图（3:2）水墨小品——八式轮换（远山晓日 / 竹影 / 空亭听雨 / 汀洲孤雁 /
-孤舟远影 / 红杏出墙 / 云岫 / 杨柳岸），翻转由哈希决定，每篇文章稳定且各不相同。
-图案在 CSS 里被压成居中铺底的一枚淡印（20% 不透明度 + 模糊 0.5px），
-所以不再套 feTurbulence 毛边滤镜——那个浓度下根本看不出来，只白付每张卡的栅格化开销。
-各式的定妆预览稿在 static/images/covers/（亮色调自包含），改形状请两处同步。 */}}
+{{/* 八式水墨小品：按标题哈希生成一幅横构图（3:2）——远山晓日 / 竹影 / 空亭听雨 / 汀洲孤雁 /
+孤舟远影 / 红杏出墙 / 云岫 / 杨柳岸，翻转由哈希决定，每篇稳定且各不相同。
+唯一的落点是首页诗笺右下角（.poem-art，见 home.html 与 CSS 同名段）：8 枚叠在同一位，
+JS 每次到访随机亮一枚。不接受自定义图——front matter `cover` 已于 2026-09-13 移除，
+卡片上也不再渲染印记。
+图案在 CSS 里被压成 92×62 的一枚淡印（50% 不透明度 + 模糊 0.4px），
+所以不再套 feTurbulence 毛边滤镜——那个浓度下根本看不出来，只白付栅格化开销。
+各式的定妆预览稿在 static/images/ink-art/（亮色调自包含），改形状请两处同步。 */}}
 {{- $page := .page -}}
 {{- $hash := int (hash.FNV32a $page.Title) -}}
 {{- $variant := mod $hash 8 -}}
@@ -12,18 +14,7 @@
      调用方统一传 (dict "page" $page ...)，保证 isset 只作用于 dict，不落到 pageState */ -}}
 {{- if isset . "variant" }}{{ $variant = mod (int .variant) 8 }}{{ end -}}
 {{- if isset . "flip" }}{{ $flip = mod (int .flip) 2 }}{{ end -}}
-{{- with $page.Params.cover -}}
-  {{- with $page.Resources.GetMatch . -}}
-    {{- $thumb := . -}}
-    {{- if and (eq .ResourceType "image") (not (in .MediaType.SubType "svg")) (not (eq .MediaType.SubType "gif")) -}}
-      {{- $thumb = .Resize "600x400 webp q80" -}}
-    {{- end -}}
-    <img class="inkcard-print-img" src="{{ $thumb.RelPermalink }}" alt="" loading="lazy">
-  {{- else -}}
-    <img class="inkcard-print-img" src="{{ . | relURL }}" alt="" loading="lazy">
-  {{- end -}}
-  {{- else -}}
-<svg class="inkcard-print-svg{{ with $flip }} art-flip{{ end }}" viewBox="0 0 390 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+<svg class="ink-art-svg{{ with $flip }} art-flip{{ end }}" viewBox="0 0 390 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
   {{- if eq $variant 0 }}
   {{/* 远山晓日：日头是主角——朱砂实心、放大居中；山退成陪衬，第二道山压淡 */}}
   <circle class="cov-sun-strong" cx="236" cy="94" r="30" opacity="0.9"/>
@@ -125,4 +116,3 @@
   <ellipse class="ink-mid" cx="70" cy="196" rx="4.5" ry="24" transform="rotate(14 70 196)" opacity="0.6"/>
   {{- end }}
 </svg>
-{{- end -}}

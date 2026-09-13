@@ -51,9 +51,9 @@
         <span class="poem-seal" aria-hidden="true">{{ substr $author 0 1 }}</span>
       </span>
     </div>
-      {{/* 试验：诗笺右下角意象 —— 8 式水墨小品全埋，JS 每次到访随机亮一枚（见 site.js） */}}
+      {{/* 诗笺右下角意象 —— 8 式水墨小品全埋，JS 每次到访随机亮一枚（见 site.js） */}}
       {{- range $v := seq 0 7 }}
-      <span class="poem-art inkcard-print" data-v="{{ $v }}" aria-hidden="true">{{ partial "post-card-cover.html" (dict "page" $ "variant" $v) }}</span>
+      <span class="poem-art" data-v="{{ $v }}" aria-hidden="true">{{ partial "ink-art.html" (dict "page" $ "variant" $v) }}</span>
       {{- end }}
     </div>
   </div>

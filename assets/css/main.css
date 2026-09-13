@@ -3574,116 +3574,97 @@ html[data-theme="dark"] .inkcard:hover {
   outline-offset: 3px;
 }
 
-/* 印记：八式水墨小品铺在信笺下缘居中（续读与标签之间的大片空白处），如渗进纸里的一枚淡印。
-   绝对定位，不参与卡片布局；低透明度 + 轻微模糊 + 径向羽化，四周不越出纸边 */
-.inkcard-print {
-  /* 暂隐意象，预览「无意象」观感；要恢复删掉这一行即可 */
-  display: none;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 8px;
-  z-index: 0;
-  width: 192px;
-  height: 128px;
-  opacity: 0.18;
-  filter: blur(1px);
-  pointer-events: none;
-  /* 径向大范围羽化：中心到外缘渐隐入纸，外圈不落硬边 */
-  -webkit-mask-image: radial-gradient(ellipse 85% 85% at 50% 50%, #000 30%, transparent 92%);
-  mask-image: radial-gradient(ellipse 85% 85% at 50% 50%, #000 30%, transparent 92%);
-}
-.inkcard-print-img,
-.inkcard-print-svg {
+/* 八式水墨小品：SVG 由 partials/ink-art.html 生成，八式定妆预览稿在 static/images/ink-art/。
+   容器与落点在下方「诗笺右下角意象」段——卡片上不再有印记，诗笺是它唯一的落点 */
+.ink-art-svg {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
 }
-.inkcard-print-svg.art-flip { transform: scaleX(-1); }
+.ink-art-svg.art-flip { transform: scaleX(-1); }
 
 /* 水墨小品用色：全走 token，明暗与点缀色自动跟随 */
-.inkcard-print .ink-strong { fill: var(--color-title); }
-.inkcard-print .ink-mid { fill: var(--color-text); }
-.inkcard-print .ink-soft { fill: var(--color-text-secondary); }
-.inkcard-print .cov-sun { fill: var(--color-accent-soft); }
+.poem-art .ink-strong { fill: var(--color-title); }
+.poem-art .ink-mid { fill: var(--color-text); }
+.poem-art .ink-soft { fill: var(--color-text-secondary); }
+.poem-art .cov-sun { fill: var(--color-accent-soft); }
 /* 晓日的日头：用朱砂实心，让它在淡印浓度下也立得住 */
-.inkcard-print .cov-sun-strong { fill: var(--color-zhu); }
+.poem-art .cov-sun-strong { fill: var(--color-zhu); }
 /* 通用笔意线条：新式水墨小品（孤舟/红杏/云岫/杨柳岸）共用，线宽逐笔另定 */
-.inkcard-print .ink-stroke {
+.poem-art .ink-stroke {
   fill: none;
   stroke: var(--color-title);
   stroke-linecap: round;
 }
-.inkcard-print .ink-stroke-mid {
+.poem-art .ink-stroke-mid {
   fill: none;
   stroke: var(--color-text);
   stroke-linecap: round;
 }
-.inkcard-print .ink-stroke-soft {
+.poem-art .ink-stroke-soft {
   fill: none;
   stroke: var(--color-text-secondary);
   stroke-linecap: round;
 }
-.inkcard-print .art-zhu { fill: var(--color-zhu); }
-.inkcard-print .rain line {
+.poem-art .art-zhu { fill: var(--color-zhu); }
+.poem-art .rain line {
   stroke: var(--color-text-secondary);
   stroke-width: 1.6;
   stroke-linecap: round;
 }
 /* 空亭：一笔弧顶 + 细柱 + 地线，与孤雁同笔意，不取实形 */
-.inkcard-print .pavilion path {
+.poem-art .pavilion path {
   fill: none;
   stroke: var(--color-title);
   stroke-width: 3.2;
   stroke-linecap: round;
 }
-.inkcard-print .pavilion .pav-col {
+.poem-art .pavilion .pav-col {
   stroke: var(--color-text);
   stroke-width: 2.2;
 }
-.inkcard-print .pavilion .pav-ground {
+.poem-art .pavilion .pav-ground {
   stroke: var(--color-text-secondary);
   stroke-width: 2;
   opacity: 0.6;
 }
 /* 檐角滴水：水丝 + 半空坠滴 */
-.inkcard-print .drip line {
+.poem-art .drip line {
   stroke: var(--color-text-secondary);
   stroke-width: 1.6;
   stroke-linecap: round;
   opacity: 0.9;
 }
-.inkcard-print .drip ellipse {
+.poem-art .drip ellipse {
   fill: var(--color-text-secondary);
   opacity: 0.85;
 }
-.inkcard-print .geese path {
+.poem-art .geese path {
   fill: none;
   stroke: var(--color-title);
   stroke-width: 2.6;
   stroke-linecap: round;
 }
 
-/* ---- 试验：诗笺右下角意象（随机亮一枚） ----
- * 复用卡片那套八式水墨小品（描色吃 .inkcard-print 前缀规则），8 枚叠在右下角同一位，
- * 默认随 .inkcard-print 整体 display:none，JS 每访问给其中一枚加 .is-on 亮出来。
+/* ---- 诗笺右下角意象（随机亮一枚） ----
+ * 八式水墨小品由 partials/ink-art.html 生成，8 枚叠在右下角同一位，默认全隐藏，
+ * JS 每次到访给其中一枚加 .is-on 亮出来（见 site.js）。
+ * 这个容器同时也是 SVG 描色的命名空间（下方 .poem-art .ink-* 那批规则吃它）。
  * 不需要时删掉本块 + home.html 的 .poem-art + site.js 的随机段三处即可 */
-.poem-art.inkcard-print {
-  left: auto;
+.poem-art {
+  display: none;
+  position: absolute;
   right: 8px;
   bottom: 16px;
-  transform: none;
+  z-index: 0;
   width: 92px;
   height: 62px;
   opacity: 0.5;
   filter: blur(0.4px);
-  -webkit-mask-image: none;
-  mask-image: none;
+  pointer-events: none;
 }
-.poem-art.inkcard-print.is-on { display: block; }
-.poem-art svg,
-.poem-art img {
+.poem-art.is-on { display: block; }
+.poem-art svg {
   display: block;
   width: 100%;
   height: 100%;
@@ -3851,7 +3832,6 @@ html[data-theme="dark"] .inkcard:hover {
   .poem-line { font-size: 1.05rem; letter-spacing: 0.24em; }
 
   .inkcard-grid { grid-template-columns: minmax(0, 1fr); gap: 20px; }
-  .inkcard-print { width: 132px; height: 88px; left: 50%; bottom: 6px; }
 }
 
 /* ============ 锚点落点与滚动条 ============ */

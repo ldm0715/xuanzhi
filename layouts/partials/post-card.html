@@ -1,10 +1,9 @@
-{{/* 主页红框封卡片：素纸 + 一道朱丝框；八式水墨小品缩成居中铺底的一枚淡印（从下缘溢出）；
+{{/* 主页红框封卡片：素纸 + 一道朱丝框；
      朱砂日期邮戳盖右上；下部题字式标题 + 灰褐摘要 + 落款行（分类与标签，细竖线分隔） */}}
 {{ $cats := .GetTerms "categories" }}
 {{ $tags := .GetTerms "tags" }}
 <article class="inkcard">
   <a class="inkcard-link" href="{{ .RelPermalink }}">
-    <span class="inkcard-print" aria-hidden="true">{{ partial "post-card-cover.html" (dict "page" .) }}</span>
     <span class="inkcard-postmark" aria-hidden="true">
       <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006.01.02" }}</time>
     </span>

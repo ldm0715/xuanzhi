@@ -1114,7 +1114,7 @@
 
   /* 诗笺意象：首页诗笺右下角的 8 式水墨小品，每次到访随机亮一枚 */
   (function () {
-    var arts = document.querySelectorAll('.poem-art.inkcard-print');
+    var arts = document.querySelectorAll('.poem-art');
     if (!arts.length) return;
     var pick = function () {
       for (var i = 0; i < arts.length; i++) arts[i].classList.remove('is-on');
