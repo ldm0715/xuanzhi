@@ -4,22 +4,16 @@
 
 ---
 
-## 1. front matter `cover` / `description`：主题接了线，但没人用
+## 1. front matter `cover` / `description`：已了结
 
-**现状**：
-- `layouts/partials/post-card-cover.html:15` 读 `.Params.cover`，没填就按标题哈希生成八式水墨小品
-- `layouts/partials/head.html` 读 `.Description`（P0 改造后优先级：`description` → 自动摘要 → 站点描述）
-- **`description` 已不是未覆盖路径**（2026-09-10）：`exampleSite/content/` 与 `docs/` 下每一篇都填了它，演示站的文档索引页还直接拿它当条目说明
-- **但 `cover` 仍然全站零使用**——`post-card-cover.html` 那条自定义图分支从未被真实数据跑过
+**现状**：两条都不再是「未覆盖路径」。
 
-**为什么要关注**：自定义 `cover` 会走 Hugo 图片管线（`.Resize`），如果 `cover` 指向 SVG 或尺寸异常的图，`post-card-cover.html` 可能报错——而这个错误只有在第一篇文章填了 `cover` 时才会暴露。
+- `description`（2026-09-10）：`exampleSite/content/` 与 `docs/` 下每一篇都填了它，演示站的文档索引页还直接拿它当条目说明；`head.html` 的取值顺序是 `description` → 自动摘要 → 站点描述
+- `cover`（2026-09-13）：**已移除**。卡片上不再渲染印记——八式水墨小品只剩诗笺右下角这一处落点（按标题哈希生成）；`head.html` 的 `og:image` 固定取主题默认图。原先登记的两条风险随之消失——「自定义图走图片管线可能报错」与「`og:image` 的 1200×630 裁剪分支从未被真实数据跑过」——因为这两条分支都整条删掉了（见 `CHANGELOG.md`）
 
-**怎么修**：给**一篇文章**（不是文档页——只有文章会进首页卡片）真的填上 `cover`。`cover` 要么是 bundle 内 `assets/` 下的资源（写 `assets/…`）、要么是以 `/` 开头的静态路径，所以：
+**为什么留这一节**：当初登记它，是因为「接了线却没有内容走到过」；现在路径已删，不需要再补回归内容，保留结论备查即可。
 
-- 简单做法：把 `exampleSite/content/posts/ink-gradation.md` 改成 bundle（`ink-gradation/index.md` + `ink-gradation/assets/一张图`），front matter 写 `cover: "assets/那张图.png"`
-- 或者先拿静态路径试：`cover: "/images/covers/…png"`
-
-**验证**：构建后确认卡片右下角的印记换成了自己的图，且 `<head>` 里的 `og:image` 指向按 `1200x630` 裁好的版本。
+**验证**：全仓库 `grep -rin "cover"` 只剩三类无关命中——音频 / 播放列表的轨道封面（短代码 `cover=` 参数）、`video` 的 `poster=`、`static/images/ink-art/` 的八式定妆预览稿，以及 `dev/archive/` 的历史档案。
 
 ---
 

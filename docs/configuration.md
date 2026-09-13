@@ -143,7 +143,6 @@ enableEmoji = true
 |---|---|---|
 | `content/about.md` | `layout: "about"` | 用关于页模板，而不是文章模板 |
 | 任意页 | `frame: "narrow"` | 把这一页的框架收窄到版心宽（否则走文章页的 1150px 宽档） |
-| 任意页 | `cover: "assets/cover.jpg"` | 首页卡片右下角的印记换成自己的图，同时作为分享卡片的 `og:image` |
 | 任意页 | `description: "…"` | 覆盖该页的 meta description；没写时首页卡片用正文摘要 |
 
 哪些是站点级、哪些是页面级，上面那张表和[写作](writing/index.md)分头写清楚了。

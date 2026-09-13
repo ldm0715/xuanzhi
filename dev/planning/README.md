@@ -48,7 +48,7 @@
 
 ### 其他 —— [`uncovered-paths.md`](uncovered-paths.md)
 
-内容从未用到的路径（`cover` / `description` front matter、h5/h6、TOML front matter…）与仓库死重。
+内容从未用到的路径（h5/h6、TOML front matter…）与仓库死重。
 
 ### 待优化清单 —— [`optimizations.md`](optimizations.md)
 

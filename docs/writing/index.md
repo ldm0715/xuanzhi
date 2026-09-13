@@ -2,7 +2,7 @@
 title: "四、写作"
 date: 2026-09-10T10:00:00+08:00
 weight: 40
-description: "front matter 字段、图片、公式、代码块、标题锚点、首页封面"
+description: "front matter 字段、图片、公式、代码块、标题锚点"
 tags:
   - 图片
   - 公式
@@ -43,7 +43,6 @@ tags:
 categories:
   - 随笔
 description: "一句话摘要，会用作 meta description 与分享卡片描述"
-cover: "assets/cover.jpg"
 draft: false
 ---
 ```
@@ -54,7 +53,6 @@ draft: false
 | `date` | 建议写 | 归档按它分年月；**不写日期或写成未来时间，文章不会出现在归档里** |
 | `tags` / `categories` | 否 | 分类法。标签渲染成印谱、分类渲染成书架，见[站点配置](configuration.md) |
 | `description` | 否 | 覆盖 meta description；不写就用正文自动摘要 |
-| `cover` | 否 | 首页卡片右下角的印记换成自己的图（写文章 `assets/` 下的文件名，如 `assets/cover.jpg`），同时作为分享卡片的 `og:image` |
 | `draft` | 否 | `true` 时不渲染，需要 `hugo server -D` 才看得到 |
 
 > **日期写成了未来时间，文章会「消失」**——Hugo 默认不渲染未来日期的内容。这是最容易自己吓自己的一条。
@@ -68,10 +66,10 @@ content/posts/my-post/
 ├── index.md
 └── assets/
     ├── photo.jpg
-    └── cover.jpg
+    └── paper-test.png
 ```
 
-正文写 `![说明](assets/photo.jpg)`，front matter 的 `cover` 也写 `assets/cover.jpg`（都是**相对文章目录**的路径）。构建时自动做三件事：
+正文写 `![说明](assets/photo.jpg)`（路径**相对文章目录**）。构建时自动做三件事：
 
 - 压缩并转 **WebP**，生成三档**响应式 srcset** + 懒加载
 - 每张图包一层指向最大档的链接——点图进入**图窗**（放大镜浏览，见[设计理念](design.md)）
@@ -416,19 +414,6 @@ plain block without language tag
 ```
 
 # 这是一个正文一级标题
-
-## 首页卡片的印记（封面）
-
-每张首页卡片右下角有一枚淡印。默认按文章标题哈希自动生成八式水墨小品（远山晓日 / 竹影 / 空亭听雨 / 汀洲孤雁 / 孤舟远影 / 红杏出墙 / 云岫 / 杨柳岸），**同一篇文章永远同一幅**。想换成自己的图，在 front matter 给 `cover`：
-
-```yaml
----
-title: "我的文章"
-cover: "assets/cover.jpg"   # 文章 assets/ 下的文件名，或以 / 开头的静态图片路径
----
-```
-
-自定义图会经图片管线压成 WebP；社交分享的 `og:image` 也取这张 `cover`（裁成 1200×630），没填就用主题默认图（站点在 `static/images/og-default.png` 放一张同名图即可覆盖）。
 
 ## 手动指定摘要
 

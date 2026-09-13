@@ -146,11 +146,9 @@ cp themes/xuanzhi/assets/css/token.css assets/css/token.css
 | 文件 | 是什么 |
 |---|---|
 | `static/images/me.jpg` | 关于页自述块的默认人像（`nameplate` 短代码不传 `image` 时用它） |
-| `static/images/og-default.png` | 分享卡片默认图（文章没写 `cover` 时用它） |
+| `static/images/og-default.png` | 分享卡片默认图（全站 `og:image` 都用它） |
 
 ```bash
 mkdir -p static/images
 cp 你的人物照.jpg static/images/me.jpg
 ```
-
-同理，页面级的 `cover`（首页卡片印记）写在那一篇的 front matter 里，见[写作](writing/index.md#首页卡片的印记封面)。

@@ -14,7 +14,7 @@
 |---|---|---|
 | ~~`single.html` TOC 渲染两份（DOM/id 重复）~~ | `uncovered-paths.md` §4 杂项 | **已修**（2026-09-09，见该行） |
 | ~~`qr` 短代码 PNG 写到站点根~~ | `uncovered-paths.md` §4 杂项 | **已修**（2026-09-09，见该行） |
-| 给 `cover` / `description` / h5–h6 / 引用式链接 / `{.class}` / TOML front matter / definitionList / 外链图补真实回归内容 | `uncovered-paths.md` §1–2 | 待办（建议补到 exampleSite 与站点，作回归面） |
+| 给 `description` / h5–h6 / 引用式链接 / `{.class}` / TOML front matter / definitionList / 外链图补真实回归内容 | `uncovered-paths.md` §1–2 | 待办（建议补到 exampleSite 与站点，作回归面） |
 | ~~`themes/ananke` 死子模块清理~~ | `uncovered-paths.md` §3 | **已修**（2026-09-09，见该行） |
 | ~~搜索无中文分词 → 将来换 Pagefind~~ | `structure.md` §3 | **已实施**（2026-09-09，升级为 Pagefind） |
 | 相关文章 / `lastmod`+`enableGitInfo` / 面包屑 / series / 作者页 | `structure.md` 文末「备查」 | 备查 |
@@ -30,7 +30,6 @@
 | `content/posts/test.md` 非草稿会发布 | 占位正文 "gogogo" 会成一篇真实页面 | 删掉或转草稿/改真文。零成本 | 构建产物无「我的test」 |
 | `my-first-post.md` | Hugo scaffold 草稿残留 | 清理。零成本 | 发布列表干净 |
 | `static/` 两个 dev 预览 HTML | `header-extend-demo.html` / `mobile-nav-demo.html` 会被发布到站点根 | 移出 `static/` 或删除 | 产物根目录没有这两个文件 |
-| 真实首篇带 `cover` 的文章 | 主题 `cover` 路径从未被真实数据跑过（回归风险） | 写正式文章时填 `cover: "assets/…"`（图片的新约定，同时回归 §1 那条） | 首页卡片换图、OG 正常 |
 
 ### 内容/页面候选
 

@@ -8,6 +8,11 @@
 
 ## [Unreleased]
 
+### 移除
+
+- **front matter `cover`**：字段整体移除——页面级不再有配图入口，社交卡片的 `og:image` 固定取主题默认图（站点在 `static/images/og-default.png` 放一张同名图即可覆盖）。已填 `cover` 的文章不受影响、也不会报错——这个字段现在被忽略。同步删掉了 `head.html` 里 `cover` → `1200×630` 的裁剪链与 CSS 的 `.inkcard-print-img` 规则（两条分支都从未被真实内容跑过）
+- **卡片上的水墨印记**：首页卡片右下角不再渲染印记，八式水墨小品只留在诗笺右下角（八枚叠放，访客每次到访随机亮一枚）——那枚淡印会破坏卡面的留白与秩序。随之下线 CSS 的 `.inkcard-print` 基础几何与 ≤640px 覆盖（该规则此前已被 `display:none` 暂隐，卡片上其实一直看不到）。`partials/post-card-cover.html` 就此改名 `partials/ink-art.html`——它现在只服务诗笺，「card cover」这个名字已名不副实；描色命名空间也从 `.inkcard-print *` 换成 `.poem-art *`，预览稿目录 `static/images/covers/` → `static/images/ink-art/`
+
 ## [1.0.0-rc.1] - 2026-09-11
 
 首个版本的候选版。原先按 `1.0.0` 记的那批内容已并入本节——`v1.0.0` 从未打过 tag，没有已发布的旧版本要对照。

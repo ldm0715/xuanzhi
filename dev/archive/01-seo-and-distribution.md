@@ -33,6 +33,8 @@ Sitemap: {{ "sitemap.xml" | absURL }}
 
 **为什么要修**：微信、微博、X、Telegram、Slack 分享卡片**有没有图，点击率差得很明显**——无图时平台只给一行标题，几乎没人点。这是分发环节投入产出比最高的一条。
 
+> **后续修订（2026-09-13）**：`cover` 已移除——`og:image` 现在固定用主题默认图 `static/images/og-default.png`，下面「怎么修」里的 `cover` 裁剪分支与 1200×630 约定已不适用。另：文中的 `layouts/partials/post-card-cover.html` 已改名 `ink-art.html`，且卡片上不再渲染印记（八式水墨小品只剩诗笺右下角这一处落点）。本节保留当初的决策过程备查。
+
 主题其实已经有现成的图源：front matter 的 `cover`（`layouts/partials/post-card-cover.html` 已在读），以及首页卡片那套按标题哈希生成的八式水墨小品。
 
 **怎么修**：

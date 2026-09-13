@@ -20,7 +20,7 @@ layouts/
 │                        # details[open] > :not(summary) 的特异性会压过内层元素自己的
 │                        # margin/padding，少了这层列表缩进会被顶掉、墨点探出框外
 ├── partials/            # head / header / footer / nav-links / appearance-tiles / header-extra
-│                        # / post-item / post-card / post-card-cover / seal-count
+│                        # / post-item / post-card / ink-art / seal-count
 │                        # / pagination（收 dict：pager + 可选 anchor）
 │                        # / taxonomy-shelf / taxonomy-sealwall / term-category / term-tag
 │                        # / schema（JSON-LD）/ player-src / player-audio
@@ -42,7 +42,7 @@ assets/
 static/fonts/            # 字体二进制切片（woff2），原样发布到 /fonts/... 供上面的 CSS 相对引用
 static/images/me.jpg     # 关于页自述块的**默认人像**（站点放同名同路径即可覆盖）
 static/images/og-default.png  # 分享卡片默认图（同样靠站点同名覆盖）
-static/images/covers/    # 八式水墨小品定妆预览稿（页面按题哈希内联渲染）
+static/images/ink-art/   # 八式水墨小品定妆预览稿（页面按题哈希内联渲染）
 static/vendor/plyr.svg   # Plyr 图标 sprite（运行时取，必须放 static，不能放 assets）
 ```
 
