@@ -22,7 +22,7 @@ cd xuanzhi
 hugo server --source exampleSite      # http://localhost:1313/
 ```
 
-演示站的正文就是这本手册——手册各篇就是文章，首页第一张卡是「一、快速开始」，外加几篇示例文章展示归档、分类书架与标签印谱。**它同时是主题的回归测试面**——每种内容形态都在手册里真实渲染着。
+演示站的正文就是这本手册——手册各篇就是文章，首页第一张卡是「一、快速开始」。另有一节[**样例**](exampleSite/content/samples/)（四篇演示数据，不进首页卡片）：把日期铺到 2024 / 2025 / 2026 撑开归档的年月分组，给分类书架与标签印谱添词条，其中一篇故意写长来压长文排版。**它同时是主题的回归测试面**——每种内容形态都在手册里真实渲染着。
 
 ## 特性
 
@@ -72,6 +72,7 @@ hugo server
 | 五分钟先跑起来 | [快速开始](docs/quick-start.md) |
 | 引入方式、升级与回退 | [安装与升级](docs/installation.md) |
 | `hugo.toml` 全量配置（含「功能 → 配置 → 不配的后果」与复制粘贴样板） | [站点配置](docs/configuration.md) |
+| 目录结构、URL 怎么来的、哪些路径被占用 | [内容组织](docs/structure.md) |
 | 写作：front matter / 图片 / 公式 / 代码块 | [写作](docs/writing/index.md) |
 | 短代码参数表：折叠块 / 二维码 / 视频音频 / 关于页 | [短代码参考](docs/shortcodes.md) |
 | 自定义：菜单、界面文案、头栏图标按钮、改颜色 | [自定义](docs/customization.md) |

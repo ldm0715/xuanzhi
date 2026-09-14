@@ -13,13 +13,14 @@ categories:
 - **一、快速开始**（当前篇）
 - [二、安装与升级](installation.md)
 - [三、站点配置](configuration.md)
-- [四、写作](writing/index.md)
-- [五、短代码参考](shortcodes.md)
-- [六、自定义](customization.md)
-- [七、部署](deployment.md)
-- [八、常见问题](troubleshooting.md)
-- [九、设计理念](design.md)
-- [十、许可](licenses.md)
+- [四、内容组织](structure.md)
+- [五、写作](writing/index.md)
+- [六、短代码参考](shortcodes.md)
+- [七、自定义](customization.md)
+- [八、部署](deployment.md)
+- [九、常见问题](troubleshooting.md)
+- [十、设计理念](design.md)
+- [十一、许可](licenses.md)
 {{< /details >}}
 
 这一篇只做一件事：**让你在五分钟内看到一个跑起来的站点**。不解释原理，不讲可选项，每一条命令都可以直接复制。
@@ -130,6 +131,7 @@ hugo server
 | 想做的事 | 去哪 |
 |---|---|
 | 加「关于」页、分类、标签 | [站点配置](configuration.md) |
+| 新开一个存放文章的地方、搞清 URL 怎么来的 | [内容组织](structure.md) |
 | 往文章里放图、公式、代码块 | [写作](writing/index.md) |
 | 用折叠块、二维码、视频、音频 | [短代码参考](shortcodes.md) |
 | 改导航、改界面上的字 | [自定义](customization.md) |

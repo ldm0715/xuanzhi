@@ -1,7 +1,7 @@
 ---
-title: "五、短代码参考"
+title: "六、短代码参考"
 date: 2026-09-10T10:00:00+08:00
-weight: 50
+weight: 60
 description: "折叠块、二维码、代码高亮、站内引用、视频音频，以及关于页的四颗短代码"
 tags:
   - 短代码
@@ -14,13 +14,14 @@ categories:
 - [一、快速开始](quick-start.md)
 - [二、安装与升级](installation.md)
 - [三、站点配置](configuration.md)
-- [四、写作](writing/index.md)
-- **五、短代码参考**（当前篇）
-- [六、自定义](customization.md)
-- [七、部署](deployment.md)
-- [八、常见问题](troubleshooting.md)
-- [九、设计理念](design.md)
-- [十、许可](licenses.md)
+- [四、内容组织](structure.md)
+- [五、写作](writing/index.md)
+- **六、短代码参考**（当前篇）
+- [七、自定义](customization.md)
+- [八、部署](deployment.md)
+- [九、常见问题](troubleshooting.md)
+- [十、设计理念](design.md)
+- [十一、许可](licenses.md)
 {{< /details >}}
 
 短代码（shortcode）是 markdown 之外的扩展通道：在正文里写一对 `{{</* … */>}}`，构建时被替换成一段结构化的 HTML。这一篇列全主题与 Hugo 内置的可用短代码及其参数。

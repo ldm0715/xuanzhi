@@ -1,7 +1,7 @@
 ---
-title: "七、部署"
+title: "八、部署"
 date: 2026-09-10T10:00:00+08:00
-weight: 70
+weight: 80
 description: "构建、子路径的坑、站内搜索索引，以及 GitHub Pages / Netlify / Vercel 的完整配置"
 tags:
   - 部署
@@ -15,13 +15,14 @@ categories:
 - [一、快速开始](quick-start.md)
 - [二、安装与升级](installation.md)
 - [三、站点配置](configuration.md)
-- [四、写作](writing/index.md)
-- [五、短代码参考](shortcodes.md)
-- [六、自定义](customization.md)
-- **七、部署**（当前篇）
-- [八、常见问题](troubleshooting.md)
-- [九、设计理念](design.md)
-- [十、许可](licenses.md)
+- [四、内容组织](structure.md)
+- [五、写作](writing/index.md)
+- [六、短代码参考](shortcodes.md)
+- [七、自定义](customization.md)
+- **八、部署**（当前篇）
+- [九、常见问题](troubleshooting.md)
+- [十、设计理念](design.md)
+- [十一、许可](licenses.md)
 {{< /details >}}
 
 这一篇讲怎么把站点发到线上。Hugo 的产物是纯静态文件，任何静态托管都能放。

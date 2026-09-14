@@ -14,13 +14,14 @@ categories:
 - [一、快速开始](quick-start.md)
 - **二、安装与升级**（当前篇）
 - [三、站点配置](configuration.md)
-- [四、写作](writing/index.md)
-- [五、短代码参考](shortcodes.md)
-- [六、自定义](customization.md)
-- [七、部署](deployment.md)
-- [八、常见问题](troubleshooting.md)
-- [九、设计理念](design.md)
-- [十、许可](licenses.md)
+- [四、内容组织](structure.md)
+- [五、写作](writing/index.md)
+- [六、短代码参考](shortcodes.md)
+- [七、自定义](customization.md)
+- [八、部署](deployment.md)
+- [九、常见问题](troubleshooting.md)
+- [十、设计理念](design.md)
+- [十一、许可](licenses.md)
 {{< /details >}}
 
 这一篇解决「主题怎么进到我的站点里、之后怎么升」。从零建站请看[快速开始](quick-start.md)。
@@ -145,4 +146,15 @@ cd xuanzhi
 hugo server --source exampleSite      # http://localhost:1313/
 ```
 
-演示站用 Hugo 的 **module mount** 把仓库根目录的主题挂进来，**没有**用 `themesDir = '../..'` 那套写法——所以它不挑仓库目录名，克隆下来的目录叫 `xuanzhi` 还是别的都行。站点接入主题走的是常规 `theme = 'xuanzhi'`，不涉及 mount。
+演示站用 Hugo 的 **module mount** 把仓库根目录的主题挂进来，**没有**用 `themesDir = '../..'` 那套写法——所以它不挑仓库目录名，克隆下来的目录叫 `xuanzhi` 还是别的都行。站点接入主题本身走的是常规的 `theme = 'xuanzhi'`，**不涉及 mount**。
+
+**正文不都在 `exampleSite/` 下**，别翻那个目录找文档：
+
+| 站上看到的 | 源文件在哪 |
+|---|---|
+| 「一、快速开始」…「十一、许可」十一篇手册 | 仓库根 **`docs/`** |
+| `about.md`、「样例」一节四篇 | `exampleSite/content/` |
+
+`docs/` 就是演示站的正文，**只有这一份源文件**。「样例」那一节是演示数据、不是教程——撑开归档的年月分组、给分类书架和标签印谱添词条用的，其中「墨的小史」是故意写长来压长文排版的。
+
+> **别把 `exampleSite/hugo.toml` 抄进自己的站。** 那份配置里**没有 `theme = 'xuanzhi'`**——整个主题是靠 `../layouts`、`../assets` 这些相对路径的 mount 挂进来的，换到你的站里这些路径不存在，Hugo 不报错、直接当空，于是布局和短代码全找不到，构建硬失败。你自己的站走上面「把主题放进站点」的常规写法，可直接复制的配置见[快速开始](quick-start.md#四写-hugotoml)。细节在 `exampleSite/README.md`。

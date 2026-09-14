@@ -1,7 +1,7 @@
 ---
-title: "四、写作"
+title: "五、写作"
 date: 2026-09-10T10:00:00+08:00
-weight: 40
+weight: 50
 description: "front matter 字段、图片、公式、代码块、标题锚点"
 tags:
   - 图片
@@ -15,13 +15,14 @@ categories:
 - [一、快速开始](quick-start.md)
 - [二、安装与升级](installation.md)
 - [三、站点配置](configuration.md)
-- **四、写作**（当前篇）
-- [五、短代码参考](shortcodes.md)
-- [六、自定义](customization.md)
-- [七、部署](deployment.md)
-- [八、常见问题](troubleshooting.md)
-- [九、设计理念](design.md)
-- [十、许可](licenses.md)
+- [四、内容组织](structure.md)
+- **五、写作**（当前篇）
+- [六、短代码参考](shortcodes.md)
+- [七、自定义](customization.md)
+- [八、部署](deployment.md)
+- [九、常见问题](troubleshooting.md)
+- [十、设计理念](design.md)
+- [十一、许可](licenses.md)
 {{< /details >}}
 
 这一篇讲**怎么写正文**：文章头部的字段、图片放哪、公式和代码怎么写、各类 markdown 元素在主题里长什么样。

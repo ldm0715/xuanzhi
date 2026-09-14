@@ -1,7 +1,7 @@
 ---
-title: "九、设计理念"
+title: "十、设计理念"
 date: 2026-09-10T10:00:00+08:00
-weight: 90
+weight: 100
 description: "这套视觉语言为什么长这样：纸、墨、朱饰三层材料，以及每页一件器物的取舍"
 tags:
   - 设计
@@ -13,13 +13,14 @@ categories:
 - [一、快速开始](quick-start.md)
 - [二、安装与升级](installation.md)
 - [三、站点配置](configuration.md)
-- [四、写作](writing/index.md)
-- [五、短代码参考](shortcodes.md)
-- [六、自定义](customization.md)
-- [七、部署](deployment.md)
-- [八、常见问题](troubleshooting.md)
-- **九、设计理念**（当前篇）
-- [十、许可](licenses.md)
+- [四、内容组织](structure.md)
+- [五、写作](writing/index.md)
+- [六、短代码参考](shortcodes.md)
+- [七、自定义](customization.md)
+- [八、部署](deployment.md)
+- [九、常见问题](troubleshooting.md)
+- **十、设计理念**（当前篇）
+- [十一、许可](licenses.md)
 {{< /details >}}
 
 宣纸不是"套了一层古风皮的博客"，而是把整套界面当作**一件纸上的器物**来做：每个页面都借一个真实物件（诗笺、信封、函套、印谱、书卷）来组织信息，版式里只出现"纸、墨、朱砂"三种材料。这一篇讲这套语言是怎么落地的。

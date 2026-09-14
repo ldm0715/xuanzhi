@@ -1,7 +1,7 @@
 ---
-title: "十、许可"
+title: "十一、许可"
 date: 2026-09-10T10:00:00+08:00
-weight: 100
+weight: 110
 description: "主题本体与随附第三方资产各自的许可，以及各自要保留什么"
 tags:
   - 许可
@@ -14,13 +14,14 @@ categories:
 - [一、快速开始](quick-start.md)
 - [二、安装与升级](installation.md)
 - [三、站点配置](configuration.md)
-- [四、写作](writing/index.md)
-- [五、短代码参考](shortcodes.md)
-- [六、自定义](customization.md)
-- [七、部署](deployment.md)
-- [八、常见问题](troubleshooting.md)
-- [九、设计理念](design.md)
-- **十、许可**（当前篇）
+- [四、内容组织](structure.md)
+- [五、写作](writing/index.md)
+- [六、短代码参考](shortcodes.md)
+- [七、自定义](customization.md)
+- [八、部署](deployment.md)
+- [九、常见问题](troubleshooting.md)
+- [十、设计理念](design.md)
+- **十一、许可**（当前篇）
 {{< /details >}}
 
 主题本体（模板 / CSS / JS）是 **MIT**，见仓库根目录的 `LICENSE`。

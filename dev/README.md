@@ -10,7 +10,7 @@
 - 配套博客站点：`F:\hugo_gcnanmu`（另一个独立仓库）。开发期主题以 **junction** 挂载：
   `F:\hugo_gcnanmu\themes\xuanzhi → F:\hugo_theme`（两个路径是同一目录）。站点 `.gitignore` 已排除该 junction，勿删。
 - 主题改动即时生效于站点，无需同步文件。
-- **用户手册 `docs/` 就是演示站正文**：`exampleSite/hugo.toml` 用 module mount 把它挂成 `content/posts`，手册各篇和示例文章一起进归档、上首页卡片。手册**只有这一份源文件**——改 `docs/` 就等于改演示站正文，没有第二份要同步。挂载的硬约束（必须同时补 `content → content`；各篇要有 `title`/`date`/`weight`/`description`）见 [`../CLAUDE.md`](../CLAUDE.md)「结构与规则」。
+- **用户手册 `docs/` 就是演示站正文**：`exampleSite/hugo.toml` 用 module mount 把它挂成 `content/posts`，手册各篇就是演示站的 `posts`；四篇示例文章另立一节 `exampleSite/content/samples/`（**演示数据不是教程**，靠 `mainSections = ['posts']` 与首页卡片、RSS 划开，跨年归档展示留在 `/samples/`）。手册**只有这一份源文件**——改 `docs/` 就等于改演示站正文，没有第二份要同步。挂载的硬约束（必须同时补 `content → content`；各篇要有 `title`/`date`/`weight`/`description`）见 [`../CLAUDE.md`](../CLAUDE.md)「结构与规则」。
 
 ## 常用命令
 

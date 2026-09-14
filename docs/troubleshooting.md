@@ -1,7 +1,7 @@
 ---
-title: "八、常见问题"
+title: "九、常见问题"
 date: 2026-09-10T10:00:00+08:00
-weight: 80
+weight: 90
 description: "卡住了先翻这里：构建、渲染、资源、升级四类问题的排查"
 tags:
   - 排错
@@ -13,13 +13,14 @@ categories:
 - [一、快速开始](quick-start.md)
 - [二、安装与升级](installation.md)
 - [三、站点配置](configuration.md)
-- [四、写作](writing/index.md)
-- [五、短代码参考](shortcodes.md)
-- [六、自定义](customization.md)
-- [七、部署](deployment.md)
-- **八、常见问题**（当前篇）
-- [九、设计理念](design.md)
-- [十、许可](licenses.md)
+- [四、内容组织](structure.md)
+- [五、写作](writing/index.md)
+- [六、短代码参考](shortcodes.md)
+- [七、自定义](customization.md)
+- [八、部署](deployment.md)
+- **九、常见问题**（当前篇）
+- [十、设计理念](design.md)
+- [十一、许可](licenses.md)
 {{< /details >}}
 
 按症状找。每条先说**为什么**，再给**怎么改**——知道原因下次就不会再踩。
