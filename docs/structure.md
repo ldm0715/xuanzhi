@@ -38,13 +38,13 @@ content/
 │   └── my-post/
 │       ├── index.md         →  /posts/my-post/
 │       └── assets/photo.jpg
-├── samples/
-│   ├── _index.md            →  /samples/
-│   └── long-form.md         →  /samples/long-form/
+├── notes/
+│   ├── _index.md            →  /notes/
+│   └── reading.md           →  /notes/reading/
 └── about.md                 →  /about/
 ```
 
-新开一个目录**不需要改任何配置**：建好目录、往里放 `.md`，站上立刻就有了。演示站的「样例」那一节就是这么来的——`exampleSite/content/samples/` 一个目录加一个 `_index.md`，再在头栏菜单里加一行，它就开始工作。之所以挪过去就能被解析，没有别的机关，就是因为 Hugo 认目录。
+新开一个目录**不需要改任何配置**：建好目录、往里放 `.md`，站上立刻就有了。没有「注册栏目」这一步，也没有要改的模板——Hugo 认的就是目录本身。
 
 ## `_index.md` 和 `index.md`，差一个下划线差很多
 
@@ -60,13 +60,13 @@ content/
 
 ## 新开一个存放文章的地方：三个动作
 
-以演示站的 `samples/` 为例，从无到有只需要三步。
+假设你要开一节「笔记」放读书笔记，从无到有只需要三步。
 
 ### 1. 建目录，给一个 `_index.md`
 
 ```markdown
 ---
-title: 样例
+title: 笔记
 description: 一句话说明这一节放什么
 ---
 ```
@@ -82,7 +82,7 @@ description: 一句话说明这一节放什么
   mainSections = ['posts']
 ```
 
-演示站写死 `['posts']`，所以「样例」那一节**不进首页卡片**——这正是它想要的：教程归教程，演示数据归演示数据。不写这行时 Hugo 会自己算出「页数最多的那个栏目」。
+演示站写死 `['posts']`，首页卡片和 RSS 就只出手册。**新开的栏目默认不在这个列表里**，所以它不会跑去占首页——它只在自己的 `/notes/` 下出现，头栏点进去才看得到。不写这行时 Hugo 会自己算出「页数最多的那个栏目」，这时你在 `posts/` 之外新建的栏目就可能把首页卡片占满。
 
 ### 3. 给它一个入口
 
@@ -90,8 +90,8 @@ description: 一句话说明这一节放什么
 
 ```toml
 [[menus.main]]
-  name = '样例'
-  pageRef = '/samples'
+  name = '笔记'
+  pageRef = '/notes'
   weight = 15
 ```
 
