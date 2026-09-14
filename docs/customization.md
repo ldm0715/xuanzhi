@@ -29,6 +29,22 @@ categories:
 
 > **不要直接改 `themes/xuanzhi/` 里的文件。** 升级主题时那个目录会被整体替换，改动全丢。所有自定义都在**你自己的站点仓库**里做——要么改配置，要么在站点侧建一个同名文件把主题的顶掉（Hugo 的查找顺序是「站点先于主题」）。
 
+## 主题的文件都在哪
+
+后面会反复提到主题里的几个文件，先把它们的位置一次说清。都在 `themes/xuanzhi/` 下：
+
+| 目录 | 放什么 | 你大概会想改的 |
+|---|---|---|
+| `layouts/` | 页面模板。`baseof.html` / `single.html` / `home.html` / `list.html` 是页面骨架，`partials/` 是可复用片段 | `partials/head.html`（整个 `<head>` 的输出）、`partials/header.html`（头栏）、`partials/footer.html`（页脚）、`partials/nav-links.html`（导航链接） |
+| `assets/css/` | 样式。**全部设计 token 在 `token.css`** | `token.css`——改颜色、字体、纹理从这里进 |
+| `assets/js/` | 交互，全站只有一个文件 | `site.js`（明暗切换、外观面板、搜索、图窗、播放器初始化…） |
+| `assets/vendor/` | 第三方库（Plyr 管视频、APlayer 管音频） | 别手改，皮肤覆写写在 `assets/css/main.css`，升级方式见其 `README.md` |
+| `static/` | 按原样发布的文件，路径原样进站 | `static/images/`（默认人像 `me.jpg`、分享图 `og-default.png`、水墨小品预览稿） |
+| `i18n/` | 界面文案 | `zh-cn.yaml` |
+| `docs/` | 就是这本手册 | — |
+
+**记两条就够**：模板在 `layouts/`，样式与脚本在 `assets/`。想改哪一份，就在站点侧建同名同路径的文件覆盖它——下面每一节都是这么做的。
+
 ## 头栏导航
 
 加**文字链接**只改配置，模板会自动出现在桌面头栏和手机 ☰ 面板两处：
@@ -123,7 +139,7 @@ mkdir -p assets/css
 cp themes/xuanzhi/assets/css/token.css assets/css/token.css
 ```
 
-然后只改站点这份 `assets/css/token.css`。`head.html` 是用 `resources.Get "css/token.css"` 取这个文件的，而 Hugo 的资源查找**站点先于主题**，所以站点这份会被自动用上。
+然后只改站点这份 `assets/css/token.css`。`layouts/partials/head.html` 是用 `resources.Get "css/token.css"` 取这个文件的，而 Hugo 的资源查找**站点先于主题**，所以站点这份会被自动用上。
 
 > **代价**：主题以后新增的 token 不会自动出现在你这份副本里。升级主题时对着 [CHANGELOG](https://github.com/ldm0715/xuanzhi/blob/master/CHANGELOG.md) 看一眼有没有新增的 token，有就补进你的副本。
 >

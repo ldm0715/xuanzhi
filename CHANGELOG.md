@@ -11,6 +11,7 @@
 ### 新增
 
 - **用户手册新增「四、内容组织」一章**（`docs/structure.md`）：`content/` 的目录怎么变成 URL、新开一个存放文章的地方要做哪三个动作（`_index.md` / `mainSections` / 菜单项）、哪些路径已经被 Hugo 与主题占用、`slug` / `url` / `aliases` 怎么换 URL 不换目录。两条写进去的都是实测结论：**在分类法根目录下放内容文件会静默吞掉同名词条的词条页**（配对测试，两边都是零报错零警告），**新建栏目的列表页默认继承归档版式**——`layouts/list.html` 不渲染 `_index.md` 的正文，无日期的内容还会掉进「0001 年」那一组。要自己的形制就给栏目单独一个 `layouts/<section>/list.html`
+- **`docs/customization.md` 新增「主题的文件都在哪」一节**：手册此前只在正文里零散提到 `head.html` / `site.js` / `token.css`，却从没说明它们在主题的哪个目录下，读者没有锚点。补一张 `layouts/` / `assets/` / `static/` / `i18n/` 的对照表（顺带一句「模板在 `layouts/`，样式与脚本在 `assets/`」），并把几处裸文件名补成完整路径：`layouts/partials/head.html`、`layouts/partials/nav-links.html`、`assets/js/site.js`、`layouts/single.html`、`layouts/about.html`。短代码那篇的媒体素材也补上了「站内文件放站点的 `static/media/`」——此前只说了短代码参数里怎么写 `/media/…`，没说文件该放哪
 - **演示站新增 `exampleSite/README.md`**：讲清用户手册在仓库根 `docs/`（靠 `exampleSite/hugo.toml` 末尾的 module mount 挂成 `content/posts`，所以翻 `exampleSite/` 目录找文档会扑空），并写明**别把这份 `hugo.toml` 抄进自己的站**——它没有 `theme = 'xuanzhi'`，靠的是 `../layouts`、`../assets` 这些只在主题仓库里成立的相对路径；抄过去 Hugo 不报错、直接当空，构建会硬失败在第一个短代码上
 
 ### 变更

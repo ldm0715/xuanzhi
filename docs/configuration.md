@@ -132,7 +132,7 @@ enableEmoji = true
   mainSections = ['posts']     # 你的文章放在哪个栏目就写哪个
 ```
 
-> 这一行同时会改掉**没配菜单时**的自动导航兜底（`nav-links.html` 也读 `site.MainSections`）。配了 `[[menus.main]]` 的站点不受影响。
+> 这一行同时会改掉**没配菜单时**的自动导航兜底（`layouts/partials/nav-links.html` 也读 `site.MainSections`）。配了 `[[menus.main]]` 的站点不受影响。
 >
 > 演示站的 `exampleSite/hugo.toml` 里也配了这行，注释讲清了来龙去脉，可对着看。
 
@@ -154,7 +154,7 @@ enableEmoji = true
 
 ## 媒体短代码也不用配
 
-`video` / `audio` / `playlist` 三个短代码开箱即用，**没有开关**。两个播放器库（Plyr 管视频、APlayer 管音频）由 `head.html` 按 `.HasShortcode` 判断，**只有嵌了媒体的页面才加载**——不放媒体的站点不会为此多背 200 多 KB，其余页面的资源体积与从前一致。
+`video` / `audio` / `playlist` 三个短代码开箱即用，**没有开关**。两个播放器库（Plyr 管视频、APlayer 管音频）由 `layouts/partials/head.html` 按 `.HasShortcode` 判断，**只有嵌了媒体的页面才加载**——不放媒体的站点不会为此多背 200 多 KB，其余页面的资源体积与从前一致。
 
 需要你自备的是素材本身：
 
