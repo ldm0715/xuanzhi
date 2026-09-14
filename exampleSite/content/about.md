@@ -6,6 +6,10 @@ layout: "about"
 # 但正文的 .container 仍是 800px，于是头栏页脚会比正文宽出一截。
 # 这里不是长文，写 narrow 收回窄档，头栏页脚与正文对齐。
 frame: "narrow"
+
+# 以下是演示内容：nameplate / social / project 里填的都是主题作者本人的信息。
+# 抄这一篇当模板时，整段替换成你自己的——顺带演示了三种 project 形态
+# （带 url 的可点、没 url 的纯文字、archived="true" 换白文印）。
 ---
 
 {{< nameplate name="宫城楠木" role="独立开发者 · 居杭州" >}}

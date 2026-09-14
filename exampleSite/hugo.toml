@@ -55,6 +55,12 @@ enableEmoji = true
   name = '归档'
   pageRef = '/posts'
   weight = 10
+# 演示数据单独成节：它不进首页卡片（mainSections 只收 posts），
+# 但归档版式的跨年份展示、分类书架与标签印谱的额外词条都靠它。
+[[menus.main]]
+  name = '样例'
+  pageRef = '/samples'
+  weight = 15
 [[menus.main]]
   name = '分类'
   pageRef = '/categories'

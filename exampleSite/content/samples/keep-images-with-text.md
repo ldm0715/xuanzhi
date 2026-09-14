@@ -1,7 +1,7 @@
 ---
 title: "把图放在文章旁边"
 date: 2024-11-02T10:00:00+08:00
-weight: 130
+weight: 230
 description: "为什么我不用图床：图片和文章在同一个 Git 仓库里"
 tags:
   - 图片
