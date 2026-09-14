@@ -98,7 +98,7 @@ hugo --source F:/hugo_gcnanmu --gc
 - PowerShell 5.1 把**无 BOM 的 UTF-8 `.ps1` 按 GBK 读**：脚本里写中文字面量（连注释也算）会让解析器报 `MissingEndParenthesisInMethodCall`。生成 OG 图的脚本踩过，改成全 ASCII + `[char]0x5BA3` 取字形才通
 - **新建 / 删除 partial 文件后 Hugo 的 watcher 不一定重建**：实测删掉站点侧 `layouts/partials/header-extra.html` 后页面仍是旧的（插槽还在、footer 还是老 markup），改已有文件才一定热重建。加删模板文件后没生效就重启 `hugo server`
 - **`site.MainSections` 在没配 `params.mainSections` 时是「页数最多的顶层栏目」，不是「所有顶层栏目」**：`home.html` 和 `nav-links.html` 的兜底都读它。站点里出现一个页数比文章多的栏目（文档 / 笔记 / 周刊）时，文章会从**首页卡片和 RSS 里整个消失**，**不报任何错**。修法是站点侧一行 `[params] mainSections = ['posts']`（演示站的 `hugo.toml` 里也配了，注释写明理由）。**任何新增的、页数可能超过文章的栏目都要回头检查这一条**——这是主题层面「静默失效」的典型，排查时容易去怀疑排序而不是来源筛选
-- **`layouts/list.html` 是归档专用，不渲染 `.Content`**：它把 `.Pages` 按年 / 月分组、且完全不输出段索引正文。**非文章段落（文档 / 笔记这类无日期内容）直接套它，会掉进「0001 年」那一组，输出一个空壳**。现在演示站没有这种段落（手册就是 posts），但站点建任何独立栏目都要给它单独一个索引模板或 `layout`——这是主题已知的缺口
+- **`layouts/list.html` 是归档专用，不渲染 `.Content`**：它把 `.Pages` 按年 / 月分组、且完全不输出段索引正文。**非文章段落（文档 / 笔记这类无日期内容）直接套它，会掉进「0001 年」那一组，输出一个空壳**。现在演示站没有这种段落（手册就是 posts），但站点建任何独立栏目都要给它单独一个索引模板或 `layout`——这是主题已知的缺口。2026-09-14 起，用户手册「四、内容组织」里有一份面向使用者的写法（含实测：`_index.md` 的正文不渲染、无日期的内容落进 `0001` 组）
 - **`resources.Get` 是「站点先于主题」的**，所以站点只要在自己的 `assets/` 下放一份同名文件就能覆盖主题的（用户文档里「改颜色」一节就是靠这个——复制一份 `token.css` 到站点改，而不是改主题目录）。`head.html` 的 CSS / JS 都走这条路，包括字体 `@font-face` 的 `resources.Get` 探测
 
 ## 相关文档
