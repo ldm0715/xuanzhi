@@ -23,6 +23,7 @@ categories:
 - [九、常见问题](troubleshooting.md)
 - [十、设计理念](design.md)
 - [十一、许可](licenses.md)
+- [十二、评论](comments.md)
 {{< /details >}}
 
 这一篇讲**怎么写正文**：文章头部的字段、图片放哪、公式和代码怎么写、各类 markdown 元素在主题里长什么样。

@@ -22,6 +22,7 @@ categories:
 - [九、常见问题](troubleshooting.md)
 - [十、设计理念](design.md)
 - [十一、许可](licenses.md)
+- [十二、评论](comments.md)
 {{< /details >}}
 
 这一篇讲**文件放哪儿**：`content/` 下的目录结构怎么变成站上的 URL，新开一个存放文章的地方要做哪几件事，以及哪些路径是 Hugo 自己占着的、别拿去用。

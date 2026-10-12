@@ -22,6 +22,7 @@ categories:
 - [九、常见问题](troubleshooting.md)
 - [十、设计理念](design.md)
 - [十一、许可](licenses.md)
+- [十二、评论](comments.md)
 {{< /details >}}
 
 短代码（shortcode）是 markdown 之外的扩展通道：在正文里写一对 `{{</* … */>}}`，构建时被替换成一段结构化的 HTML。这一篇列全主题与 Hugo 内置的可用短代码及其参数。

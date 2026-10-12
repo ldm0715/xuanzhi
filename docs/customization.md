@@ -23,6 +23,7 @@ categories:
 - [九、常见问题](troubleshooting.md)
 - [十、设计理念](design.md)
 - [十一、许可](licenses.md)
+- [十二、评论](comments.md)
 {{< /details >}}
 
 下面几项**不写在 `hugo.toml` 里**，改的是站点仓库中的文件。公共原则只有一条：

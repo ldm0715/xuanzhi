@@ -21,6 +21,7 @@ categories:
 - [九、常见问题](troubleshooting.md)
 - [十、设计理念](design.md)
 - [十一、许可](licenses.md)
+- [十二、评论](comments.md)
 {{< /details >}}
 
 这一篇只做一件事：**让你在五分钟内看到一个跑起来的站点**。不解释原理，不讲可选项，每一条命令都可以直接复制。

@@ -21,6 +21,7 @@ categories:
 - [九、常见问题](troubleshooting.md)
 - [十、设计理念](design.md)
 - [十一、许可](licenses.md)
+- [十二、评论](comments.md)
 {{< /details >}}
 
 主题有一批功能是**模板在主题、开关在站点**——不配就是没有。这一篇把 `hugo.toml` 里所有要写的东西列全，按「不配会怎样」排。
@@ -168,7 +169,9 @@ enableEmoji = true
 
 ## 评论（Waline）：可选，不配就没有
 
-评论走 [Waline](https://waline.js.org/)——**服务端你自己部署**，客户端两个文件在主题的 `static/vendor/waline/`，不挂第三方 CDN。主题不带服务端，所以这一步得先做完，否则配了也没用。
+> 这一节只管**配置项**。开启步骤、上游那个「非管理员点赞必然失败」的 bug、以及服务端该用哪个仓库，单独写在[十二、评论](comments.md)。
+
+评论走 [Waline](https://waline.js.org/)——**服务端你自己部署**，客户端三个文件在主题的 `static/vendor/waline/`，不挂第三方 CDN。主题不带服务端，所以这一步得先做完，否则配了也没用。
 
 ### 一、先拿到服务端地址
 

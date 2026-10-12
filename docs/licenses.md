@@ -22,6 +22,7 @@ categories:
 - [九、常见问题](troubleshooting.md)
 - [十、设计理念](design.md)
 - **十一、许可**（当前篇）
+- [十二、评论](comments.md)
 {{< /details >}}
 
 主题本体（模板 / CSS / JS）是 **MIT**，见仓库根目录的 `LICENSE`。

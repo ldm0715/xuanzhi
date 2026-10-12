@@ -23,6 +23,7 @@ categories:
 - [九、常见问题](troubleshooting.md)
 - [十、设计理念](design.md)
 - [十一、许可](licenses.md)
+- [十二、评论](comments.md)
 {{< /details >}}
 
 这一篇讲怎么把站点发到线上。Hugo 的产物是纯静态文件，任何静态托管都能放。

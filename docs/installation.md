@@ -22,6 +22,7 @@ categories:
 - [九、常见问题](troubleshooting.md)
 - [十、设计理念](design.md)
 - [十一、许可](licenses.md)
+- [十二、评论](comments.md)
 {{< /details >}}
 
 这一篇解决「主题怎么进到我的站点里、之后怎么升」。从零建站请看[快速开始](quick-start.md)。
