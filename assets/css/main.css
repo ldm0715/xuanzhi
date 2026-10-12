@@ -2705,12 +2705,17 @@ html[data-theme="dark"] .shelf-folder:focus-visible {
     grid-template-areas:
       "head head"
       "body memo"
-      "foot memo";
+      "foot memo"
+      "comm memo";
     gap: 0 44px;
   }
   .post-header { grid-area: head; }
   .post-content { grid-area: body; }
   .post-footer { grid-area: foot; }
+  /* 评论区的网格位必须显式给。.post 是 display:contents，评论块是 .post-layout
+     的直接网格项；不给的话它落进隐式行，而 memo 那栏只跨到 foot 为止——
+     目录笺会在评论区上方就断掉。窄屏是单列 grid，自动落成第四行，不必另写。 */
+  .comments { grid-area: comm; }
   .toc-memo { display: block; grid-area: memo; }
 }
 
@@ -3192,6 +3197,370 @@ html[data-theme="dark"] .post-seal::after {
   .post-tool-btn:hover,
   .post-seal:hover { transform: none; }
 }
+
+/* ============ 评论（Waline） ============
+ * 客户端与样式都在 static/vendor/waline/（见 assets/vendor/README.md），
+ * 由 site.js 的「评论（Waline）」段滚到视口前 400px 才注入。
+ *
+ * **整段用 #waline 起头，不是随手写的类名前缀。** waline.css 是运行期插进来的
+ * <link>，落点必然在 main.css **之后**——与播放器那边「vendor 排在 main.css
+ * 之前、同特异性靠源码顺序取胜」正好相反。ID 的特异性 (1,0,0) 高过 waline.css
+ * 里的 html[data-theme="dark"] (0,1,1) 和 :root (0,1,0)，这样不赌加载顺序：
+ * 明暗切换时 Waline 自己那段暗色变量块压不过我们这里的 token 映射。
+ *
+ * 变量一律映到 token，四象限（亮暗 × 朱砂/黛青）自动跟随，不必补两套。
+ */
+
+#waline {
+  /* 字号跟正文走：Waline 的根节点自己接管 font-size，继承链在此断开，
+     不显式给就会落到它默认的 1rem（16px），窄屏正文降到 16px 时又对不上。
+     1em 在 var() 代入 font-size 时按父元素字号解析，正好一路跟着 body。 */
+  --waline-font-size: 1em;
+
+  --waline-color: var(--color-text);
+  --waline-light-grey: var(--color-text-secondary);
+  --waline-dark-grey: var(--color-text-note);
+
+  /* 点缀色：朱砂 / 黛青随 data-accent 自动切换 */
+  --waline-theme-color: var(--color-zhu);
+  --waline-active-color: var(--color-zhu-strong);
+
+  /* 面：面板落在素纸上（与外观面板同一套 recipe）；输入框聚焦时压深一档，
+     走的是和正文 code 同一个底，看起来像笺格 */
+  --waline-bg-color: var(--color-surface);
+  --waline-bg-color-light: var(--color-code-bg);
+  --waline-bg-color-hover: var(--color-bg);
+  --waline-border-color: var(--color-border-light);
+  --waline-border: 1px solid var(--color-border-light);
+  --waline-disable-bg-color: var(--color-border-light);
+  --waline-disable-color: var(--color-ink-weak);
+  --waline-code-bg-color: var(--color-code-bg);
+  --waline-bq-color: var(--color-quote-bg);
+  --waline-info-bg-color: var(--color-bg);
+  --waline-info-color: var(--color-text-secondary);
+
+  /* 「博主」签：waline 的 .wl-badge 是朱框朱字，形制同 .post-meta .tag */
+  --waline-badge-color: var(--color-zhu);
+
+  /* --waline-white 的用途是「与主题色相反的那个色」（实心按钮的字、
+     排行徽章的底），映成纸色即得朱底纸字，与落款引首章同源 */
+  --waline-white: var(--color-bg);
+
+  /* 头像收成小方章，不取默认的整圆 */
+  --waline-avatar-radius: 3px;
+  --waline-avatar-size: 2.6rem;
+
+  font-family: var(--font-sans);
+}
+
+/* 输入控件默认不继承字体，不补这一条评论框会用系统 UI 字体，与正文的文楷脱节 */
+#waline button,
+#waline input,
+#waline textarea { font-family: inherit; }
+
+/* 代码块与正文同源（waline.css 自带的语言高亮类把字族写死成 Consolas） */
+#waline code,
+#waline pre { font-family: var(--font-mono); }
+
+/* ---- 投稿面板：照诗笺的形制做成一枚笺 ----
+ *
+ * 原来是「素纸 + 一道浅褐细框」，平得像块 UI 卡片。诗笺（首页那片）的纸感来自
+ * 四样东西，这里一样一样搬过来：
+ *   ① 素纸底 + --tex-noise 噪点做旧（与首页卡片、诗笺同一张纹理，90px 平铺）
+ *   ② 一道朱丝外框，外加 ::before 内缩 5px 的第二道细框 —— 双框才是笺纸的规矩
+ *   ③ 直角（2px），不用面板那套 6px 圆角
+ *   ④ 双层柔影把它从纸面上托起来
+ *
+ * 影子的两个色值直接抄自 .poem-scroll；要调就两处一起调。暗色必须另写一套——
+ * 亮色那层暖影落在夜墨底上会发脏，这是主题里所有浮起面的通例。
+ *
+ * padding 是给内框让位的：内框缩进 5px，内容再缩进 10px，两者留 5px 空隙，
+ * 否则内框会横穿昵称/邮箱那几道的底线。 */
+#waline .wl-panel {
+  padding: 10px 10px 4px;
+  background-color: var(--color-surface);
+  background-image: var(--tex-noise);
+  background-size: 90px 90px;
+  border: 1px solid var(--color-zhu-soft);
+  border-radius: 2px;
+  box-shadow:
+    0 2px 6px rgba(60, 45, 20, 0.10),
+    0 14px 34px rgba(60, 45, 20, 0.12);
+}
+#waline .wl-panel::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1px solid var(--color-zhu-soft);
+  pointer-events: none;
+}
+html[data-theme="dark"] #waline .wl-panel {
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.40),
+    0 14px 34px rgba(0, 0, 0, 0.32);
+}
+
+/* ---- 正文框，以及「昵称 / 邮箱 / 网址」那三行 ----
+ *
+ * 底线只画在输入控件上（正文框 .wl-editor 与自己那一行；昵称/邮箱/网址那三行
+ * 只画在 <input> 上，label 不画）——这是刻意的形制。聚焦时转朱砂，底色不动：
+ * Waline 默认会填一层浅底，那样就在素纸上又起了第二层纸。
+ *
+ * 唯一的坑在**高度**：.wl-header-item 是 flex 行，默认 align-items: stretch
+ * 会把 input 拉满整行（行高由 padding 更大的 label 决定）。于是 input 的文字
+ * 在中间垂直居中、而底线落在行的最底，中间空出一大截，看着就是「字比线高出
+ * 一截」。把它居中即可：input 回到自然高度，底线就贴着文字了。踩过。 */
+#waline .wl-header-item { align-items: center; }
+
+#waline .wl-editor,
+#waline .wl-input {
+  border: none;
+  border-bottom: 1px solid var(--color-rule);
+  border-radius: 0;
+  background: none;
+  transition: border-color 0.2s ease;
+}
+#waline .wl-editor:focus,
+#waline .wl-input:focus {
+  border-bottom-color: var(--color-zhu);
+  background: none;
+}
+
+/* 按钮：只收主按钮的圆角。别给 .wl-btn 一刀切——登录态那组是两个半圆拼的
+   分段控件（.wl-comment-status .wl-btn 自带 border-radius:0 与首个子元素的
+   半圆），一刀切会把它的形制拆掉 */
+#waline .wl-btn.primary { border-radius: 3px; }
+#waline .wl-btn { transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease; }
+
+/* 弹层（表情 / 表情包）收圆角。默认关着，开了才有 */
+#waline .wl-emoji-popup,
+#waline .wl-gif-popup { border-radius: 4px; }
+
+/* 评论卡片那排动作：爱心 / 回复 / 编辑 / 删除。
+ *
+ * 爱心的颜色：Waline 把「已赞」直接写成行内 fill="red"（硬编码 #ff0000），
+ * 跟宣纸的朱砂不是一回事。行内 fill 是 SVG 的**表现属性**，任何 CSS 声明都能
+ * 压过它，所以可以夺回来——但**不能改成 fill: currentColor 就完事**：
+ *
+ *   .wl-like 这颗按钮根本没有 active 类。打包产物里是写死的 class:`wl-like`，
+ *   拿到 active 的是它内部的 LikeIcon。所以照搬 waline.css 里那条
+ *   .wl-card .wl-like.active 的规则谁也命中不了，爱心会永远跟着
+ *   --waline-color 走成同一个墨色，实心空心都一个样——点了像没反应（踩过）。
+ *
+ * 改判据认路径上那个行内属性：:has(svg path[fill="red"])。它是真实的 DOM 属性，
+ * :has() 看得见；CSS 的 fill 与它互不干扰。未赞时 Waline 写的是 fill="currentColor"，
+ * 这条不命中，爱心仍是墨色；已赞时命中，按钮的 color 转朱砂，fill 跟着走。
+ *
+ * @supports 兜底：不支持 :has() 的浏览器整段不生效，爱心退回 Waline 自己的红色——
+ * 是"没改成主题色"，不是"永远不变色"。
+ *
+ * 另加一个按下即缩的即时反馈：Waline 的点赞**不是乐观更新**，数字与红心都要等
+ * 服务端往返回来才变（Vercel 冷启动时能到一两秒），按下先缩一下才不至于像点空了。
+ * 这治不了本——根子在库的设计，不可以去改 vendor 里的文件。 */
+@supports selector(:has(*)) {
+  #waline .wl-card .wl-like svg path { fill: currentColor; }
+  #waline .wl-card .wl-like:has(svg path[fill="red"]) { color: var(--waline-active-color); }
+}
+
+#waline .wl-card .wl-like,
+#waline .wl-card .wl-reply,
+#waline .wl-card .wl-edit,
+#waline .wl-card .wl-delete { transition: color 0.2s ease, transform 0.12s ease; }
+#waline .wl-card .wl-like:active,
+#waline .wl-card .wl-reply:active,
+#waline .wl-card .wl-edit:active,
+#waline .wl-card .wl-delete:active { transform: scale(0.86); }
+
+@media (prefers-reduced-motion: reduce) {
+  #waline .wl-card .wl-like:active,
+  #waline .wl-card .wl-reply:active,
+  #waline .wl-card .wl-edit:active,
+  #waline .wl-card .wl-delete:active { transform: none; }
+}
+
+/* 页脚那行 Waline 版权与 RSS：退到最淡的一档墨，别跟正文抢 */
+#waline .wl-power,
+#waline .wl-rss { color: var(--color-ink-weak); }
+
+/* ---- 加载指示 ----
+ *
+ * Waline 自带的转圈是 SVG **SMIL**（<animateTransform type="rotate">），不是
+ * CSS 动画——主题的样式表既碰不到它、也救不回来，而 SMIL 本身就是被各家浏览器
+ * 逐步淘汰的老机制。所以干脆不用它：把那个 <svg> 藏掉，用 CSS 画一枚朱砂弧线。
+ *
+ * 好处是这枚转圈从此归主题管：颜色跟着点缀色（朱砂 / 黛青）走，也受
+ * prefers-reduced-motion 约束——那边只留一个静止的环，不转。 */
+#waline .wl-loading svg { display: none; }
+#waline .wl-loading::after {
+  content: "";
+  display: block;
+  width: 26px;
+  height: 26px;
+  margin: 0 auto;
+  border: 2px solid var(--color-zhu-soft);
+  border-top-color: var(--color-zhu);
+  border-radius: 50%;
+  animation: xz-comment-spin 0.8s linear infinite;
+}
+@keyframes xz-comment-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #waline .wl-loading::after { animation: none; }
+}
+
+/* ---- 昵称那一行：把行盒上方那段空白收掉 ----
+ *
+ * 症状是「昵称明明贴着 .wl-head 的顶，看着却离行顶很远」。两层原因：
+ *
+ *   ① waline.css 的 [data-waline] *{line-height:1.75} 给 head 的每个子元素
+ *      （徽章、时间…）**各自**钉了 1.75，比继承更优先，整行行盒被撑到 ~30px。
+ *   ② 更要紧的是**行盒本身**：.wl-head 是普通的行内格式化上下文，行盒高度由
+ *      「strut」（承来的 17px 字号 × 行高）决定；昵称的字只有 15px 上下，差出来的
+ *      那一半全摊在字的上方。实测：line-height 1.75 时约 10px，收到 1.2 仍有 ~5px
+ *      ——所以只调 line-height 治不干净，得让它**不再是行内布局**。
+ *
+ * 改成 flex：flex 里没有 strut、也没有行盒，昵称的盒子直接从容器顶起排，
+ * 字离顶只剩字体自身那一两px的内边距。
+ *
+ * align-items 用 **baseline** 而不是 flex-start：这一行混着两种字号（昵称
+ * 14.9px、时间 12.75px），对齐盒顶会让两者的基线错开两px——看着就是「时间飞
+ * 到昵称上面去了」。基线对齐才是同一行文字该有的对法。
+ *
+ * 副作用两处：
+ *   · .wl-comment-actions 原本靠 float:right 靠右，进了 flex 就不认 float 了，
+ *     改用 margin-inline-start: auto 推它到右端；
+ *   · 它里面是 24px 的图标，参与基线对齐的话基线取的是 svg 底边，会被拽下去
+ *     24px，所以单独给它 align-self: flex-start，仍旧贴着顶——与改之前
+ *     float 的表现一致。 */
+#waline .wl-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  /* 1 而不是 1.2：每项自身的行盒高度 = 行高 × 字号，行高 1 时行盒正好等于字身，
+     字上方就没有半行距了。改成 flex 之后整行的竖向节奏由 flex 管，不再靠行高撑。 */
+  line-height: 1;
+}
+#waline .wl-head > * { line-height: inherit; }
+#waline .wl-head .wl-comment-actions {
+  float: none;
+  margin-inline-start: auto;
+  align-self: flex-start;
+}
+
+/* 评论列表头上那行：Waline 渲染成「<条数> <locale.comment>」，也就是「3 评论」——
+   和评论区标题那行「评论 · 3」撞了个正着。题头那句已经换成招呼语了（见
+   i18n 的 commentListHeading），这里再把前面那枚条数收掉：条数在标题那行已经有了，
+   留着就是同一页面上印两遍。右边那排排序按钮（最新/最早/最热）在同级，
+   别连坐，所以只点掉 .wl-num。 */
+#waline .wl-count .wl-num { display: none; }
+
+/* ---- 「地址 / 浏览器 / 系统」那排小签 ----
+ *
+ * 图标本身来自**第二份样式表** waline-meta.css（Font Awesome 的 data-URI，我们
+ * 也 vendor 了，由 site.js 和 waline.css 一起注入）——不在 waline.css 里，
+ * 少了它这排就只有字、没有图标。
+ *
+ * 颜色是烤在 data-URI 里的 #999，CSS 的 color 够不着它（那是 background-image，
+ * 不是 currentColor 形的图标），所以只能用 filter 拉：brightness(0) 把任何颜色
+ * 压成纯黑，再用 opacity 调浓淡；夜墨下必须反过来提亮，否则黑图标落在暗底上
+ * 等于没有。 */
+#waline .wl-card .wl-meta > span {
+  /* 用 flex 居中，而不是让 ::before 当 inline-block：
+     后者默认 vertical-align:baseline，图标的底边贴基线，视觉上整枚会飘到
+     文字上方。间距也顺势交给 gap，不再用 margin 拼。 */
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 1px 6px;
+  border: 1px solid var(--color-border-light);
+  border-radius: 2px;
+  background: none;
+  color: var(--color-text-note);
+  font-size: 0.72rem;
+  line-height: 1.6;
+}
+#waline .wl-card .wl-meta > span::before {
+  flex: none;
+  width: 0.95em;
+  height: 0.95em;
+  /* waline-meta.css 里那个 2px 要显式抹掉，否则会和 gap 叠加 */
+  margin-inline-end: 0;
+  filter: brightness(0);
+  opacity: 0.5;
+}
+html[data-theme="dark"] #waline .wl-card .wl-meta > span::before {
+  filter: brightness(0) invert(1);
+  opacity: 0.55;
+}
+
+/* ---- 嵌套回复左侧那道竖线 ----
+ *
+ * Waline 给的是 rgba(237,237,237,.5) —— 一道近白，是配它自己那套白底做的：
+ * 落在宣纸底（--color-bg #F7F3EB）上直接看不见，只有夜墨里才显形。
+ * 换成 --color-rule（点缀色 28% 与 --color-frame 调和），随 data-accent
+ * 在朱砂 / 黛青之间换，明暗也自动跟随——和评论标题那道横线同一个 token，
+ * 横竖两道同色，正是宣纸的「朱丝栏」。
+ *
+ * 虚线保留：主题的 .post-footer 折痕也是 dashed + --color-rule 这一套。
+ * 嫌太淡就换成 var(--color-zhu-soft) 或把 1px 加到 2px。 */
+#waline .wl-card .wl-quote { border-inline-start: 1px dashed var(--color-rule); }
+
+/* ---- 区块与题跋式标题 ---- */
+
+.comments {
+  /* .post-footer 自带 margin-bottom: 3rem，网格项之间不折叠，
+     所以这里到上面那块的实际间距就是 3rem */
+  margin: 0 0 3.5rem;
+}
+
+/* 标题居中，两侧各引一道淡出的细线——同首页「近期文章」那枚（.home-heading）。
+   间距没用 gap：这一行的 flex 项是 [引线, 评论, 篇数, 引线] 四个，用 gap 的话
+   篇数也会被推开 18px。改成只给两条引线加外边距，间距就只落在两端。 */
+.comments-title {
+  display: flex;
+  align-items: center;
+  margin: 0 0 1.5rem;
+  text-align: center;
+  font-family: var(--font-title);
+  font-size: 1.12rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--color-title);
+}
+.comments-title::before,
+.comments-title::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+}
+.comments-title::before {
+  margin-inline-end: 18px;
+  background: linear-gradient(to right, transparent, var(--color-rule));
+}
+.comments-title::after {
+  margin-inline-start: 18px;
+  background: linear-gradient(to left, transparent, var(--color-rule));
+}
+
+.comments-count {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--color-text-note);
+  font-variant-numeric: tabular-nums;
+}
+/* 篇数由 Waline 写入。取不到时（还没加载 / 请求失败）它一直是空的，
+   这时把前置的分隔点一并收掉，免得孤零零挂着一个「·」 */
+.comments-count::before {
+  content: "·";
+  /* 两侧都要留白：标题那行改成没有 gap 之后，前面那格间距得自己给。
+     左边 0.35em 是配标题继承来的 0.14em 字距，两眼看上去才匀。 */
+  margin: 0 0.45em 0 0.35em;
+  color: var(--color-ink-weak);
+}
+.comments-count:empty::before { content: none; }
 
 /* ============ 页脚 ============ */
 
@@ -4282,6 +4651,7 @@ html::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radiu
   .pagination,
   .post-toolbar,
   .post-sign-seal,
+  .comments,
   .xz-player--video,
   .xz-player--audio { display: none !important; }
 

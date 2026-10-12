@@ -46,6 +46,29 @@ enableEmoji = true
   [params.hero]
     greeting = '一纸短笺，见字如面'
 
+  # ---- 评论（Waline）· 可选，不配就没有 ----
+  # 服务端要自己部署（Waline 官方推荐 Vercel，全程点按钮），拿到地址填进
+  # serverURL，全站文章页立刻都有评论区；某一页不想要，在它的 front matter
+  # 写 comments: false 关掉。
+  #
+  # 演示站没有接 Waline 服务端，所以下面整段注释着——把注释去掉、换成自己的
+  # 地址即生效。可用选项、部署步骤见文档「三、站点配置」的「评论（Waline）」。
+  #
+  # [params.comments]
+  #   serverURL = 'https://your-waline.vercel.app'
+  #   lang = 'zh-CN'             # 也可 'zh-TW'
+  #   login = 'enable'           # enable | disable | force
+  #   pageSize = 10
+  #   commentSorting = 'latest'  # latest | oldest | hottest
+  #   requiredMeta = ['nick']    # 或 ['nick', 'mail']
+  #   reaction = false
+  #   emoji = false              # 默认关。开了会去 unpkg 拉表情包，
+  #                              # 那是诗笺之外多出来的一条外部请求
+  #
+  # 其余 Waline 选项照官方文档写在这里。键名写标准 camelCase 即可（模板会
+  # 把它还原回去），但**多词的选项要在 comments.html 的 $alias 表里有一条**，
+  # 否则会被 Hugo 小写化之后原样传给 Waline，静默失效。
+
 # 头栏导航：加页面只改这里，不用动模板
 [[menus.main]]
   name = '快速开始'

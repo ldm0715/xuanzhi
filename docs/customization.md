@@ -156,6 +156,34 @@ cp themes/xuanzhi/assets/css/token.css assets/css/token.css
 
 > 朱饰系 token 是**随 `data-accent` 换色**的（terracotta = 朱砂、indigo = 黛青），所以新增朱饰必须补齐「亮 / 暗 × 两种点缀色」四个象限，只改一处会在某个组合下露馅。
 
+## 改评论区配色
+
+评论区（Waline）自带一套 `--waline-*` 变量，主题在 `main.css` 的「评论（Waline）」段把它们整体映到了主题 token 上：
+
+| Waline 变量 | 映到主题的 |
+|---|---|
+| `--waline-theme-color` / `--waline-active-color` | `--color-zhu` / `--color-zhu-strong` |
+| `--waline-color` | `--color-text` |
+| `--waline-light-grey` / `--waline-dark-grey` | `--color-text-secondary` / `--color-text-note` |
+| `--waline-bg-color` / `--waline-bg-color-light` | `--color-surface` / `--color-code-bg` |
+| `--waline-border-color` | `--color-border-light` |
+| `--waline-code-bg-color` / `--waline-bq-color` | `--color-code-bg` / `--color-quote-bg` |
+| `--waline-badge-color` | `--color-zhu`（「博主」那枚签） |
+
+所以**换点缀色不用碰评论区**——照上一节的办法改 `token.css` 里的 `--color-zhu`，朱砂换黛青、明暗切换都会跟着走。
+
+只想单独调评论区，就在站点侧的 `assets/css/main.css` 里写同名变量（`resources.Get` 站点先于主题，站点这份直接生效）：
+
+```css
+/* 站点 assets/css/main.css */
+#waline {
+  --waline-avatar-size: 3rem;
+  --waline-font-size: 0.95em;
+}
+```
+
+> **选择器必须用 `#waline`，不能图省事写 `.xz-waline`。** 评论区的样式表是 `site.js` 在**运行时**插进去的，落点必然在你这份 `main.css` **之后**——同特异性时它反倒赢。`#waline` 是 ID，特异性高过 Waline 自己的 `html[data-theme="dark"]` 与 `:root`，这才不赌加载顺序。主题里整段评论皮肤都按这个规矩写。
+
 ## 换掉主题自带的默认图
 
 主题里有几张「带默认值、站点同名覆盖」的图。**只要在站点 `static/images/` 放一张同名同路径的即可顶掉，不用改配置**：

@@ -87,6 +87,51 @@ playerRestart: 重播
 playerRewind: 后退 {seektime} 秒
 playerFastForward: 快进 {seektime} 秒
 
+# ---- 评论（Waline）----
+# 前两条是主题自己的文案；comment 起头的其余各条是 Waline 界面文案的覆写
+# （模板把这一组拼成 locale 对象传给 Waline）。没在这里覆写的（错误提示、
+# 读屏专用标签、用户等级名）仍走 Waline 内置中文。
+commentsTitle: 评论
+# Waline 在评论列表上方印的那句。它内置的是「评论」（渲染成「3 评论」），
+# 和标题那行「评论 · 3」撞在一起，所以换成一句招呼。改的是 Waline 的 comment 键。
+commentListHeading: 看看大家都说了什么
+commentPlaceholder: 写下你的想法…（QQ 邮箱可自动获取 QQ 头像）
+commentSofa: 纸上还空着，等你落笔
+commentSubmit: 投笺
+commentMore: 加载更多
+commentLogin: 署名
+commentLogout: 取消署名
+commentNick: 昵称
+# 头像规则在服务端（见 docs/configuration.md「头像：QQ 头像开箱可用」）：
+# 邮箱写 <QQ号>@qq.com（或昵称写纯数字）就直接取 QQ 头像，否则回落 Gravatar。
+# 这一格只写「邮箱」两个字——约定放在下面正文框的占位文字里提示，
+# 挤在下拉框里既不好看、也容易看成「必须这么填」。
+commentMail: 邮箱
+commentLink: 网址
+commentOptional: 可选
+commentRefresh: 刷新
+commentPreview: 预览
+commentEmoji: 表情
+commentGif: 表情包
+commentGifSearchPlaceholder: 搜索表情包
+commentUploadImage: 上传图片
+commentUploading: 正在上传
+commentAnonymous: 匿名
+commentAdmin: 博主
+commentSticky: 置顶
+commentWord: 字
+commentWordHint: 留言字数应在 $0 到 $1 字之间（当前 $2 字）
+commentProfile: 个人资料
+commentNow: 刚刚
+commentSeconds: 秒前
+commentMinutes: 分钟前
+commentHours: 小时前
+commentDays: 天前
+commentLatest: 最新
+commentOldest: 最早
+commentHottest: 最热
+commentReactionTitle: 你觉得这篇怎么样
+
 # ---- 归档页 ----
 yearNote: 岁在
 monthUnit: 月

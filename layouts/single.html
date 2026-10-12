@@ -96,6 +96,13 @@
     <a class="post-nav post-nav-next" href="{{ .RelPermalink }}"><span class="nav-label">{{ i18n "older" }}</span><span class="nav-title">{{ .Title }}</span></a>
     {{- end }}
   </footer>
+
+  {{- /* 评论区：必须在 <article class="post"> 内。它是 .post-layout 的网格项
+         （.post 是 display:contents），放到 article 外面同样会多出一个网格项；
+         而放进 .post-content 更不行——那里挂着 .post-content ul > li::before
+         那枚朱砂墨点，Waline 内部大量用 <ul>，会歪在文字左上方并探出左缘。
+         站点的 [params.comments] 没配 serverURL 时这个 partial 什么都不输出。 */ -}}
+  {{ partial "comments.html" . }}
 </article>
 
 {{- if findRE "<li" $toc -}}

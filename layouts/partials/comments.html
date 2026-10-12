@@ -1,0 +1,107 @@
+{{- /* 评论区（Waline）· 主题在模板、开关在站点
+       把 [params.comments] 的 serverURL 填上，全站文章页就都出现评论区；
+       某一页不想要，front matter 写 comments: false。不配 serverURL 则整个
+       模板不输出任何东西——「不配就是没有」。
+
+       客户端**不在这里加载**：文件在 static/vendor/waline/，由 site.js 的
+       「评论（Waline）」段滚到视口前 400px 才注入（waline.umd.js 约 275KB，
+       评论区又在文章最底部，没滚到那儿就不下载）。这里只把地址和数据交出去。
+
+       为什么要先把 params 的键名过一遍 lower()：Hugo 会小写化 params 的键，
+       直接 jsonify 出来的是 serverurl / pagesize 这种，Waline 一个都不认，
+       而且是**静默**失效——评论区像没配一样空着，构建不报任何错。所以这里
+       自己迭代建一份全小写的表，再用 $alias 还原成 Waline 的 camelCase。 */ -}}
+
+{{- $c := site.Params.comments | default dict -}}
+{{- $raw := dict -}}
+{{- range $k, $v := $c }}{{ $raw = merge $raw (dict (lower $k) $v) }}{{ end -}}
+{{- $serverURL := index $raw "serverurl" | default "" -}}
+
+{{- if and $serverURL (ne .Params.comments false) -}}
+
+{{- /* Waline 界面文案的覆写：只传我们在 i18n 里列过的那几项，
+       其余（错误提示、读屏标签、用户等级名）仍走 lang 的内置中文。 */ -}}
+{{- $locale := dict
+     "comment" (i18n "commentListHeading")
+     "placeholder" (i18n "commentPlaceholder")
+     "sofa" (i18n "commentSofa")
+     "submit" (i18n "commentSubmit")
+     "more" (i18n "commentMore")
+     "login" (i18n "commentLogin")
+     "logout" (i18n "commentLogout")
+     "nick" (i18n "commentNick")
+     "mail" (i18n "commentMail")
+     "link" (i18n "commentLink")
+     "optional" (i18n "commentOptional")
+     "refresh" (i18n "commentRefresh")
+     "preview" (i18n "commentPreview")
+     "emoji" (i18n "commentEmoji")
+     "gif" (i18n "commentGif")
+     "gifSearchPlaceholder" (i18n "commentGifSearchPlaceholder")
+     "uploadImage" (i18n "commentUploadImage")
+     "uploading" (i18n "commentUploading")
+     "anonymous" (i18n "commentAnonymous")
+     "admin" (i18n "commentAdmin")
+     "sticky" (i18n "commentSticky")
+     "word" (i18n "commentWord")
+     "wordHint" (i18n "commentWordHint")
+     "profile" (i18n "commentProfile")
+     "now" (i18n "commentNow")
+     "seconds" (i18n "commentSeconds")
+     "minutes" (i18n "commentMinutes")
+     "hours" (i18n "commentHours")
+     "days" (i18n "commentDays")
+     "latest" (i18n "commentLatest")
+     "oldest" (i18n "commentOldest")
+     "hottest" (i18n "commentHottest")
+     "reactionTitle" (i18n "commentReactionTitle") -}}
+
+{{- /* 多词选项要把 Hugo 小写过的键还原成 Waline 的写法。
+       单词的（lang / emoji / login / meta / reaction / search / highlighter …）
+       小写后本来就是 Waline 的名字，不必进这张表。
+       **serverurl 看着像单词，其实是多词**。这条踩过：漏掉它时，$opts 里先
+       预设一个 serverURL、循环里又拿小写的 serverurl 加进去，而 Hugo 的 merge
+       对键**不区分大小写**——后写的那个胜出、连键名一起换成小写，产出的 JSON
+       变成 serverurl，Waline 一个都不认、评论区静默空着。所以这里让 $alias
+       当唯一出口，预设里不再写 serverURL（见下面 $opts 的注释）。
+       新增可配置项时若键是驼峰，记得往这里补一行。 */ -}}
+{{- $alias := dict
+     "serverurl" "serverURL"
+     "pagesize" "pageSize"
+     "commentsorting" "commentSorting"
+     "requiredmeta" "requiredMeta"
+     "wordlimit" "wordLimit"
+     "nocopyright" "noCopyright"
+     "norss" "noRss"
+     "gifsearchplaceholder" "gifSearchPlaceholder" -}}
+
+{{- /* 主题定下的默认值放前面。emoji 默认 false：Waline 的默认值会去
+       unpkg 拉微博表情包，那是诗笺之外凭空多出来的一条外部请求，
+       想开的话在 hugo.toml 里自己填地址（见 docs/configuration.md）。
+       serverURL 不在这里预设——它由上面的 $alias 从 serverurl 还原，
+       两处都写反而会踩 merge 那个大小写不敏感的坑（见 $alias 的注释）。 */ -}}
+{{- $opts := dict
+     "lang" (default "zh-CN" (index $raw "lang"))
+     "emoji" (default false (index $raw "emoji"))
+     "locale" $locale -}}
+{{- range $k, $v := $raw -}}
+  {{- if ne $k "locale" -}}
+    {{- $key := index $alias $k | default $k -}}
+    {{- $opts = merge $opts (dict $key $v) -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* data-pagefind-ignore：<article> 带着 data-pagefind-body，不加这个的话
+       标题「评论」二字会被收进站内搜索索引。
+       el / path / dark / comment 四项由 site.js 覆盖，不在这里给：
+       dark 必须等 Waline 自己生成 html[data-theme="dark"] 那段变量块。 */ -}}
+<section class="comments" id="comments" aria-labelledby="comments-title" data-pagefind-ignore>
+  <h2 class="comments-title" id="comments-title">{{ i18n "commentsTitle" }}<span class="comments-count" id="comments-count"></span></h2>
+  <div id="waline"
+       data-path="{{ .RelPermalink }}"
+       data-config="{{ $opts | jsonify }}"
+       data-js="{{ "vendor/waline/waline.umd.js" | relURL }}"
+       data-css="{{ "vendor/waline/waline.css" | relURL }}"
+       data-meta-css="{{ "vendor/waline/waline-meta.css" | relURL }}"></div>
+</section>
+{{- end -}}

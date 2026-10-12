@@ -56,6 +56,7 @@ theme = 'xuanzhi'
 | 默认点缀色 | `params.accent` | `terracotta`（访客仍可在外观面板自行切换） |
 | JSON-LD 作者 | `params.author` | 回落成站点 `title` |
 | 站点描述（meta description） | `params.description`（站点级兜底）；单篇可用 front matter `description` 优先 | 单篇没写描述时，`<meta name="description">` 用该页自动摘要（压平到 160 字）；站点级兜底缺失 |
+| 评论（Waline） | `params.comments.serverURL`（填你自己部署的服务端地址） | 整块不出现，客户端脚本也不下载——首屏与从前完全一致。**服务端要自己部署**，见下方「评论（Waline）」 |
 
 > 不走 `hugo.toml` 的自定义还有两处——**界面文案**和**头栏图标按钮**，改的是站点仓库里的文件，见[自定义](customization.md)。
 
@@ -145,6 +146,7 @@ enableEmoji = true
 | `content/about.md` | `layout: "about"` | 用关于页模板，而不是文章模板 |
 | 任意页 | `frame: "narrow"` | 把这一页的框架收窄到版心宽（否则走文章页的 1150px 宽档） |
 | 任意页 | `description: "…"` | 覆盖该页的 meta description；没写时首页卡片用正文摘要 |
+| 任意页 | `comments: false` | 这一页不显示评论区（站点配了 Waline 时才有意义） |
 
 哪些是站点级、哪些是页面级，上面那张表和[写作](writing/index.md)分头写清楚了。
 
@@ -163,6 +165,86 @@ enableEmoji = true
 - **封面要单独给一张图**——Hugo 读不了音频文件里内嵌的元数据，`cover=` 必须显式写。很多音频自带封面，抽出来就行：`ffmpeg -i x.flac -an -c:v copy -frames:v 1 cover.jpg`
 
 写法与参数见[短代码参考](shortcodes.md)。
+
+## 评论（Waline）：可选，不配就没有
+
+评论走 [Waline](https://waline.js.org/)——**服务端你自己部署**，客户端两个文件在主题的 `static/vendor/waline/`，不挂第三方 CDN。主题不带服务端，所以这一步得先做完，否则配了也没用。
+
+### 一、先拿到服务端地址
+
+Waline 官方推荐 Vercel，全程点按钮，见[部署文档](https://waline.js.org/guide/deploy/vercel.html)。大致是「用模板建项目 → 在 Vercel 的 Storage 里建数据库（选 Neon）→ 到 Neon 的 SQL Editor 跑一遍 [`waline.pgsql`](https://github.com/walinejs/waline/blob/main/assets/waline.pgsql) 建表 → 回 Vercel 点一次 Redeploy」。
+
+部署完，项目首页那个地址就是 `serverURL`；管理端在同地址的 `/ui`，第一次访问 `/ui/register` 注册的那个人会成为管理员。
+
+### 二、填进 hugo.toml
+
+```toml
+[params.comments]
+  serverURL = 'https://你的-waline.vercel.app'
+```
+
+这一行就够，全站文章页立刻都有评论区。
+
+> **开关在「有没有 serverURL」上，不在某个 `enabled` 上。** 删掉这行、或把值留空，评论区连同客户端脚本一起消失——构建产物里一个字都没有，首屏也不受任何影响。
+
+### 三、某一页不想开
+
+那一页的 front matter 写一行：
+
+```yaml
+comments: false
+```
+
+### 四、可选配置
+
+下面这些都有默认值，按需写：
+
+| 键 | 默认 | 说明 |
+|---|---|---|
+| `lang` | `zh-CN` | 也可 `zh-TW`。只影响**没被 i18n 覆写**的那部分文案 |
+| `login` | `enable` | `enable` / `disable`（只能填信息，不能注册登录）/ `force`（必须登录） |
+| `pageSize` | `10` | 每页评论条数 |
+| `commentSorting` | `latest` | `latest` / `oldest` / `hottest` |
+| `requiredMeta` | `[]` | 必填项，如 `['nick']` 或 `['nick', 'mail']` |
+| `meta` | `['nick', 'mail', 'link']` | 评论框显示哪几个字段 |
+| `wordLimit` | `0` | 字数上限，`0` 为不限 |
+| `reaction` | `false` | 文章表情互动 |
+| `noCopyright` | `false` | 隐藏 Waline 的页脚版权行。**建议留着**，支持一下这个项目 |
+| `emoji` | `false` | 表情包，见下 |
+
+其余 Waline 选项照它的[组件属性文档](https://waline.js.org/reference/client/props.html)写，键名用文档里的 camelCase 拼法即可。
+
+> **`emoji` 为什么默认关掉。** Waline 自带的默认值是去 unpkg 拉微博表情包——主题自托管了所有资产，唯一的对外请求是首页诗笺，凭空多一条第三方 CDN 请求不划算。想开就自己填地址（`emoji = ['https://unpkg.com/@waline/emojis@1.1.0/weibo']`），或指向自托管的图库。
+
+> **新增多词选项要动模板。** Hugo 会把 `params` 的键**一律小写化**，`pageSize` 存进去就成了 `pagesize`，Waline 一个都不认——而且是静默失效，评论区像没配一样空着，构建不报任何错。主题在 `layouts/partials/comments.html` 里用一张 `$alias` 表把多词的键还原回 camelCase（单词的不用，`lang` / `emoji` / `login` / `meta` / `reaction` 小写后本来就是对的）。**要加的多词选项不在表里，就去那张表补一行**，否则配了等于没配。
+
+### 界面文案
+
+在站点自己的 `i18n/zh-cn.yaml` 里覆写，key 是「评论（Waline）」那一组（`commentsTitle`、`commentPlaceholder`、`commentSofa`、`commentSubmit`…），和主题其余文案同一条路。没被覆写的部分（错误提示、读屏专用标签、用户等级名）仍走 `lang` 的内置中文。
+
+### 客户端不是首屏加载的
+
+`waline.umd.js` 有 275KB。评论区在文章最底部，所以主题**滚到视口前 400px 才注入**样式与脚本——滚到那儿的人本来就是想看评论的人，所以这里不加点击门槛，只延迟下载，首屏完全不受影响。
+
+> 试过更狠的一版：默认折叠、点标题那行才加载。撤了——给每个想看评论的人加一次点击，换来的只是省掉一次他本来就要发的请求，不划算。滚到跟前再加载已经把两头都占上了。
+
+加载失败时（断网、地址写错、被网络环境拦掉）静默留白，不报错、也不挡页面其余部分。
+
+### 头像：QQ 头像开箱可用
+
+不用写代码。Waline 服务端默认的头像规则就是这样：
+
+| 评论者填的 | 头像取自 |
+|---|---|
+| 昵称是**纯数字** | QQ 头像（把昵称当 QQ 号） |
+| 邮箱是 `<QQ号>@qq.com` | QQ 头像 |
+| 其余 | Gravatar / Libravatar |
+
+所以读者在「邮箱」里填 `你的QQ号@qq.com`，头像自动就是 QQ 头像。主题把这个约定提示在**正文框的占位文字**里（i18n 的 `commentPlaceholder`），邮箱那一格仍旧只写「邮箱」——挤在下拉框里既不好看，也容易被当成「必须这么填」。两个 key 都在站点自己的 `i18n/zh-cn.yaml` 里覆盖。
+
+要换整套规则是服务端的事：`@waline/vercel` 读环境变量 `GRAVATAR_STR`，值是一段 nunjucks 模板（可用的过滤器有 `md5`、`sha256`，变量就是评论的 `nick` / `mail`）。
+
+配色怎么改见[自定义](customization.md#改评论区配色)。
 
 ## 另一个容易踩的：`public/` 里的地址
 

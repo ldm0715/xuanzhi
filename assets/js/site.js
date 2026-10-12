@@ -1221,4 +1221,87 @@
       aplayers.push(player);
     });
   })();
+
+  /* 评论（Waline）：懒加载 + 静默降级。
+
+     客户端在 static/vendor/waline/，三个文件合计约 290KB。评论区在文章最底部，
+     所以滚到视口前 400px 才注入样式与脚本——与站内搜索的「懒加载器」同一个思路。
+     （试过改成「默认折叠、点开才加载」，撤了：滚到文章底部的人本来就是想看评论的
+     人，多一次点击换一个请求不划算。滚到跟前再加载已经既省流量又不加门槛。）
+
+     不在 head.html 里拼进产物，是因为那会让每一个开评论的文章页都白下这一份。
+
+     waline.css 是**运行期**插进来的，因而排在 main.css **之后**。评论皮肤整段
+     用 #waline 起头就是为了这个（见 main.css 的「评论」段），别改成类选择器。
+
+     加载失败（断网、serverURL 配错、vercel.app 被拦）什么都不做：评论区空着，
+     不抛到控制台、不挡页面其余部分。 */
+  (function () {
+    var host = document.getElementById('waline');
+    if (!host) return;
+
+    var cfg = {};
+    try {
+      cfg = JSON.parse(host.getAttribute('data-config')) || {};
+    } catch (err) {
+      cfg = {};   /* 配置坏了当空对象走，让 Waline 自己去报缺 serverURL */
+    }
+
+    var started = false;
+    var loading = false;
+
+    function boot() {
+      if (started || !window.Waline || !window.Waline.init) return;
+      started = true;
+      var opts = Object.assign({}, cfg, {
+        el: host,
+        path: host.getAttribute('data-path') || window.location.pathname,
+        /* 传选择器而不是 true：Waline 据此生成 html[data-theme="dark"]{--waline-*: …}，
+           与主题的 html 属性机制天然对接——切明暗时那个选择器自己就匹配上了。
+           它也决定了上面那枚篇数写进哪里（主包自带，不需要额外的 comment.js）。 */
+        dark: 'html[data-theme="dark"]',
+        comment: '#comments-count'
+      });
+      try {
+        window.Waline.init(opts);
+      } catch (err) {
+        /* serverURL / el 不合规时 init 会同步抛错。吞掉：页面其余部分照常 */
+      }
+    }
+
+    function load() {
+      if (loading) return;
+      loading = true;
+
+      /* 两份样式表：waline.css 是组件本体，waline-meta.css 只管
+         「地址 / 浏览器 / 系统」那排小签的图标（一堆 Font Awesome 的 data-URI）。 */
+      var attrs = ['data-css', 'data-meta-css'];
+      for (var i = 0; i < attrs.length; i++) {
+        var href = host.getAttribute(attrs[i]);
+        if (!href) continue;
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = href;
+        document.head.appendChild(link);
+      }
+
+      var s = document.createElement('script');
+      s.src = host.getAttribute('data-js');
+      s.async = true;
+      s.onload = boot;
+      s.onerror = function () {};   /* 静默：取不到就让它空着 */
+      document.head.appendChild(s);
+    }
+
+    if (!('IntersectionObserver' in window)) {
+      load();
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      if (!entries[0].isIntersecting) return;
+      io.disconnect();
+      load();
+    }, { rootMargin: '400px 0px' });
+    io.observe(host);
+  })();
 })();

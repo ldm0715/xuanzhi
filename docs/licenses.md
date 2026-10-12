@@ -38,6 +38,7 @@ categories:
 | Simple Icons 品牌 path | 模板内联（`layouts/about.html` 的 GitHub / Bilibili） | CC0 1.0 |
 | **Plyr 3.8.3**（视频播放器） | `assets/vendor/plyr/` + `static/vendor/plyr.svg` | MIT © Sam Potts |
 | **APlayer 1.10.1**（音频播放器） | `assets/vendor/aplayer/` | MIT © DIYgod |
+| **@waline/client 3.16.0**（评论区客户端） | `static/vendor/waline/`（`waline.umd.js` / `waline.css` / `waline-meta.css`） | MIT © lizheming |
 
 一般图标取自 `@material-design-icons/svg`（Apache-2.0）。
 
@@ -63,7 +64,13 @@ CC0 虽不要求署名，但**出处仍要记在这里**，否则下次换图标
 
 只在你**真正嵌了媒体**的页面上才会被加载（`layouts/partials/head.html` 用 `.HasShortcode` 判断），没有媒体的页面一个字节都不带。两者的升级方式、以及升级时必须重做的改动（删掉末行的 `sourceMappingURL`、把 Plyr 的图标 sprite 放到 `static/`）记在 [`assets/vendor/README.md`](https://github.com/ldm0715/xuanzhi/blob/master/assets/vendor/README.md)。
 
-> **版权声明保留在哪**：这两个库的 min 版**都把 MIT 版权头剥掉了**，所以那份 `assets/vendor/README.md` 同时充当它们的许可声明——里头写了上游仓库地址、版本与版权人。删它等于丢掉署名。
+### 评论客户端（Waline）的说明
+
+`@waline/client` 只是**客户端挂件**，服务端不在主题里、也不由主题分发——评论数据的归属与合规由部署者自己负责（默认推荐 Vercel + Neon）。客户端两个文件随主题分发，按上面的 `assets/vendor/README.md` 升级。
+
+不开评论的站点一个字节都不带：文件在 `static/vendor/waline/`，由 `site.js` 滚到评论区附近才注入，而整块评论区在没配 `params.comments.serverURL` 时根本不输出。
+
+> **版权声明保留在哪**：三个库的 min 版**都把 MIT 版权头剥掉了**，所以那份 `assets/vendor/README.md` 同时充当它们的许可声明——里头写了上游仓库地址、版本与版权人。删它等于丢掉署名。
 
 想换掉字体（比如改用自己的）：删掉 `static/fonts/` 与 `assets/fonts/` 下对应的目录即可——主题会探测到文件不在就自动不输出那几个 `<link>`，不会 404。
 
