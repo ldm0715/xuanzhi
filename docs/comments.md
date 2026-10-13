@@ -43,7 +43,7 @@ comments: false
 
 > 演示站的 `exampleSite/hugo.toml` 里有一段注释掉的样例，可以对着抄。
 >
-> **`serverURL` 指向的服务端要自己部署**，主题不带服务端，客户端也不上第三方 CDN——`waline.umd.js` 与两份 CSS 已经自托管在 `static/vendor/waline/` 里。服务端怎么部署见官方文档：<https://waline.js.org/guide/deploy/>（Vercel 最省事，全程点按钮）。部署完拿到的地址就是上面那个值，管理端在同地址的 `/ui`。
+> **`serverURL` 指向的服务端要自己部署**，主题不带服务端；客户端文件随主题分发，在 `static/vendor/waline/` 里。服务端怎么部署见官方文档：<https://waline.js.org/guide/deploy/>（Vercel 最省事，全程点按钮）。部署完拿到的地址就是上面那个值，管理端在同地址的 `/ui`。
 
 配置项、界面文案、配色的改法在[三、站点配置](configuration.md)与[七、自定义](customization.md)两章。
 
@@ -108,6 +108,19 @@ comment: input.data.comment,
 **二、直接用作者打好补丁的仓库**：`ldm0715/waline-server`。它把上面两件事都做了——`postinstall` 里的点赞补丁，加 `index.cjs` 里指向 `cf-connecting-ip` 的那一行；`vercel.json` 另外去掉了已废弃的 `name` 字段（保留也无妨，只是构建日志里会多一条警告）。省事，代价是信任一个第三方仓库——不过补丁脚本只有几十行、全文可读，翻一眼再决定就好。
 
 > **先确认上游修没修**：如果哪天在 `@waline/core` 里已经找不到 `comment: input.data.comment,` 这一行，说明作者修了，上面两条路都不再需要。（那份补丁脚本匹配不上时只打一行警告，不会挡构建，可以放着不管。）
+
+## 加一道验证码
+
+Waline 服务端能挂人机校验挡机器人，主题支持 Cloudflare Turnstile。**前后两半都要配**，只配一半的症状就是「点投笺没反应、评论发不出去」：
+
+- 服务端（Vercel 的环境变量）：`TURNSTILE_SECRET` = Secret Key
+- 前端（`hugo.toml` 的 `[params.comments]`）：`turnstileKey` = Site Key
+
+两个必须是**同一个 widget 的一对**，在 Cloudflare 后台 Turnstile 里建一个站点就有。同时把你的域名加进这个 widget 的 Hostname 白名单——换域名、或在本地 `localhost` / `127.0.0.1` 预览，都要加，否则挂件出来只会是一张 Cloudflare 错误页（症状与排查见[九、常见问题](troubleshooting.md#评论)）。
+
+配齐后**点「投笺」才出现**验证码，落在投稿面板下面、铺满面板宽度。挑战走完（多数人无感通过）它会自动收起、评论接着发出。
+
+> 验证码只能连 Cloudflare，没法自托管；不配 `turnstileKey` 就没有这条请求。配置细节见[三、站点配置](configuration.md)的「验证码（Turnstile）」。
 
 ## 评论区长什么样
 

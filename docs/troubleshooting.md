@@ -2,7 +2,7 @@
 title: "九、常见问题"
 date: 2026-09-10T10:00:00+08:00
 weight: 90
-description: "卡住了先翻这里：构建、渲染、资源、升级四类问题的排查"
+description: "卡住了先翻这里：构建、渲染、资源、升级、评论五类问题的排查"
 tags:
   - 排错
 categories:
@@ -230,6 +230,22 @@ npx pagefind@latest --site public
 ### 线上搜索能用，但结果点进去 404
 
 多半是 `baseURL` / 子路径没配对——Pagefind 的结果链接前缀由主题按站点路径补，站点路径本身错了就全错。对照上面的「样式与资源 → CSS / 字体 / 图片全 404」排查。
+
+## 评论
+
+### 验证码里是一张 Cloudflare 错误页，或者一直转圈
+
+**多半是 Turnstile 不认当前域名。** 它只在 widget 授权过的主机上工作——站点换了域名、或在本地 `localhost` / `127.0.0.1` 预览，都要去后台把那个主机加进该 widget 的 Hostname 白名单（Turnstile → 你的 widget → Settings → Hostname Management）。
+
+另外两条也常撞上：浏览器扩展 / 代理拦掉了 `challenges.cloudflare.com`（换无痕窗口、关代理各试一次），以及系统时间不准。
+
+想看准原因就翻控制台的错误码，对着[官方那张码表](https://developers.cloudflare.com/turnstile/troubleshooting/client-side-errors/error-codes/)：`110200` 是域名未授权，`200500` 是脚本没加载上，`300*` / `600*` 是挑战本身没过。
+
+### 点投笺没反应，评论发不出去
+
+**验证码分前后两半，只配一半就是这个症状。** 服务端的 `TURNSTILE_SECRET`（Vercel 环境变量）与前端的 `turnstileKey`（`hugo.toml`）缺一不可，而且要是**同一个 widget 的一对**；前端填的是 Site Key，别把 Secret 写进 `hugo.toml`。
+
+改完前端重启 `hugo server`；改服务端环境变量要在 Vercel 上重新部署才生效。见[十二、评论](comments.md#加一道验证码)。
 
 ## 都没解决？
 

@@ -79,11 +79,11 @@ categories:
 - **外链**在服务端标记（新标签打开 + ↗ 记号），`mailto:` 之类的链接不会误伤
 - **媒体**：站内自托管的视频 / 音频走 `video` / `audio` / `playlist` 三个短代码，分别由 **Plyr**（视频）与 **APlayer**（音频，支持播放列表与 `.lrc` 歌词）渲染，皮肤已覆写成宣纸风（牛皮纸签条那套）。这两个库**只在嵌了媒体的页面加载**。分工是「外部平台用裸 iframe，自托管媒体用短代码」——bilibili / YouTube 没有可直链的媒体文件，短代码不去假装能包住它们
 - **打印**走专门的打印样式：黑白还原、隐藏头栏 / 目录 / 工具栏 / 播放器，外链把地址印出来
-- **站内搜索（Pagefind）**：中文分词原生支持；索引由构建后的一步 `npx pagefind --site public` 生成，运行时按需加载的是**自托管的索引文件**，这一块不发外部请求。使用与构建要求见[部署](deployment.md#站内搜索)
+- **站内搜索（Pagefind）**：中文分词原生支持；索引由构建后的一步 `npx pagefind --site public` 生成，运行时按需加载的是**自托管的索引文件**。使用与构建要求见[部署](deployment.md#站内搜索)
 
 ## 内容即资产
 
 - 霞鹜文楷、思源宋体、JetBrains Mono、KaTeX、Plyr、APlayer、Pagefind 索引一律**自托管**（Pagefind 只在你的构建期跑一次，运行期加载的都是本地文件）；字体按 `unicode-range` 切片按需加载。Plyr 的图标 sprite 默认指向它的 CDN，主题已改指自托管的 `static/vendor/plyr.svg`
-- **对外请求只有一处：首页诗笺。** 它向「诗泉」（`poetry.palemoky.com`）取七言 / 五言绝句——构建期用 `resources.GetRemote` 烘一首进 HTML，浏览器端 `assets/js/site.js` 每次到访再 `fetch` 一次随机换新。取不到、超时、CORS 失败或校验不合格时**静默保留已烘入的那首**，页面不受影响。端点写在 `layouts/home.html` 的 `data-poem-api` 上，**想彻底不联网就改掉或删掉这个属性**（删掉后 `site.js` 会回落到同一个默认地址，所以两处一起改，或直接改掉 `site.js` 里的默认值）
+- **首页诗笺向「诗泉」取诗**（`poetry.palemoky.com`）：五言 / 七言绝句——构建期用 `resources.GetRemote` 烘一首进 HTML，浏览器端 `assets/js/site.js` 每次到访再 `fetch` 一次随机换新。取不到、超时、CORS 失败或校验不合格时**静默保留已烘入的那首**，页面不受影响。端点写在 `layouts/home.html` 的 `data-poem-api` 上，**不想要这个请求就改掉或删掉这个属性**（删掉后 `site.js` 会回落到同一个默认地址，所以两处一起改，或直接改掉 `site.js` 里的默认值）
 - **图片和文章在同一个 Git 仓库**是本主题的根基约定：不要用外部图床——本地所见即所得，构建产物可整站镜像（见[写作](writing/index.md)）
 - 所有图标取自 `@material-design-icons/svg` 官方包，不靠记忆手写

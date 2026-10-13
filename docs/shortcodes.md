@@ -55,7 +55,7 @@ categories:
 
 {{< qr text="https://example.com" level="high" />}}
 
-二维码在**构建时本地生成**，零网络依赖。参数：`text`（要编码的内容）、`level`（容错级别，默认 `low`）、`scale`（尺寸，默认 4）。`alt` 默认就是编码的文本。
+二维码在**构建时本地生成**。参数：`text`（要编码的内容）、`level`（容错级别，默认 `low`）、`scale`（尺寸，默认 4）。`alt` 默认就是编码的文本。
 
 > 这里有两个会**直接让构建失败**的坑：
 > ① 位置参数无效——写成 `{{</* qr "https://…" */>}}` 取不到值，短代码只读 `.Get "text"`；
@@ -111,7 +111,7 @@ func Grind(ink string, water float64) string {
 
 <iframe src="//player.bilibili.com/player.html?bvid=BV1GJ411x7h7&page=1&autoplay=0&danmaku=0" scrolling="no" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
 
-Hugo 还内置了一个 `youtube` 短代码（构建期零网络依赖，只是生成一个隐私模式的 iframe）：
+Hugo 还内置了一个 `youtube` 短代码（只是生成一个隐私模式的 iframe）：
 
 ```markdown
 {{</* youtube dQw4w9WgXcQ */>}}

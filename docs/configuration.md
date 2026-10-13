@@ -58,6 +58,7 @@ theme = 'xuanzhi'
 | JSON-LD 作者 | `params.author` | 回落成站点 `title` |
 | 站点描述（meta description） | `params.description`（站点级兜底）；单篇可用 front matter `description` 优先 | 单篇没写描述时，`<meta name="description">` 用该页自动摘要（压平到 160 字）；站点级兜底缺失 |
 | 评论（Waline） | `params.comments.serverURL`（填你自己部署的服务端地址） | 整块不出现，客户端脚本也不下载——首屏与从前完全一致。**服务端要自己部署**，见下方「评论（Waline）」 |
+| 评论验证码（Turnstile） | 前端 `params.comments.turnstileKey` + 服务端 `TURNSTILE_SECRET` | 不开就没人机校验；**只配一半评论发不出去**，见下方「验证码（Turnstile）」 |
 
 > 不走 `hugo.toml` 的自定义还有两处——**界面文案**和**头栏图标按钮**，改的是站点仓库里的文件，见[自定义](customization.md)。
 
@@ -171,7 +172,7 @@ enableEmoji = true
 
 > 这一节只管**配置项**。开启步骤、上游那个「非管理员点赞必然失败」的 bug、以及服务端该用哪个仓库，单独写在[十二、评论](comments.md)。
 
-评论走 [Waline](https://waline.js.org/)——**服务端你自己部署**，客户端三个文件在主题的 `static/vendor/waline/`，不挂第三方 CDN。主题不带服务端，所以这一步得先做完，否则配了也没用。
+评论走 [Waline](https://waline.js.org/)——**服务端你自己部署**，客户端文件随主题分发，在 `static/vendor/waline/`。主题不带服务端，所以这一步得先做完，否则配了也没用。
 
 ### 一、先拿到服务端地址
 
@@ -214,12 +215,34 @@ comments: false
 | `reaction` | `false` | 文章表情互动 |
 | `noCopyright` | `false` | 隐藏 Waline 的页脚版权行。**建议留着**，支持一下这个项目 |
 | `emoji` | `false` | 表情包，见下 |
+| `turnstileKey` | 空 | Cloudflare Turnstile 的站点密钥，填了就出验证码，见下 |
 
 其余 Waline 选项照它的[组件属性文档](https://waline.js.org/reference/client/props.html)写，键名用文档里的 camelCase 拼法即可。
 
-> **`emoji` 为什么默认关掉。** Waline 自带的默认值是去 unpkg 拉微博表情包——主题自托管了所有资产，唯一的对外请求是首页诗笺，凭空多一条第三方 CDN 请求不划算。想开就自己填地址（`emoji = ['https://unpkg.com/@waline/emojis@1.1.0/weibo']`），或指向自托管的图库。
+> **`emoji` 为什么默认关掉。** Waline 自带的默认值是去 unpkg 拉微博表情包——那是一条第三方 CDN 请求，默认替你打开不合适。想开就自己填地址（`emoji = ['https://unpkg.com/@waline/emojis@1.1.0/weibo']`），或指向自托管的图库。
 
 > **新增多词选项要动模板。** Hugo 会把 `params` 的键**一律小写化**，`pageSize` 存进去就成了 `pagesize`，Waline 一个都不认——而且是静默失效，评论区像没配一样空着，构建不报任何错。主题在 `layouts/partials/comments.html` 里用一张 `$alias` 表把多词的键还原回 camelCase（单词的不用，`lang` / `emoji` / `login` / `meta` / `reaction` 小写后本来就是对的）。**要加的多词选项不在表里，就去那张表补一行**，否则配了等于没配。
+
+### 验证码（Turnstile）
+
+Waline 服务端能挂一道人机校验，挡刷评论的机器人。主题支持其中的 Cloudflare Turnstile——验证码**分前后两半**，两边都要配，缺一半就是「点投笺没反应、评论发不出去」：
+
+1. **服务端**（Vercel 项目的环境变量）：`TURNSTILE_SECRET` 填密钥（Secret Key）；
+2. **前端**（站点 `hugo.toml`）：`turnstileKey` 填站点密钥（Site Key）。
+
+```toml
+[params.comments]
+  serverURL = 'https://你的-waline.vercel.app'
+  turnstileKey = '0x4AAA…'    # Cloudflare 后台拿到的 Site Key
+```
+
+密钥对在 Cloudflare 后台 **Turnstile** 里建一个站点就有，site key 与 secret key 是一对；**别把 secret 写进 `hugo.toml`**，那是给服务端的。
+
+> **验证码没法自托管。** Waline 会去 `challenges.cloudflare.com` 拉脚本、在页面上渲出挂件——不配 `turnstileKey` 就没有这条请求，其余一切照旧。
+
+**它出现在投稿面板下面，铺满面板宽度。** 挂件的落点与尺寸在 Waline 里都是定死的（面板页脚第一个格、150×140 的 compact），主题把落点换到了面板下方自己的一格里、尺寸换成铺满宽度的 flexible。点「投笺」才出现，验证走完（多数人是无感通过）自动收起、评论接着发出，明暗跟随站点主题。位置、尺寸、收尾都在主题里，不用你调。
+
+> **别忘了 Hostname 白名单。** Turnstile 只在 widget 授权过的域名上工作（后台 Turnstile → 你的 widget → Settings → Hostname Management）。站点换了域名、或想在本地 `localhost` / `127.0.0.1` 预览，都要把它加进去，否则挂件出来只会是一张 Cloudflare 错误页。本地调试还能临时换成官方测试 sitekey `1x00000000000000000000AA`（任何域名都放行），但它配不上海端的真 secret，过不了服务端校验。
 
 ### 界面文案
 

@@ -71,6 +71,10 @@ CC0 虽不要求署名，但**出处仍要记在这里**，否则下次换图标
 
 不开评论的站点一个字节都不带：文件在 `static/vendor/waline/`，由 `site.js` 滚到评论区附近才注入，而整块评论区在没配 `params.comments.serverURL` 时根本不输出。
 
+### 评论验证码（可选，Cloudflare Turnstile）
+
+开了验证码的站点，点「投笺」时会从 `challenges.cloudflare.com` 拉一份 Cloudflare 的脚本、渲一个挂件出来。**这份脚本不在主题的分发物里**，跟上面那份自托管的 Waline 客户端不是一回事——验证码没法自托管，这是它绕不开的外部依赖。不配 `params.comments.turnstileKey` 就完全没有这条请求。
+
 > **版权声明保留在哪**：三个库的 min 版**都把 MIT 版权头剥掉了**，所以那份 `assets/vendor/README.md` 同时充当它们的许可声明——里头写了上游仓库地址、版本与版权人。删它等于丢掉署名。
 
 想换掉字体（比如改用自己的）：删掉 `static/fonts/` 与 `assets/fonts/` 下对应的目录即可——主题会探测到文件不在就自动不输出那几个 `<link>`，不会 404。

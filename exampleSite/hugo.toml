@@ -63,7 +63,12 @@ enableEmoji = true
   #   requiredMeta = ['nick']    # 或 ['nick', 'mail']
   #   reaction = false
   #   emoji = false              # 默认关。开了会去 unpkg 拉表情包，
-  #                              # 那是诗笺之外多出来的一条外部请求
+  #                              # 那是一条多出来的第三方 CDN 请求
+  #
+  #   # 人机校验（可选）：填 Cloudflare Turnstile 的 Site Key 出验证码，
+  #   # 服务端还要设 TURNSTILE_SECRET，两半都配齐，否则评论发不出去。
+  #   # 验证码没法自托管，会连 challenges.cloudflare.com。
+  #   turnstileKey = '0x4AAA…'
   #
   # 其余 Waline 选项照官方文档写在这里。键名写标准 camelCase 即可（模板会
   # 把它还原回去），但**多词的选项要在 comments.html 的 $alias 表里有一条**，
