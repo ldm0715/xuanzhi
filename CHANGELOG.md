@@ -17,6 +17,10 @@
 - **`docs/customization.md` 新增「主题的文件都在哪」一节**：手册此前只在正文里零散提到 `head.html` / `site.js` / `token.css`，却从没说明它们在主题的哪个目录下，读者没有锚点。补一张 `layouts/` / `assets/` / `static/` / `i18n/` 的对照表（顺带一句「模板在 `layouts/`，样式与脚本在 `assets/`」），并把几处裸文件名补成完整路径：`layouts/partials/head.html`、`layouts/partials/nav-links.html`、`assets/js/site.js`、`layouts/single.html`、`layouts/about.html`。短代码那篇的媒体素材也补上了「站内文件放站点的 `static/media/`」——此前只说了短代码参数里怎么写 `/media/…`，没说文件该放哪
 - **演示站新增 `exampleSite/README.md`**：讲清用户手册在仓库根 `docs/`（靠 `exampleSite/hugo.toml` 末尾的 module mount 挂成 `content/posts`，所以翻 `exampleSite/` 目录找文档会扑空），并写明**别把这份 `hugo.toml` 抄进自己的站**——它没有 `theme = 'xuanzhi'`，靠的是 `../layouts`、`../assets` 这些只在主题仓库里成立的相对路径；抄过去 Hugo 不报错、直接当空，构建会硬失败在第一个短代码上
 
+### 修复
+
+- **首页诗笺不再更新**：`layouts/home.html` 与 `assets/js/site.js` 请求诗泉时把体裁名写成了**简体**（`%E7%BB%9D` = 绝），却同时带着 `lang=zh-Hant`。API 在繁体模式下按繁体名字面匹配，简体名匹配不到，于是稳定返回 `{"data":null}`——请求本身是 200、看着「成功」，实则没有诗：构建期整首被校验弃用、退回《鹿柴》，运行期静默保留旧的那首，表现成「诗笺永远不变」。改成繁体 `%E7%B5%95`（`絕`）即恢复。**两处必须同步改**：`layouts/home.html` 里那个构建期 URL 与 `site.js` 的 `TYPES` 数组
+
 ### 变更
 
 - **评论区：橙云下的真实 IP 修复**：`docs/comments.md` 原先给的 `DISABLE_REGION=true` 只是遮丑——它把（错的）定位藏起来，限流却仍按 Cloudflare 边缘节点 IP 算。现在改由服务端修：`ldm0715/waline-server` 的 `index.cjs` 在引导完成后把 Koa 的 `ctx.ip` 取值来源从默认的 `X-Forwarded-For` 换成 `cf-connecting-ip`（CF 透传的真实访客 IP），定位与限流同时恢复正确，`DISABLE_REGION` 可撤。手册那一节「橙云到底要不要关」与「该用哪个服务端」同步改口径，并提示这一行依赖上游仍是 Koa 架构

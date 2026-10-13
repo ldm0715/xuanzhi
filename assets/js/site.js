@@ -1044,8 +1044,11 @@
     if (!scroll || typeof fetch !== 'function' || typeof AbortController === 'undefined') return;
 
     var API = scroll.getAttribute('data-poem-api') || 'https://poetry.palemoky.com/api/poems/random';
-    /* 五言绝句 / 七言绝句，URL 预编码 */
-    var TYPES = ['%E4%BA%94%E8%A8%80%E7%BB%9D%E5%8F%A5', '%E4%B8%83%E8%A8%80%E7%BB%9D%E5%8F%A5'];
+    /* 五言絕句 / 七言絕句，URL 预编码。**必须写繁体**（%E7%B5%95 = 絕）：
+       lang=zh-Hant 下 API 按繁体名字面匹配，给简体 %E7%BB%9D = 绝 会回 {"data":null}，
+       请求看着 200 成功、实则没有诗，于是静默保留旧的那首、永不刷新。
+       与 home.html 构建期那个 URL 是同一件事，改要一起改。 */
+    var TYPES = ['%E4%BA%94%E8%A8%80%E7%B5%95%E5%8F%A5', '%E4%B8%83%E8%A8%80%E7%B5%95%E5%8F%A5'];
     var type = TYPES[Math.floor(Math.random() * TYPES.length)];
 
     var ctrl = new AbortController();
