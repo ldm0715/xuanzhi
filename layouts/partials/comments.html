@@ -7,6 +7,13 @@
        「评论（Waline）」段滚到视口前 400px 才注入（waline.umd.js 约 275KB，
        评论区又在文章最底部，没滚到那儿就不下载）。这里只把地址和数据交出去。
 
+       配了 turnstileKey 时 Waline 会去 challenges.cloudflare.com 拉验证码脚本
+       并渲染挂件——不配就没有（验证码没法自托管，只能连 Cloudflare）。
+       服务端要同时设好 TURNSTILE_SECRET。
+       挂件由 Waline 渲染在投稿面板页脚，主题把落点换到了面板**下面**自己造的一行，
+       尺寸改成铺满宽度：落点与收尾在 site.js 的「评论（Waline）」段，位置与外形
+       在 main.css 的同名段落。改这两处要一起看。
+
        为什么要先把 params 的键名过一遍 lower()：Hugo 会小写化 params 的键，
        直接 jsonify 出来的是 serverurl / pagesize 这种，Waline 一个都不认，
        而且是**静默**失效——评论区像没配一样空着，构建不报任何错。所以这里
@@ -73,10 +80,11 @@
      "wordlimit" "wordLimit"
      "nocopyright" "noCopyright"
      "norss" "noRss"
-     "gifsearchplaceholder" "gifSearchPlaceholder" -}}
+     "gifsearchplaceholder" "gifSearchPlaceholder"
+     "turnstilekey" "turnstileKey" -}}
 
 {{- /* 主题定下的默认值放前面。emoji 默认 false：Waline 的默认值会去
-       unpkg 拉微博表情包，那是诗笺之外凭空多出来的一条外部请求，
+       unpkg 拉微博表情包，那是一条凭空多出来的第三方 CDN 请求，
        想开的话在 hugo.toml 里自己填地址（见 docs/configuration.md）。
        serverURL 不在这里预设——它由上面的 $alias 从 serverurl 还原，
        两处都写反而会踩 merge 那个大小写不敏感的坑（见 $alias 的注释）。 */ -}}

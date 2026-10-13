@@ -109,7 +109,7 @@
   })();
 
   /* 站内搜索：Pagefind（构建后由 npx pagefind --site public 生成 /pagefind/ 索引）。
-     运行期按需 import pagefind.js（headless API），全程自托管、不发外部网络请求。
+     运行期按需 import pagefind.js（headless API），索引文件自托管。
      两个搜索框（桌面浮层 + 移动下拉面板）共用同一个 Pagefind 实例与状态。
      部署没跑 pagefind 时（如本地 hugo server），面板提示「索引未生成」。 */
   (function () {
@@ -1270,6 +1270,121 @@
       } catch (err) {
         /* serverURL / el 不合规时 init 会同步抛错。吞掉：页面其余部分照常 */
       }
+      hookTurnstile();
+    }
+
+    /* ---- Turnstile 验证码：落到投稿面板下沿一条，铺满面板宽度 ----
+     *
+     * Waline 把挂件 render 进 .wl-captcha-container——那个 div 写死在投稿面板页脚，
+     * 尺寸还被写死成 150×140 的 compact。这里把落点整个换到面板**下面**自己现造的
+     * 一行里（.xz-captcha-row > .xz-captcha-slip），尺寸换成铺满宽度的 flexible。
+     *
+     * **落点不能直接插在面板旁边**：面板所在的 .wl-comment 是不换行的 flex 行，
+     * 塞进去只会跟面板并排（踩过：表现为「验证码从右边展开」，面板还被挤窄）。
+     * main.css 里给那层开了 wrap，这一行再 flex-basis:100% 整行占位，才落到面板下面。
+     *
+     * flexible 是按容器**当时**的宽度算的，所以必须在 render **之前**就把这一行显
+     * 出来（.is-open）——等 Turnstile 插完 iframe 再变宽，挂件不会跟着长。
+     *
+     * 挑战一过就摘掉挂件、撤掉 .is-open，整行随之收起。Waline 自己从不清理，
+     * 不摘的话面板下面会永远多出一条。
+     *
+     * 时机：挂件是 Waline 在**提交那一刻**才去 challenges.cloudflare.com 拉脚本、
+     * 现拉现渲染的，钩子得赶在它 render 之前挂上。**不能提前用 defineProperty
+     * 占住 window.turnstile**——CF 的 api.js 自带「该全局已存在就打印 already has
+     * been loaded 然后退出」的守卫，占了位挂件根本出不来（踩过）。改为盯
+     * document.head：那个 <script> 一插进来就挂 load 钩子；我们的监听比 Waline
+     * 自己那个晚注册、但同属这一次 load 事件派发，而 Waline 的 await 要等整批
+     * 监听器跑完才恢复——来得及。 */
+    var cfApi = null;
+    var cfWidget = null;
+    var cfRow = null;
+    var cfSlip = null;
+
+    /* 小笺（连同外面那行）插在投稿面板之后。Waline 若重排把节点挪走，在这里摆回去 */
+    function captchaSlip() {
+      if (!cfRow) {
+        cfRow = document.createElement('div');
+        cfRow.className = 'xz-captcha-row';
+        cfSlip = document.createElement('div');
+        cfSlip.className = 'xz-captcha-slip';
+        cfRow.appendChild(cfSlip);
+      }
+      var panel = host.querySelector('.wl-panel');
+      if (panel && panel.parentNode) {
+        if (panel.nextSibling !== cfRow) panel.parentNode.insertBefore(cfRow, panel.nextSibling);
+      } else if (!cfRow.parentNode) {
+        host.appendChild(cfRow);
+      }
+      return cfSlip;
+    }
+
+    function closeCaptcha() {
+      if (cfApi && cfWidget !== null && typeof cfApi.remove === 'function') {
+        try { cfApi.remove(cfWidget); } catch (err) { /* 已经自行销毁 */ }
+      }
+      cfWidget = null;
+      if (cfSlip && cfSlip.firstChild) cfSlip.textContent = '';
+      if (cfRow) cfRow.classList.remove('is-open');
+    }
+
+    function wrapTurnstile(api) {
+      if (!api || typeof api.render !== 'function' || api.__xuanzhiCaptcha) return api;
+      var render = api.render;
+      api.render = function (target, opts) {
+        var next = Object.assign({}, opts);
+        var done = next.callback;
+        var fail = next['error-callback'];
+        /* 先收再放行原回调：Waline 那个 callback 就是它 Promise 的 resolve，
+           收干净了再 resolve，提交才在挂件撤下之后接着走。 */
+        next.callback = function (token) { closeCaptcha(); if (done) done(token); };
+        next['error-callback'] = function (code) { closeCaptcha(); if (fail) fail(code); };
+        /* 尺寸与明暗在这儿定；落点不用 Waline 传进来的 target，换面板下面那行。
+           theme 跟随站点而非系统：系统偏好与站点的明暗开关常常不是一回事。 */
+        next.size = 'flexible';
+        next.theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+        captchaSlip();
+        cfRow.classList.add('is-open');   /* 先显出行再渲染，flexible 要拿它量宽度 */
+        var id = render.call(api, '.xz-captcha-slip', next);
+        cfWidget = id === undefined ? null : id;
+        return id;
+      };
+      api.__xuanzhiCaptcha = true;
+      return api;
+    }
+
+    /* 钩住 window.turnstile：CF 那个脚本一加载完就把它包起来（就地改 render）。
+     *
+     * 走 document 上**捕获阶段**的 load 事件：脚本此时已经执行完、window.turnstile
+     * 就位，而捕获监听先于 Waline 自己挂在元素上的那个监听跑——所以轮到 Waline
+     * 把 Promise 解决掉、去 destructure window.turnstile 时，render 已经是我们的。
+     * 下面 head 上的 MutationObserver 是第二道，两边都装不上也只是退回 Waline
+     * 原样渲染（就是现在这个 bug 的样子），不会更糟。 */
+    function hookTurnstile() {
+      if (window.turnstile) cfApi = wrapTurnstile(window.turnstile);
+
+      function isApiScript(el) {
+        return !!el && el.tagName === 'SCRIPT' && !!el.src
+          && el.src.indexOf('challenges.cloudflare.com/turnstile') !== -1;
+      }
+
+      document.addEventListener('load', function (e) {
+        if (!isApiScript(e.target)) return;
+        try { cfApi = wrapTurnstile(window.turnstile); } catch (err) {}
+      }, true);
+
+      if (!window.MutationObserver) return;
+      new MutationObserver(function (records) {
+        for (var i = 0; i < records.length; i++) {
+          var added = records[i].addedNodes;
+          for (var j = 0; j < added.length; j++) {
+            if (!isApiScript(added[j])) continue;
+            added[j].addEventListener('load', function () {
+              try { cfApi = wrapTurnstile(window.turnstile); } catch (err) {}
+            });
+          }
+        }
+      }).observe(document.head, { childList: true });
     }
 
     function load() {

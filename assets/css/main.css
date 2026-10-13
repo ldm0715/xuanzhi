@@ -3373,7 +3373,52 @@ html[data-theme="dark"] #waline .wl-panel {
 #waline .wl-emoji-popup,
 #waline .wl-gif-popup { border-radius: 4px; }
 
-/* 评论卡片那排动作：爱心 / 回复 / 编辑 / 删除。
+/* ---- Turnstile 验证码：投稿面板下沿一条，铺满面板宽度 ----
+ *
+ * Waline 把挂件塞在投稿面板页脚、尺寸写死成 150×140 的 compact。site.js 的
+ * 「评论（Waline）」段给 turnstile.render 包了一层，把落点换到面板**下面**自己
+ * 现造的这一行（.xz-captcha-row > .xz-captcha-slip），尺寸换成铺满宽度的 flexible。
+ *
+ * **位置靠「允许换行」拿到，不是靠默认流。** 面板所在的 .wl-comment 是
+ * display:flex 且**不换行**——直接塞个兄弟节点只会跟面板并排（踩过：表现为
+ * 「验证码从右边展开」，面板还被挤窄）。所以这里先给那层开 wrap，这一行再
+ * flex-basis:100% 整行占位，才落到面板下面。面板与登录态那个头像/昵称本来也
+ * 挤得下，开 wrap 不影响它们。
+ *
+ * 用 .is-open 开合、不用 :not(:empty)：flexible 是按容器**当时**的宽度算的，
+ * 得在 Turnstile 渲染**之前**就把宽度让出来——等它插完 iframe 再变宽，挂件不会
+ * 跟着长。类名由 site.js 在 render 前加、挑战结束后撤。
+ *
+ * 空着时整行收起、不占位（display:none，连 flex 项都不是）。
+ * 颜色全走 token；暗色影子另给一套，与 .wl-panel 同源。 */
+#waline .wl-comment { flex-wrap: wrap; }
+
+#waline .xz-captcha-row { display: none; }
+#waline .xz-captcha-row.is-open {
+  display: block;
+  flex: 1 0 100%;
+  margin-top: 0.5em;
+}
+
+/* 小笺：与投稿面板同一套纸感（素纸 + 噪点 + 朱丝细框 + 直角 + 柔影）。
+   左右各留 .5em，与面板自己的外边距对齐；宽度随行铺满。 */
+#waline .xz-captcha-slip:not(:empty) {
+  margin: 0 0.5em;
+  padding: 6px;
+  background-color: var(--color-surface);
+  background-image: var(--tex-noise);
+  background-size: 90px 90px;
+  border: 1px solid var(--color-zhu-soft);
+  border-radius: 2px;
+  box-shadow:
+    0 2px 6px rgba(60, 45, 20, 0.10),
+    0 10px 24px rgba(60, 45, 20, 0.10);
+}
+html[data-theme="dark"] #waline .xz-captcha-slip:not(:empty) {
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.40),
+    0 10px 24px rgba(0, 0, 0, 0.30);
+}/* 评论卡片那排动作：爱心 / 回复 / 编辑 / 删除。
  *
  * 爱心的颜色：Waline 把「已赞」直接写成行内 fill="red"（硬编码 #ff0000），
  * 跟宣纸的朱砂不是一回事。行内 fill 是 SVG 的**表现属性**，任何 CSS 声明都能
