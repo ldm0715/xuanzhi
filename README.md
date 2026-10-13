@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <a href="https://ldm0715.github.io/xuanzhi/"><b>在线演示</b></a> · <a href="docs/">使用文档</a>
+  <a href="https://blog.gcnanmu3125.cyou/xuanzhi/"><b>在线演示</b></a> · <a href="docs/">使用文档</a>
 </p>
 
 ## 快速开始

@@ -1,6 +1,6 @@
 # exampleSite —— 宣纸主题的演示站
 
-这个目录是主题的演示站（发布在 <https://ldm0715.github.io/xuanzhi/>，构建见 `.github/workflows/demo.yml`），也是主题改代码之后的**回归测试面**。
+这个目录是主题的演示站（发布在 <https://blog.gcnanmu3125.cyou/xuanzhi/>，构建见 `.github/workflows/demo.yml`），也是主题改代码之后的**回归测试面**。
 
 ---
 
@@ -75,7 +75,7 @@ cd <主题仓库根>
 hugo server --source exampleSite      # http://localhost:1313/
 ```
 
-`hugo.toml` 里的 `baseURL = 'http://localhost:1314/'` 只在 `hugo` 直接构建时用到；`hugo server` 会用自己的地址覆盖它，CI 用 `--baseURL` 覆盖成 GitHub Pages 的地址。
+`hugo.toml` 里的 `baseURL` 是演示站的正式地址（自定义域下的子路径），本源仓库的 CI 直接用它；`hugo server` 会用自己的地址覆盖它。fork 出去的仓库没有那个自定义域，CI 会按仓库名推导 `github.io` 地址覆盖。
 
 **站内搜索在这里不工作**，这是预期：Pagefind 索引不在 Hugo 构建里生成，要在构建之后多跑一步。本地 `hugo server` 下搜索提示「索引未生成」是正常的，不是配置错了。见 [`../docs/deployment.md`](../docs/deployment.md#站内搜索)。
 

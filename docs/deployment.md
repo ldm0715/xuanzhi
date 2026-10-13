@@ -133,6 +133,8 @@ jobs:
 
 如果仓库名就是 `<用户名>.github.io`（用户型 Pages），站点在根路径下，那行就可以简化成 `hugo --minify`，`hugo.toml` 里的 `baseURL = 'https://<用户名>.github.io/'` 直接就对了。
 
+**站点挂了自定义域（Custom domain）的话，上面两种写法都是错的。** GitHub Pages 会把 `<用户名>.github.io/<仓库名>/` **301** 到自定义域，于是那个 `--baseURL` 拼出来的地址会跳走——页面里的 `canonical`、sitemap、`og:url` 跟着全部指向它，等于亲手给搜索引擎制造矛盾（表现是站点长期停在「已抓取，尚未编入索引」）。这种情况把 `baseURL` 写成自定义域的实际地址（**含子路径**），并**去掉** `--baseURL`，让配置成为唯一出处。
+
 > **推送的是 `master` 分支的话还有一处**：GitHub 新建仓库时会往 `github-pages` 环境里预置一条**只允许 `main`** 的部署分支策略，于是报「`master` 分支不允许部署到 github-pages 上」——注意 build 步骤是绿的，只有 deploy 挂。去 **Settings → Environments → `github-pages` → Deployment branches and tags** 加一条 `master`（或选 No restriction），再重跑一次 workflow。
 
 ## Netlify / Vercel

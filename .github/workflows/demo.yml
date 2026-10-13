@@ -5,9 +5,11 @@ name: demo
 # 仓库 Settings → Pages → Build and deployment → Source 要选 **GitHub Actions**，
 # 否则这个 workflow 跑完也不会发布。
 #
-# 演示站地址：https://<owner>.github.io/<repo>/
-# 因为项目型 Pages 站点在子路径下，构建时用 --baseURL 带上 /<repo>/，
-# 不然 CSS / 字体 / 图片全 404。
+# 演示站挂在自定义域的子路径下：https://blog.gcnanmu3125.cyou/xuanzhi/
+# （GitHub Pages 会把 https://ldm0715.github.io/xuanzhi/ 301 过去。）
+# 基础地址以 exampleSite/hugo.toml 的 baseURL 为准，本源仓库不覆盖；**只有 fork
+# 出去的仓库**才按仓库名推导 github.io 地址——那个推导在本源仓库是错的，地址会
+# 301 跳走，页面里的 canonical / sitemap / og:url 会跟着全指错。
 
 on:
   push:
@@ -41,9 +43,15 @@ jobs:
           extended: true
 
       - name: Build demo
+        # 本源仓库走 hugo.toml 里的自定义域地址；fork 出去的仓库没有那个自定义域，
+        # 按仓库名推导 github.io 地址覆盖它——克隆下来直接部署，不用改配置。
         run: |
-          hugo --source exampleSite --minify \
-            --baseURL "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+          if [ "${{ github.repository }}" = "ldm0715/xuanzhi" ]; then
+            hugo --source exampleSite --minify
+          else
+            hugo --source exampleSite --minify \
+              --baseURL "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+          fi
 
       # 站内搜索（Pagefind）：在 hugo 构建后给 exampleSite/public 生成 /pagefind/ 索引，
       # 产物随 public 一起上传。没跑这一步，演示站搜索面板只会提示「索引未生成」。

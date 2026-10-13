@@ -3,9 +3,11 @@
 # 本地预览：hugo server --source exampleSite
 # 部署：GitHub Actions 见仓库根的 .github/workflows/demo.yml
 
-# 部署到 GitHub Pages 项目站点时是子路径，CI 会用 --baseURL 覆盖成
-# https://<owner>.github.io/<repo>/。本地跑用默认值即可。
-baseURL = 'http://localhost:1314/'
+# 演示站的正式地址。站点挂在自定义域的子路径下——GitHub Pages 会把
+# https://ldm0715.github.io/xuanzhi/ 301 到这里，所以基础地址是它，不是 github.io。
+# 本源仓库的 CI 直接用它；只有 fork 出去的仓库才按仓库名推导 github.io 地址覆盖。
+# （本地 hugo server 会自己把 baseURL 覆盖成 localhost，不受影响。）
+baseURL = 'https://blog.gcnanmu3125.cyou/xuanzhi/'
 
 title = '见字如面'
 defaultContentLanguage = 'zh-cn'
