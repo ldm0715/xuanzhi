@@ -56,7 +56,8 @@
 <link rel="alternate" type="{{ .MediaType.Type }}" href="{{ .Permalink }}" title="{{ site.Title }}">
 {{ end -}}
 
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='2' width='28' height='28' rx='5' fill='%23DA7756'/%3E%3Ctext x='16' y='23' font-size='20' text-anchor='middle' fill='%23F7F4EC' font-family='Kaiti SC, KaiTi, serif'%3E宣%3C/text%3E%3C/svg%3E">
+{{- /* 站点图标：主题带一份默认图（static/images/logo.svg），站点在 static/images/ 放同名文件即可覆盖 */ -}}
+<link rel="icon" type="image/svg+xml" href="{{ "images/logo.svg" | relURL }}">
 
 {{- /* 明暗模式：内联先行执行防闪白；light/dark 由 localStorage 或系统偏好决定 */ -}}
 <script>

@@ -40,7 +40,7 @@ categories:
 | `assets/css/` | 样式。**全部设计 token 在 `token.css`** | `token.css`——改颜色、字体、纹理从这里进 |
 | `assets/js/` | 交互，全站只有一个文件 | `site.js`（明暗切换、外观面板、搜索、图窗、播放器初始化…） |
 | `assets/vendor/` | 第三方库（Plyr 管视频、APlayer 管音频） | 别手改，皮肤覆写写在 `assets/css/main.css`，升级方式见其 `README.md` |
-| `static/` | 按原样发布的文件，路径原样进站 | `static/images/`（默认人像 `me.jpg`、分享图 `og-default.png`、水墨小品预览稿） |
+| `static/` | 按原样发布的文件，路径原样进站 | `static/images/`（默认人像 `me.jpg`、分享图 `og-default.png`、站点图标 `logo.svg`、水墨小品预览稿） |
 | `i18n/` | 界面文案 | `zh-cn.yaml` |
 | `docs/` | 就是这本手册 | — |
 
@@ -193,6 +193,7 @@ cp themes/xuanzhi/assets/css/token.css assets/css/token.css
 |---|---|
 | `static/images/me.jpg` | 关于页自述块的默认人像（`nameplate` 短代码不传 `image` 时用它） |
 | `static/images/og-default.png` | 分享卡片默认图（全站 `og:image` 都用它） |
+| `static/images/logo.svg` | 站点图标（浏览器标签页那枚小印） |
 
 ```bash
 mkdir -p static/images
