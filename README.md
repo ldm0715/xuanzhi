@@ -97,9 +97,9 @@ npx pagefind --site public
 
 ## 开发
 
-维护者与 AI 编码的完整指引在仓库根 [`CLAUDE.md`](CLAUDE.md)（与 `AGENTS.md` 逐字相同），发布 / 维护运行手册、待办台账与决策记录在 [`dev/`](dev/README.md)。
+维护者与 AI 编码的完整指引在仓库根 [`CLAUDE.md`](CLAUDE.md)，实现细节与设计理由在 [`dev/internals.md`](dev/internals.md)，待办在 [`dev/todo.md`](dev/todo.md)。
 
-发版流程：在 `CHANGELOG.md` 顶部加一段 `## [x.y.z] - YYYY-MM-DD`，提交后打 tag 推送（`git tag vx.y.z && git push --tags`）。`.github/workflows/release.yml` 会校验 CHANGELOG 里确实有这个版本、跑一次演示站预检构建，然后打出主题包并建 Release。详见 [`dev/publishing.md`](dev/publishing.md)。
+发版流程：在 `CHANGELOG.md` 顶部加一段 `## [x.y.z] - YYYY-MM-DD`，提交后打 tag 推送（`git tag vx.y.z && git push --tags`）。`.github/workflows/release.yml` 会校验 CHANGELOG 里确实有这个版本、跑一次演示站预检构建，然后打出主题包并建 Release。
 
 ## 许可
 

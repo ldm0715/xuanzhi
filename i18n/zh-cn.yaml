@@ -9,7 +9,6 @@
 # ---- 通用 ----
 archive: 归档
 tags: 标签
-tag: 标签
 toc: 目录
 unitPosts: 篇        # 篇数单位（归档/分类/标签页的「N 篇」）
 prevPage: 上一页
