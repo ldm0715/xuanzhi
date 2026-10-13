@@ -4118,7 +4118,12 @@ html[data-theme="dark"] .inkcard:hover {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
+  /* 恒占两行高，理由同 .inkcard-title：落款行是 margin-top:auto 钉在卡底的，
+     摘要只写一行时，省下的那行高会变成摘要与分割线之间的空白，看着像浮起来 */
+  min-height: 3em;
   margin: 0 0 12px;
+  /* 与卡片标题同族（宋体标题栈），不跟正文的霞鹜文楷 */
+  font-family: var(--font-title);
   font-size: 0.9rem;
   line-height: 1.5;
   letter-spacing: 0.03em;
@@ -4136,7 +4141,9 @@ html[data-theme="dark"] .inkcard:hover {
   padding-top: 10px;
   border-top: 1px solid var(--color-border-light);
 }
-/* 「续读」：整张卡是链接，这里只是个视觉提示（不能是 a，a 套 a 非法） */
+/* 「续读」：整张卡是链接，这里只是个视觉提示（不能是 a，a 套 a 非法）。
+   margin-left:auto 把它钉在落款行右缘——这是它的位置语言，别动；
+   标签少时它左边会留出空白，那是正常的（标签会由 site.js 按宽度尽量填满）。 */
 .inkcard-more {
   margin-left: auto;
   flex-shrink: 0;
@@ -4150,23 +4157,59 @@ html[data-theme="dark"] .inkcard:hover {
 .inkcard:hover .inkcard-more { color: var(--color-zhu-strong); }
 .inkcard-tags {
   display: flex;
-  flex-wrap: wrap;
+  /* 贴着内容（不撑满，+N 才紧跟标签之后）。放不下时它自己收缩、由 overflow
+     裁掉尾巴——裁剪是动态的，裁多少由剩余空间定，标签本身不设宽度。
+     min-width:0 让 flex 项能被压到内容宽度以下，否则溢出的是整行、把「续读」挤出卡片。 */
+  flex: 0 1 auto;
+  min-width: 0;
+  flex-wrap: nowrap;
+  overflow: hidden;
   align-items: center;
   font-size: 0.82rem;
   letter-spacing: 0.08em;
   color: var(--color-text-note);
 }
-.inkcard-tag { display: inline-flex; align-items: center; }
+/* 标签不设固定宽度——标签没有「标准长度」，能放多长是落款行剩余空间说了算。
+   宽度上限交给外层 .inkcard-tags 的收缩 + 裁剪（动态的，按剩余空间算）。
+   这里唯一要做的是 flex-shrink:0：让标签保持自己的宽度被裁，
+   而不是被压扁成一团（压扁只会让字溢出自己的盒子、互相叠上）。
+   注：分隔线是它的 ::before，所以下面那条分隔线规则必须补 display:inline-block——
+   inline 盒忽略 width/height，漏了竖线会塌成 0、整条消失。 */
+.inkcard-tag {
+  display: block;
+  flex-shrink: 0;
+  /* 截断只由 JS 施加，且只用在一种情况：单枚标签自己就长到放不下。
+     正常情况一律「整枚塞得下就显示、塞不下就收进 +N」，不拿截断去凑满剩余空间。
+     这里的 overflow/text-overflow 是给那次内联截断用的——纯文本要 display:block
+     才吃 text-overflow，所以下面的分隔线规则必须带 display:inline-block。 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* 服务端先藏起来的那些标签（第 3 枚起）。没有 JS 时落款行就停在这个静态形态：
+   前 2 枚 + 服务端算好的 +N。有 JS 时 site.js 按实测宽度重新分配，会把这个类摘掉。 */
+.inkcard-tag.is-extra { display: none; }
 /* 卡片落款行的「+N」尾签：只是文字，不能是链接——整张卡已经是 <a>。
-   分隔细竖线由上面那条 `.inkcard-tag + .inkcard-tag::before` 照常给出。
-   字距要压回 0：容器那 0.08em 是给汉字标签的，"+2" 会被拉开。 */
+   它在 .inkcard-tags 之外，所以不参与收缩（超长标签也挤不掉它），
+   字号也要自己写一份——掉出了容器那 0.82rem 的作用域，不写就按正文 1rem 渲染。
+   字距压回 0：容器那 0.08em 是给汉字标签的，"+2" 会被拉开。 */
 .inkcard-tag-more {
+  flex-shrink: 0;
+  font-size: 0.82rem;
   color: var(--color-zhu-strong);
   letter-spacing: 0;
   font-variant-numeric: tabular-nums;
 }
-.inkcard-tag + .inkcard-tag::before {
+/* 标签全塞得下时由 site.js 挂上：这时没有「还有几项」，整枚收起 */
+.inkcard-tag-more.is-off { display: none; }
+/* 标签之间、以及标签与 +N 之间的分隔细竖线。
+   display:inline-block 不能省，理由见 .inkcard-tag 那条注释；
+   vertical-align 让它在行盒里居中，替代原 inline-flex 的 align-items */
+.inkcard-tag + .inkcard-tag::before,
+.inkcard-tags + .inkcard-tag-more::before {
   content: "";
+  display: inline-block;
+  vertical-align: middle;
   width: 1px;
   height: 0.85em;
   margin: 0 9px;
@@ -4176,6 +4219,7 @@ html[data-theme="dark"] .inkcard:hover {
 .inkcard-cat {
   display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
   gap: 5px;
   color: var(--color-zhu-strong);
 }
@@ -4189,6 +4233,8 @@ html[data-theme="dark"] .inkcard:hover {
 }
 .inkcard-cat + .inkcard-tag::before {
   content: "";
+  display: inline-block;
+  vertical-align: middle;
   width: 1px;
   height: 0.85em;
   margin: 0 9px;

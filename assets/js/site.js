@@ -1307,4 +1307,91 @@
     }, { rootMargin: '400px 0px' });
     io.observe(host);
   })();
+
+  /* 首页卡片落款行：标签按实测宽度动态取舍。
+     服务端把标签全部渲染出来，但只露出前 2 枚（其余带 .is-extra 藏起），+N 也写成
+     「第 3 枚起」的数量——没有 JS 时就是这个静态形态。这里按真实宽度重排：
+     整枚塞得下的都显示，其余收进 +N；全塞得下就连 +N 一起收起。
+     截断只在一种情况下用：连第一枚都塞不下（单枚自己就太长），截它，免得撑破落款行。
+     CSS 数不出「塞得下几枚」，这件事只能由 JS 做。 */
+  (function () {
+    var feet = document.querySelectorAll('.inkcard-foot');
+    if (!feet.length) return;
+
+    var MIN_TRUNC = 4 * 0.82 * 16;   /* 截断时至少留这么宽，再窄就没法认了 */
+
+    function fit(foot) {
+      var tags = foot.querySelector('[data-xz-card-tags]');
+      var readmore = foot.querySelector('.inkcard-more');
+      if (!tags || !readmore) return;
+      var more = foot.querySelector('[data-xz-card-more]');
+      var items = tags.querySelectorAll('.inkcard-tag');
+      var i;
+
+      /* 只留前 from 枚，其余收起；顺带清掉上一轮的内联截断 */
+      function show(from) {
+        for (var k = 0; k < items.length; k++) {
+          items[k].classList.toggle('is-extra', k >= from);
+          items[k].style.maxWidth = '';
+        }
+      }
+
+      /* 判据是「容器溢没溢出」，不做宽度算术：标签行常常只剩几像素余量，
+         算术会被取整和字体度量差异带偏，而溢出与否是浏览器按当前字体排出来的，
+         和最终渲染永远一致。
+         容 1px 取整噪声：scrollWidth / clientWidth 各自取整，内容刚好铺满时
+         两者可能差 1，误判成溢出就会白白收起一枚标签 */
+      function overflows() { return tags.scrollWidth > tags.clientWidth + 1; }
+
+      /* 1) 一枚不收、也不给 +N 留位：全都放得下就到此为止，不显示 +N */
+      show(items.length);
+      if (more) more.classList.add('is-off');
+      if (!overflows()) return;
+
+      if (!more) {
+        /* 没有 +N 可维护（服务端判定 ≤2 枚）：真塞不下就把最后一枚截断收尾 */
+        if (overflows()) {
+          var excess = tags.scrollWidth - tags.clientWidth;
+          var last = items[items.length - 1];
+          last.style.maxWidth = Math.max(MIN_TRUNC, last.offsetWidth - excess) + 'px';
+        }
+        return;
+      }
+
+      /* 2) 放不下：给 +N 占位，从尾部一枚一枚收，收到不再溢出为止 */
+      more.classList.remove('is-off');
+      for (var keep = items.length; keep > 1; keep--) {
+        show(keep);
+        more.textContent = '+' + (items.length - keep);
+        if (!overflows()) return;
+      }
+
+      /* 3) 只剩一枚还溢出：那一枚自己就太长——这是截断唯一的用武之地。
+         其余照旧进 +N（只剩一枚时就没有「其余」，+N 一并收起） */
+      show(1);
+      if (items.length > 1) {
+        more.textContent = '+' + (items.length - 1);
+      } else {
+        more.classList.add('is-off');
+      }
+      if (overflows()) {
+        var over = tags.scrollWidth - tags.clientWidth;
+        items[0].style.maxWidth = Math.max(MIN_TRUNC, items[0].offsetWidth - over) + 'px';
+      }
+    }
+
+    function all() {
+      for (var n = 0; n < feet.length; n++) fit(feet[n]);
+    }
+
+    requestAnimationFrame(all);
+    /* 字体没就绪时量到的是回退字形的宽度，算出来会偏，就绪后重量一次 */
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(all);
+
+    var timer;
+    window.addEventListener('resize', function () {
+      clearTimeout(timer);
+      timer = setTimeout(all, 150);
+    });
+  })();
 })();

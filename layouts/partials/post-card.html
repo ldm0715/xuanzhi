@@ -9,17 +9,20 @@
     </span>
     <h3 class="inkcard-title">{{ .Title }}</h3>
     {{- /* 简介取 front matter 的 description；没写才回落 .Summary（正文自动摘要）。
-         回落这条与 head.html 的 meta 兜底链同源。 */ -}}
-    <p class="inkcard-summary">{{ or .Description .Summary | plainify | chomp | replaceRE `\s+` " " | truncate 52 }}</p>
+         这里**不截断**：截断交给 CSS 的 -webkit-line-clamp:2 按行做——
+         服务端按字数截（原本是 truncate 52）会和它打架，把第二行切在半空。 */ -}}
+    <p class="inkcard-summary">{{ or .Description .Summary | plainify | chomp | replaceRE `\s+` " " }}</p>
     <span class="inkcard-foot">
-      <span class="inkcard-tags">
-        {{- range $cats }}<span class="inkcard-cat">{{ .LinkTitle }}</span>{{ end -}}
-        {{- /* 标签同样只出前 4 枚，余下收成一枚 +N。这里只能是 span——整张卡已经是
-               <a class="inkcard-link">，a 套 a 非法（同下面「续读」那条）。
-               上限与 single.html 保持同值，改要两处一起改。 */ -}}
-        {{- range first 4 $tags }}<span class="inkcard-tag">{{ .LinkTitle }}</span>{{ end -}}
-        {{- if gt (len $tags) 4 }}<span class="inkcard-tag inkcard-tag-more">+{{ sub (len $tags) 4 }}</span>{{ end -}}
+      {{- /* 落款行宽只有约 330px，要同时容下分类、标签和「续读」，所以两边都限量：
+             分类只出第 1 枚（多的不显示），标签只出前 2 枚、余下收成一枚 +N。
+             这里只能是 span——整张卡已经是 <a class="inkcard-link">，a 套 a 非法。 */ -}}
+      <span class="inkcard-tags" data-xz-card-tags>
+        {{- with $cats }}{{ with index . 0 }}<span class="inkcard-cat">{{ .LinkTitle }}</span>{{ end }}{{ end -}}
+        {{- range $i, $t := $tags }}<span class="inkcard-tag{{ if ge $i 2 }} is-extra{{ end }}">{{ $t.LinkTitle }}</span>{{ end -}}
       </span>
+      {{- /* +N 放在 .inkcard-tags 之外：那是个裁剪容器，放里面会被超长标签一起裁掉。
+           它自己补了字号和一条分隔线（见 CSS）；数量由 site.js 按实测宽度改写。 */ -}}
+      {{- if gt (len $tags) 2 }}<span class="inkcard-tag-more" data-xz-card-more>+{{ sub (len $tags) 2 }}</span>{{ end -}}
       {{- /* 整张卡就是链接，所以这里只能是 span 不能是 a（a 套 a 是非法 HTML），
            样式上做成"可点的样子"即可 */ -}}
       <span class="inkcard-more" aria-hidden="true">{{ i18n "readMore" }}</span>
