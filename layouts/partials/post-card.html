@@ -8,7 +8,9 @@
       <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006.01.02" }}</time>
     </span>
     <h3 class="inkcard-title">{{ .Title }}</h3>
-    <p class="inkcard-summary">{{ .Summary | plainify | chomp | replaceRE `\s+` " " | truncate 52 }}</p>
+    {{- /* 简介取 front matter 的 description；没写才回落 .Summary（正文自动摘要）。
+         回落这条与 head.html 的 meta 兜底链同源。 */ -}}
+    <p class="inkcard-summary">{{ or .Description .Summary | plainify | chomp | replaceRE `\s+` " " | truncate 52 }}</p>
     <span class="inkcard-foot">
       <span class="inkcard-tags">
         {{- range $cats }}<span class="inkcard-cat">{{ .LinkTitle }}</span>{{ end -}}

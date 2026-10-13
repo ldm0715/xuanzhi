@@ -44,7 +44,7 @@ tags:
   - 排版
 categories:
   - 随笔
-description: "一句话摘要，会用作 meta description 与分享卡片描述"
+description: "一句话简介，首页卡片、RSS 与分享卡片都用它"
 draft: false
 ---
 ```
@@ -54,7 +54,7 @@ draft: false
 | `title` | 是 | 标题。同时用于首页卡片、归档目录、页面 `<title>` |
 | `date` | 建议写 | 归档按它分年月；**不写日期或写成未来时间，文章不会出现在归档里** |
 | `tags` / `categories` | 否 | 分类法。标签渲染成印谱、分类渲染成书架，见[站点配置](configuration.md) |
-| `description` | 否 | 覆盖 meta description；不写就用正文自动摘要 |
+| `description` | 否 | 一句话简介。用于首页卡片、RSS 与 meta description；不写就回落正文自动摘要 |
 | `draft` | 否 | `true` 时不渲染，需要 `hugo server -D` 才看得到 |
 
 > **日期写成了未来时间，文章会「消失」**——Hugo 默认不渲染未来日期的内容。这是最容易自己吓自己的一条。
@@ -417,14 +417,18 @@ plain block without language tag
 
 # 这是一个正文一级标题
 
-## 手动指定摘要
+## 卡片简介与 RSS 摘要
 
-首页卡片显示的是 `.Summary`。默认取正文第一段，想手动截断就在那里插一行：
+首页卡片和 RSS 都取 front matter 的 **`description`**，写什么就显示什么。
+
+没写 `description` 时回落到正文开头。想让回落的那段从某处截断，在正文里插一行：
 
 ```markdown
-这是摘要段，首页卡片只会显示到这里。
+这是简介段，首页卡片只会显示到这里。
 
 <!--more-->
 
-后面的内容不进摘要。
+后面的内容不进简介。
 ```
+
+卡片上的简介**不按字数截断**，由 CSS 把行数限在两行——铺满两行才打省略号。
