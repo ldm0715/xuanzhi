@@ -225,10 +225,24 @@ html.xz-page-in main {
   background: none;
   color: var(--color-text-secondary);
   cursor: pointer;
+  /* 悬浮的位移要随时间走，不给过渡就是瞬移 */
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 #theme-toggle:hover,
 #appearance-toggle:hover,
 #search-toggle:hover { color: var(--color-accent); }
+/* 悬浮上浮：默认这几枚圆钮一起抬 2px（取值与 .post-tool-btn 一致）。
+   另两处的取舍：
+   · 明暗按钮——它悬浮时图标转 40°，再叠个位移会晃，不抬；
+   · ☰——只在 ≤640px 出现，触屏没有 hover，不跟头栏那组变色 */
+#appearance-toggle:hover,
+#search-toggle:hover,
+.nav-burger:hover { transform: translateY(-2px); }
+@media (prefers-reduced-motion: reduce) {
+  #appearance-toggle:hover,
+  #search-toggle:hover,
+  .nav-burger:hover { transform: none; }
+}
 
 /* 两个 Material 图标叠放同一格，随主题淡入淡出切换 */
 #theme-toggle .icon-sun,
@@ -433,7 +447,8 @@ html[data-theme="dark"] .appearance-panel { box-shadow: 0 8px 24px rgba(0, 0, 0,
 
 /* ---- 移动端下拉导航面板 ----
    ≤640px 时头栏只留 ☰ · 站名 · 明暗按钮，导航链接 / 搜索 / 外观收进这里。
-   ☰ 的尺寸、颜色、hover 走上面 #theme-toggle 那组，这里只管显隐。 */
+   ☰ 的尺寸、颜色走上面 #theme-toggle 那组，这里只管显隐。
+   它的 hover 只有上浮、不变色——触屏没有 hover，那点变色没处显。 */
 .nav-burger { display: none; }
 
 /* 面板挂在 .site-header 内，sticky 的 header 天然是它的定位基准。
@@ -3600,9 +3615,14 @@ html[data-theme="dark"] #waline .wl-card .wl-meta > span::before {
   align-items: center;
   color: var(--color-text-secondary);
   text-decoration: none;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
-.footer-links a:hover { color: var(--color-accent); }
+/* 与头栏那几枚圆钮同样的悬浮上浮 */
+.footer-links a:hover { color: var(--color-accent); transform: translateY(-2px); }
 .footer-links a svg { display: block; }
+@media (prefers-reduced-motion: reduce) {
+  .footer-links a:hover { transform: none; }
+}
 
 /* 印章：站名首字，朱底纸字 */
 .seal {
