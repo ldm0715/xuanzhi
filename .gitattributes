@@ -4,14 +4,17 @@
 # 仓库是给作者看的，包是给用户 `themes/xuanzhi/` 直接解压用的，
 # 两者的合适内容不一样。
 #
-# 打了标记的：作者向开发文档、演示站、CI 配置、仓库级杂项配置。
-# 没打标记的（即会进包）：layouts/ assets/ static/ i18n/ docs/ theme.toml
+# 打了标记的：作者向开发文档、演示站、**用户手册**、CI 配置、仓库级杂项配置。
+# docs/ 也排除：它是手册的**唯一源文件**，同时被演示站当正文挂载，读它去仓库或
+# 演示站；解压出来的 themes/xuanzhi/ 里躺一份不参与渲染的副本只是死重量。
+# 没打标记的（即会进包）：layouts/ assets/ static/ i18n/ theme.toml
 # LICENSE README.md CHANGELOG.md。
 #
 # exampleSite/public/ 不用在这里管——它被 .gitignore 的 `public/` 覆盖，本来就不入库。
 
 /.github        export-ignore
 /dev            export-ignore
+/docs           export-ignore
 /exampleSite    export-ignore
 /CLAUDE.md      export-ignore
 /.gitignore     export-ignore

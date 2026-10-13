@@ -8,36 +8,48 @@ layout: "about"
 frame: "narrow"
 
 # 以下是演示内容：nameplate / social / project 里填的都是主题作者本人的信息。
-# 抄这一篇当模板时，整段替换成你自己的——顺带演示了三种 project 形态
-# （带 url 的可点、没 url 的纯文字、archived="true" 换白文印）。
+# 抄这一篇当模板时，整段替换成你自己的。
+# 主题**不带**默认人像，所以这里显式写了 image=——那张图是演示站自己的，放在
+# exampleSite/static/images/me.jpg（用户站点照做：放自己的图，再指过来）。
+# project 短代码另有两种形态（没 url 的渲染成纯文字、archived="true" 换白文印），
+# 见文档「六、短代码参考」。
 ---
 
-{{< nameplate name="宫城楠木" role="独立开发者 · 居杭州" >}}
-写代码，也写字。站名取自木性——稳、慢、纹理诚实，年轮不撒谎。白日与论文、开源为伍，夜里把过手的念想整理成字。
+{{< nameplate name="宫城楠木" role="广州大学在读" image="/images/me.jpg" >}}
 
-{{< social github="https://github.com/ldm0715" rss="/index.xml" >}}
+- 🎓 广州大学在读，平时喜欢把「用着顺手」的小东西真的做出来
+- 🧰 桌面端偏多：Tauri v2、WinUI 3、Flutter、PySide6 / Qt 都在折腾
+- 🌏 常用语言：`Go` · `C#` · `Python` · `TypeScript` · `Dart` · `JavaScript`
+- ✍️ 写博客，也写主题 —— 自己的 Hugo 主题 [xuanzhi](https://github.com/ldm0715/xuanzhi)
+
+{{< social github="https://github.com/ldm0715" email="gcnanmu3125@gmail.com" >}}
 {{< /nameplate >}}
 
 ## 在做的事
 
-{{< project name="宣纸" code="xuanzhi" year="二〇二五" status="维护中" tags="Hugo, CSS, Go" url="https://github.com/ldm0715/xuanzhi" >}}
-暖宣纸底的 Hugo 主题：竖排诗笺、题跋素纸、函架与钤印；明暗双纸、陶土与黛青双点缀。
+{{< project name="波纹音乐" code="bowen_music" year="二〇二六" status="维护中" tags="C#, WinUI 3" url="https://github.com/ldm0715/bowen_music" >}}
+非官方的波点音乐第三方桌面客户端，用 WinUI 3 构建。
 {{< /project >}}
 
-{{< project name="示例项目" code="demo" year="二〇二六" status="进行中" tags="Python" >}}
-这一条是**没有 `url`** 的示范——它渲染成纯文字而不是链接。已归档、没入口的项目
-不该给一个点不进去的入口。
+{{< project name="表情盒子" code="emobox" year="二〇二六" status="维护中" tags="TypeScript, Tauri" url="https://github.com/ldm0715/emobox" >}}
+Windows 优先的本地表情包管理器：导入整理、秒速搜索、一键复制到任何聊天窗口。
 {{< /project >}}
 
-{{< project name="旧工具" year="二〇二三" status="已归档" archived="true" tags="Go" >}}
-`archived="true"` 的示范：状态印从朱文换成白文，和「在做」的一眼分得开。
+{{< project name="B站表情包下载器" code="BiliEmojiDD" year="二〇二六" status="维护中" tags="Python, PySide6" url="https://github.com/ldm0715/BiliEmojiDD" >}}
+按 ID 或全量列表查表情包、搜索收藏集并预览，GIF 与视频内嵌播放，会话级队列批量下载。
+{{< /project >}}
+
+{{< project name="研讨厅有效提问次数查询器" code="fangclass_check_web" year="二〇二六" status="维护中" tags="Python" url="https://github.com/ldm0715/fangclass_check_web" >}}
+查询方班研讨厅提问的小工具。
 {{< /project >}}
 
 ## 关于本站
 
 {{< colophon >}}
-- **本站** 引擎 [Hugo](https://gohugo.io) · 主题 **宣纸 xuanzhi**（原创）
+- **本站** 引擎 [Hugo](https://gohugo.io) · 主题 [宣纸 · xuanzhi](https://github.com/ldm0715/xuanzhi)
+- **评论** [Waline](https://waline.js.org)，客户端自托管、随文章懒加载，服务端自建
 - **纸墨** 思源宋 / [LXGW 文楷](https://github.com/lxgw/LxgwWenKai) / JetBrains Mono，SIL OFL 1.1，本地自托管
-- **插件** 播放器 [Plyr](https://github.com/sampotts/plyr) / [APlayer](https://github.com/DIYgod/APlayer)、搜索 [Pagefind](https://pagefind.app)，均 MIT
-- **许可** 主题 MIT · 旧文与代码见 GitHub
+- **插件** 播放器 [Plyr](https://github.com/sampotts/plyr) / [APlayer](https://github.com/DIYgod/APlayer)、搜索 [Pagefind](https://pagefind.app)、公式 [KaTeX](https://katex.org)，均 MIT
+- **图标** [Material Design](https://github.com/google/material-design-icons)（Apache-2.0）· [Simple Icons](https://simpleicons.org/)（CC0）
+- **许可** [MIT](https://opensource.org/license/mit) · 旧文与代码见 GitHub
 {{< /colophon >}}

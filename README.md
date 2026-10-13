@@ -47,7 +47,8 @@ hugo server
 |---|---|
 | 站点图标（浏览器标签页那枚小印） | `static/images/logo.svg` |
 | 分享到社交平台的卡片配图 | `static/images/og-default.png` |
-| 关于页的人像 | `static/images/me.jpg` |
+
+关于页的人像不在这张表里——**主题不带默认人像**，图属站点私有：把自己的图放进 `static/images/`，再在 `nameplate` 短代码上写 `image="/images/xxx.jpg"`。
 
 配色、字体、界面文案与菜单见[自定义](docs/customization.md)。
 

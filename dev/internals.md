@@ -7,7 +7,7 @@
 - **i18n key 必须扁平**：`i18n "a.b"` 这种点号嵌套访问**不报错、静默返回空串**，界面上的字直接消失。
 - **`<script>` 里输出 JSON 必须 `jsonify | safeJS`**：只写 `jsonify` 会被 html/template 按 JS 字符串字面量再转义一次，`JSON.parse` 拿到的是字符串而非对象。
 - **`resources.Concat` 按目标路径缓存**：同一模板给不同内容拼产物时目标名必须区分，否则先算出来的那份被复用给所有页面，**结果随构建顺序漂移**。
-- **`resources.Get` 站点先于主题**：站点放同名文件即可覆盖主题的（改颜色、`og-default.png`、`me.jpg` 都靠这个）。
+- **`resources.Get` 站点先于主题**：站点放同名文件即可覆盖主题的（改颜色、`og-default.png` 都靠这个）。
 - **`site.MainSections` 是「页数最多的顶层栏目」**（站点没配 `params.mainSections` 时），不是"所有栏目"——站点多一个页数更多的栏目，文章会**静默**从首页与 RSS 消失，站点须配 `[params] mainSections`。
 - **goldmark passthrough 的键是 `enable = true`**：写成 `enabled` 不报错但静默失效。
 - **短代码是否闭合由模板里有没有引用 `.Inner` 决定**——`nameplate` / `project` / `colophon` / `playlist` 因此是闭合短代码，改它的闭合方式等于改写法约定（站点内容 / 文档 / 示例必须同一次改完）。
