@@ -3455,6 +3455,16 @@ html[data-theme="dark"] #waline .wl-panel {
    别连坐，所以只点掉 .wl-num。 */
 #waline .wl-count .wl-num { display: none; }
 
+/* 收掉条数之后，这行剩下的就是那句招呼语，而它自己还偏大：Waline 给 .wl-count
+   的是 1.25em + bold，落在 17px 正文上就是 21px 的粗体——比上面那行真正的区块
+   标题（.comments-title，1.12rem ≈ 18px）还大还重，一句招呼反倒喧宾夺主。
+   收到 0.9rem / 600：比正文（17px）明显小一档，只当一句轻声的引子。
+   .wl-sort 是它的兄弟节点、排序按钮自带 .75em，所以不受这一条影响。 */
+#waline .wl-count {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
 /* ---- 「地址 / 浏览器 / 系统」那排小签 ----
  *
  * 图标本身来自**第二份样式表** waline-meta.css（Font Awesome 的 data-URI，我们
