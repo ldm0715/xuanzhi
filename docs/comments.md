@@ -59,7 +59,10 @@ TypeError: Update comment failed with 500: Input data should be a String
 
 结果是**点赞其实已经写进库了**，只是响应 500，客户端以为失败，于是不更新界面。而除了博主自己（走另一条分支，写库数据里不带 `comment` 键），**任何读者点赞都必然失败**。
 
-**另有一处：橙云到底要不要关。** 站点套着 Cloudflare 橙云（代理开着）时，服务端记下的是 Cloudflare 边缘节点的 IP，不是读者的。于是「地址」显示成机房所在地；更要紧的是**评论频率限制也按这个 IP 算**——两个互不相识的读者 60 秒内先后留言，第二个会被判「Comment too fast!」。
+**另有一处：橙云之下，服务端认不认得真实访客。** 站点套着 Cloudflare 橙云（代理开着）时，请求链是 访客 → Cloudflare 边缘 → 源站，源站看到的连接方是**边缘节点**而不是读者。Waline 记下的 IP 因此成了节点 IP，两个后果：
+
+- **评论频率限制按节点算**——两个互不相识的读者 60 秒内先后留言，第二个会被判「Comment too fast!」（限流是 `IPQPS`，默认 60 秒一次）；
+- **「地址」显示成机房所在地**——读者的真实归属地全错。
 
 看着一关了之就行，**但除非读者全在境外，别关**：
 
@@ -68,7 +71,17 @@ TypeError: Update comment failed with 500: Input data should be a String
 | **橙云**（保持代理） | 边缘节点的 | **能**——连的是 Cloudflare 边缘 |
 | **灰云**（关掉代理） | 访客真实的 | **基本不能**——直连 Vercel 实测 20 秒超时，晚高峰更甚；而且 `*.vercel.app` 这个名字在国内解析会拿到假地址（实测返回过 `162.125.8.1`，那是 Dropbox 的段），连过去的根本不是 Vercel |
 
-**面向国内读者的站点，保持橙云。** 可用性优先，代价是定位显示成机房、限流按节点算。前者设个 `DISABLE_REGION=true` 关掉整项就好（不显示，好过显示假的）；后者属功能问题，要改服务端才能修——让它认 Cloudflare 写进去的 `cf-connecting-ip` 头（里面是真实访客 IP）。
+**面向国内读者的站点，保持橙云。** 可用性优先，上面那两条代价都能修，而且不用摘橙云：Cloudflare 会把真实客户端 IP 写进 `CF-Connecting-IP` 头透传到源站，**让服务端改读它，定位与限流就一起回来了**。
+
+Waline 服务端跑在 ThinkJS/Koa 上，取的 `ctx.ip` 默认读 `X-Forwarded-For`，把取值来源换掉只是一行：
+
+```js
+global.think.app.proxyIpHeader = 'cf-connecting-ip';
+```
+
+放在 `index.cjs` 里、`Application(...)` 调用**之后**（`think.app` 到那时才就绪）。改完定位显示正确，**`DISABLE_REGION` 也就不必再设**。`ldm0715/waline-server` 已经内置这一行，见下一节。
+
+> 这一行依赖上游仍是 Koa 架构（`@waline/vercel` 1.43.4 是）。升级服务端后若发现地址又变成机房，回来复核这里。
 
 ## 该用哪个服务端
 
@@ -90,7 +103,9 @@ comment: input.data.comment,
 
 > **两处都要覆盖**：npm 会把 `@waline/core` 提升到根 `node_modules`，而 `@waline/vercel` 包里本身还带一份嵌套的，两个路径都得看。
 
-**二、直接用作者打好补丁的仓库**：`ldm0715/waline-server`。它就是上游模板加了这个 `postinstall` 补丁，`vercel.json` 里另外去掉了已废弃的 `name` 字段（保留也无妨，只是构建日志里会多一条警告）。省事，代价是信任一个第三方仓库——不过补丁脚本只有几十行、全文可读，翻一眼再决定就好。
+顺手把上一节的真实 IP 修复也加进 `index.cjs`——同样是一行。
+
+**二、直接用作者打好补丁的仓库**：`ldm0715/waline-server`。它把上面两件事都做了——`postinstall` 里的点赞补丁，加 `index.cjs` 里指向 `cf-connecting-ip` 的那一行；`vercel.json` 另外去掉了已废弃的 `name` 字段（保留也无妨，只是构建日志里会多一条警告）。省事，代价是信任一个第三方仓库——不过补丁脚本只有几十行、全文可读，翻一眼再决定就好。
 
 > **先确认上游修没修**：如果哪天在 `@waline/core` 里已经找不到 `comment: input.data.comment,` 这一行，说明作者修了，上面两条路都不再需要。（那份补丁脚本匹配不上时只打一行警告，不会挡构建，可以放着不管。）
 
