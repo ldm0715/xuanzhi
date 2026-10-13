@@ -34,3 +34,4 @@ git tag vx.y.z && git push --tags   # 发版：先在 CHANGELOG.md 顶部加 ## 
 - **`docs/` 演示站挂载**必须同时补 `content → content`；手册各篇 front matter（`title`/`date`/`weight`/`description`）要齐。
 - **`CHANGELOG.md` 是 Release Notes 的来源**——发版 workflow 直接读取它当发布说明；**只在用户明确说要发布时才写入**，平时不要往里加内容。
 - **发版**：版本号唯一出处是 `CHANGELOG.md`（格式 `## [x.y.z] - YYYY-MM-DD`）；包里放什么由 `.gitattributes` 决定。
+- 写/dev文档不要写细节，只要写关键部分的摘要就行了，细节以代码为准
