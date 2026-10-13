@@ -2325,19 +2325,34 @@ figure.xz-player--video { text-align: left; }
   filter: brightness(0.94) saturate(1.1);
 }
 .seal-stamp:active .seal-face { scale: 0.92; }
-/* 印文：一至二字的短名竖排，如印章右行竖读；五字以上收小一号 */
+/* 印文：一至二字的短名竖排，如印章右行竖读；
+   其余由模板切好行——**每行四字**，一行一个 .seal-line，居中摞起来 */
 .seal-name {
   font-size: 1.18rem;
   line-height: 1.35;
   letter-spacing: 0.06em;
   overflow-wrap: anywhere;
+  text-align: center;
+}
+/* 一行印文。block 让它独占一行；span 默认行内，不写这个会挤成一行 */
+.seal-line { display: block; }
+/* 拉丁名的印文。印面是按汉字设计的：汉字占满 em 框，拉丁只占一半
+   （x-height ≈ 0.48em 对 0.85em），同字号下看着偏小——所以略提一档，
+   字面也换成楷体那套（x-height 更高、笔画更开），宋体的细横画在印泥
+   蒙版下先烂。只提一档是刻意的：按字身差补满（1.45rem 以上）在印面里
+   反而比汉字抢眼，一排印看过去不齐。
+   宽度仍有余量：1.3rem × 「GitHub」6 字 ≈ 65px < 90px */
+.seal-name--latin {
+  font-family: var(--font-sans);
+  font-size: 1.3rem;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
 }
 .seal-name--vert {
   writing-mode: vertical-rl;
   font-size: 1.5rem;
   letter-spacing: 0.18em;
 }
-.seal-name--sm { font-size: 0.92rem; letter-spacing: 0.02em; }
 /* 边款：汉字篇数缀于印下，墨色小楷，悬停染朱 */
 .seal-side {
   font-size: 0.8rem;
@@ -2658,6 +2673,13 @@ html[data-theme="dark"] .shelf-folder:focus-visible {
 }
 .term-tag-seal--vert { writing-mode: vertical-rl; }
 .term-tag-seal--sm { font-size: 1.05rem; letter-spacing: 0.06em; }
+/* 拉丁名：理由同印谱那条——字身偏小，但只提一档，且长词得允许在词内断 */
+.term-tag-seal--latin {
+  font-family: var(--font-sans);
+  font-size: 1.2rem;
+  letter-spacing: 0.02em;
+  overflow-wrap: anywhere;
+}
 .term-tag-meta { display: flex; flex-direction: column; gap: 6px; }
 .term-tag-count {
   font-family: var(--font-title);

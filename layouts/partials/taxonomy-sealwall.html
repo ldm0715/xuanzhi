@@ -8,11 +8,28 @@
 <ul class="seal-wall">
   {{- range .Data.Terms.ByCount }}
   {{- $name := .Page.Title }}
-  {{- $runes := countrunes $name }}
+  {{- $chars := split $name "" }}
+  {{- $total := len $chars }}
+  {{- /* 印文排版：汉字**每行四字**（超过四字才折，不是按容器宽度随便折）。
+         拉丁名另走一条：四字断行会把 GitHub Pages 切成 GitH/ub P/ages，
+         更没法读——所以不竖排、不缩号，交给浏览器按词折行。
+         ≤2 字仍竖排（印章竖读），但只对全汉字名生效：Go 竖起来是 G 上 o 下。 */}}
+  {{- $isLatin := findRE "[A-Za-z0-9]" $name }}
   <li class="seal-tile">
     <a class="seal-stamp" href="{{ .Page.RelPermalink }}" aria-label="{{ $name }} {{ .Count }} {{ i18n "unitPosts" }}">
       <span class="seal-face">
-        <span class="seal-name{{ if le $runes 2 }} seal-name--vert{{ else if gt $runes 4 }} seal-name--sm{{ end }}">{{ $name }}</span>
+        {{- if and (not $isLatin) (le $total 2) }}
+        <span class="seal-name seal-name--vert">{{ $name }}</span>
+        {{- else if $isLatin }}
+        <span class="seal-name seal-name--latin">{{ $name }}</span>
+        {{- else }}
+        <span class="seal-name">
+          {{- range $i := seq 0 4 (sub $total 1) }}
+          {{- $n := sub $total $i }}{{ if gt $n 4 }}{{ $n = 4 }}{{ end }}
+          <span class="seal-line">{{ delimit (first $n (after $i $chars)) "" }}</span>
+          {{- end }}
+        </span>
+        {{- end }}
       </span>
       <span class="seal-side">{{ partial "seal-count.html" .Count }}{{ i18n "unitPosts" }}</span>
     </a>
