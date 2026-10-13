@@ -79,6 +79,10 @@ moreTags: 更多标签      # 标签超出 4 枚时那枚「+N」尾签的悬停
 
 想放**图标按钮**（GitHub、RSS、邮件、友链…）时，在**站点仓库**新建 `layouts/partials/header-extra.html`，写自己的 markup。Hugo 的模板查找顺序是「站点先于主题」，同名 partial 会顶掉主题里那份空的（主题那份只有一段注释，不用改它）。
 
+> 演示站头栏那个 GitHub 入口就是这么加的，源文件 `exampleSite/layouts/partials/header-extra.html`，可以直接对着抄——只需把 `href` 换成你自己的仓库。
+>
+> **用 module mounts 接主题的站点**（含演示站）注意：站点自己的 `layouts/` 得跟着显式挂一次，否则会被主题的 mount 顶掉，见 `exampleSite/hugo.toml`。
+
 ### 例一：一个链接
 
 ```html

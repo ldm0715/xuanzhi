@@ -120,6 +120,12 @@ enableEmoji = true
   [[module.mounts]]
     source = 'static'
     target = 'static'
+  # 演示站自己的 layouts/ 也要显式挂一次——理由同上面 content / static：
+  # 给某个 target 加了 mount，该 target 的默认 mount 就被顶掉。演示站靠这条放
+  # 自己的 partials/header-extra.html（头栏那个 GitHub 入口）。
+  [[module.mounts]]
+    source = 'layouts'
+    target = 'layouts'
   [[module.mounts]]
     source = '../layouts'
     target = 'layouts'
