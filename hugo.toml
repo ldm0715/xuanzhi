@@ -1,0 +1,8 @@
+# 主题要求的 Hugo 版本。themes.gohugo.io 的收录流程读的就是这里
+# （来自 `hugo config mounts` 输出的 Module.HugoVersion），显示在主题页上。
+#
+# 这不是演示站的配置——演示站自己的配置在 exampleSite/hugo.toml。
+[module]
+  [module.hugoVersion]
+    extended = true
+    min = "0.146.0"
