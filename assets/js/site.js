@@ -532,11 +532,9 @@
       cards.forEach(function (c) { c.setAttribute('hidden', ''); });
     }
 
-    /* 目录浮层统一开关：改 <html> 的 xz-toc-open，并同步窄屏触发条的 aria */
+    /* 目录浮层统一开关：改 <html> 的 xz-toc-open */
     function setTocOverlay(open) {
       document.documentElement.classList.toggle('xz-toc-open', !!open);
-      var b = document.querySelector('.toc-bar');
-      if (b) b.setAttribute('aria-expanded', open ? 'true' : 'false');
     }
 
     /* ---- 按钮行为 ---- */
@@ -594,18 +592,9 @@
     /* 窄屏浮层目录：点它外面关掉 */
     document.addEventListener('click', function (e) {
       if (!document.documentElement.classList.contains('xz-toc-open')) return;
-      if (e.target.closest('.toc-memo') || e.target.closest('[data-act="toc"]') || e.target.closest('.toc-bar')) return;
+      if (e.target.closest('.toc-memo') || e.target.closest('[data-act="toc"]')) return;
       setTocOverlay(false);
     });
-
-    /* 窄屏顶部「目录」触发条：与朱印目录按钮同源，开闭同一份 memo 浮层 */
-    var tocBar = document.querySelector('.toc-bar');
-    if (tocBar) {
-      tocBar.addEventListener('click', function () {
-        if (window.innerWidth >= 1200) return;
-        setTocOverlay(!document.documentElement.classList.contains('xz-toc-open'));
-      });
-    }
 
     /* 分享卡片：点它外面或按 Esc 收起 */
     document.addEventListener('click', function (e) {

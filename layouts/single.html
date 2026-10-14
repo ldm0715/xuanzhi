@@ -44,14 +44,9 @@
     </div>
   </header>
 
+  {{- /* 目录树在页面里只渲染一次，位置在文章末那份 .toc-memo：宽屏是右栏侧笺，
+       窄屏点开是浮层。入口只有右下角那枚朱印里的「目录」按钮，正文顶部不放触发条。 */ -}}
   {{- $toc := .TableOfContents -}}
-  {{- if findRE "<li" $toc -}}
-  {{/* 窄屏目录入口：一条常驻触发条；点开的是文章末那一份 .toc-memo（宽屏它是侧栏），
-       目录树在页面里只渲染一次，不重复 DOM / id */}}
-  <button type="button" class="toc-bar" aria-expanded="false" aria-controls="toc-memo">
-    <span>{{ i18n "toc" }}</span>
-  </button>
-  {{- end }}
 
   {{- /* 首字下沉只给真正的导语。3em 的下沉字要吃掉两行高，开篇只有一句话时
          （customization / troubleshooting 那类页面，正文头一块还是折叠块）看着像
