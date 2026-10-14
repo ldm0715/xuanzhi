@@ -24,11 +24,13 @@
 
 ```bash
 git submodule add https://github.com/ldm0715/xuanzhi.git themes/xuanzhi
-# 在 hugo.toml 里声明：theme = 'xuanzhi'
+# 在 hugo.toml 里声明（两行都必须有）：
+#   theme = 'xuanzhi'
+#   defaultContentLanguage = 'zh-cn'
 hugo server
 ```
 
-要求 **Hugo extended ≥ 0.146**（图片管线需要 extended）。这三步只是骨架——公式、代码高亮随明暗、robots.txt 等开关不配就没有，照[快速开始](docs/quick-start.md)补齐即可。
+要求 **Hugo extended ≥ 0.146**（图片管线需要 extended）。这三步只是骨架——公式、代码高亮随明暗、robots.txt 等开关不配就没有，照[快速开始](docs/quick-start.md)补齐即可；其中 **`defaultContentLanguage` 不能漏**，缺了它界面上的字会全部空掉。
 
 ## 特性
 

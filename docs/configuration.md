@@ -28,12 +28,14 @@ categories:
 
 ## 最小可用配置
 
-先确认站点的 `hugo.toml` 至少有这三行：
+先确认站点的 `hugo.toml` 至少有这几行：
 
 ```toml
 baseURL = 'https://你的域名/'    # 末尾必须带 /
 title = '站点名'
 theme = 'xuanzhi'
+
+defaultContentLanguage = 'zh-cn'   # 少这行，界面上的字会全部空掉，见下表第一行
 ```
 
 能跑起来，但只有骨架。下面这些不补，主题的功能会**静默消失**——不报错，就是没有。
@@ -42,6 +44,7 @@ theme = 'xuanzhi'
 
 | 主题功能 | 需要的配置 | 不配会怎样 |
 |---|---|---|
+| **界面文案**（所有界面字） | `defaultContentLanguage = 'zh-cn'` | Hugo 默认按 `en` 去找 `i18n/en.*`，而主题只带 `zh-cn.yaml`——于是**每一个界面字都渲染成空**：按钮、提示、日期前缀、分页、字数……全不见，且不报错。漏配时最难查的一个 |
 | `robots.txt` | `enableRobotsTXT = true` | 主题的 `layouts/robots.txt` **不生成**，构建产物里没有这个文件 |
 | emoji 短代码 | `enableEmoji = true`（**顶层**） | `:+1:` 原样输出。写进 `[markup.goldmark.extensions]` 不报错但静默失效 |
 | 代码高亮跟随明暗 | `markup.highlight.noClasses = false` | 用 Hugo 的内联样式，切明暗时代码块不跟随 |
@@ -70,6 +73,9 @@ theme = 'xuanzhi'
 baseURL = 'https://你的域名/'
 title = '站点名'
 theme = 'xuanzhi'
+
+defaultContentLanguage = 'zh-cn'
+locale = 'zh-cn'
 
 enableRobotsTXT = true
 enableEmoji = true

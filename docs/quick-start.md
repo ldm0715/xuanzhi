@@ -80,6 +80,9 @@ baseURL = 'https://你的域名/'
 title = '我的博客'
 theme = 'xuanzhi'
 
+defaultContentLanguage = 'zh-cn'
+locale = 'zh-cn'
+
 enableRobotsTXT = true
 enableEmoji = true
 
@@ -105,7 +108,7 @@ enableEmoji = true
   weight = 10
 ```
 
-这几行不是装饰——**关掉任何一行都会有功能静默消失**（公式不渲染、代码块不跟明暗、emoji 变成 `:+1:` 的字面文本……）。每一条管什么、不配会怎样，逐项列在[站点配置](configuration.md)里。
+这几行不是装饰——**关掉任何一行都会有功能静默消失**（公式不渲染、代码块不跟明暗、emoji 变成 `:+1:` 的字面文本……）。尤其是 `defaultContentLanguage`：**漏了它，页面上所有界面字都会变成空白**，按钮、提示、日期前缀全不见，构建却不报任何错。每一条管什么、不配会怎样，逐项列在[站点配置](configuration.md)里。
 
 ## 五、写第一篇
 

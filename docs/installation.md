@@ -89,6 +89,9 @@ hugo mod get github.com/ldm0715/xuanzhi@v1.0.0
 baseURL = 'https://你的域名/'
 title = '站点名'
 theme = 'xuanzhi'      # 用方式 C 的则跳过这行，改用 module.imports
+
+defaultContentLanguage = 'zh-cn'
+locale = 'zh-cn'
 ```
 
 然后**务必照[快速开始](quick-start.md#四写-hugotoml)那份配置补齐 `[markup]` 各段**——主题有一批功能是「模板在主题、开关在站点」，不配就没有：公式不渲染、代码块不跟明暗、robots.txt 不生成。每一项管什么见[站点配置](configuration.md)的「功能 → 配置 → 不配的后果」表。
