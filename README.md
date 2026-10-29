@@ -5,8 +5,8 @@
 <h1 align="center">Xuanzhi 宣纸</h1>
 
 <p align="center">
-  一套为中文写作设计的 Hugo 博客主题<br>
-  暖纸底 · 稿纸格纹 · 霞鹜文楷 · 墨阶排版
+  A Hugo blog theme made for Chinese writing<br>
+  warm paper · ruled grid · LXGW WenKai · ink-toned typography
 </p>
 
 <p align="center">
@@ -17,71 +17,75 @@
 </p>
 
 <p align="center">
-  <a href="https://blog.gcnanmu3125.cyou/xuanzhi/"><b>在线演示</b></a> · <a href="docs/">使用文档</a>
+  <a href="https://blog.gcnanmu3125.cyou/xuanzhi/"><b>Live demo</b></a> · <a href="docs/">Docs</a>
 </p>
 
-## 快速开始
+<p align="center">
+  <a href="README.zh-CN.md">中文版</a>
+</p>
+
+## Quick start
 
 ```bash
 git submodule add https://github.com/ldm0715/xuanzhi.git themes/xuanzhi
-# 在 hugo.toml 里声明（两行都必须有）：
+# Declare it in hugo.toml (both lines are required):
 #   theme = 'xuanzhi'
 #   defaultContentLanguage = 'zh-cn'
 hugo server
 ```
 
-要求 **Hugo extended ≥ 0.146**（图片管线需要 extended）。这三步只是骨架——公式、代码高亮随明暗、robots.txt 等开关不配就没有，照[快速开始](docs/quick-start.md)补齐即可；其中 **`defaultContentLanguage` 不能漏**，缺了它界面上的字会全部空掉。
+Requires **Hugo extended ≥ 0.146** (the image pipeline needs extended). These three steps are only a skeleton — math, light/dark-aware code highlighting, robots.txt and other switches stay off until configured; follow [Quick start](docs/quick-start.md) to fill them in. Do not omit **`defaultContentLanguage`**: without it, every piece of interface text renders empty.
 
-## 特性
+## Features
 
-- **写作即所得**：图片自动转 WebP 与多档清晰度，点击进入灯箱；公式在构建期排版好，禁 JS 的读者、爬虫与 RSS 阅读器都能读到。
-- **中文排版**：霞鹜文楷正文字体、中文着重号代替假斜体，脚注、表格、引用等元素各有版式。
-- **内容组织**：归档、分类书架、标签印谱各有形制；文章页有目录、阅读进度与一枚可拖动的朱印。
-- **站内搜索**：由 Pagefind 驱动，中文分词原生支持。
-- **媒体与评论**：自托管的视频 / 音频 / 播放列表；评论区可选，不配置就完全不出现。
-- **自托管**：字体、图标、播放器、搜索索引全部随主题分发。
+- **Write and see it**: images are converted to WebP at several sizes and open in a lightbox; math is typeset at build time, so readers without JS, crawlers and RSS readers can all see it.
+- **Chinese typography**: LXGW WenKai for body text, emphasis marks instead of fake italics, and dedicated layouts for footnotes, tables and blockquotes.
+- **Content organization**: archives, a category shelf and a tag seal catalog each have their own form; article pages carry a table of contents, reading progress and a draggable vermilion seal.
+- **Site search**: powered by Pagefind, with native Chinese word segmentation.
+- **Media and comments**: self-hosted video / audio / playlists; comments are optional and disappear entirely when unconfigured.
+- **Self-hosted**: fonts, icons, player and search index all ship with the theme.
 
-## 自定义
+## Customization
 
-主题自带几处素材，可以**直接在站点里替换**，不用改任何模板——在你自己站点的 `static/` 下放一份同名同路径的文件即可顶掉：
+The theme bundles a few assets you can **replace directly in your site**, without touching any template — drop a file with the same name at the same path under your site's `static/`:
 
-| 想换掉的 | 放一份自己的 |
+| To replace | Put your own |
 |---|---|
-| 站点图标（浏览器标签页那枚小印） | `static/images/logo.svg` |
-| 分享到社交平台的卡片配图 | `static/images/og-default.png` |
+| Site icon (the small seal in the browser tab) | `static/images/logo.svg` |
+| Social share card image | `static/images/og-default.png` |
 
-关于页的人像不在这张表里——**主题不带默认人像**，图属站点私有：把自己的图放进 `static/images/`，再在 `nameplate` 短代码上写 `image="/images/xxx.jpg"`。
+The portrait on the about page is not in this table — **the theme ships no default portrait**; the image belongs to the site. Put your own in `static/images/` and pass `image="/images/xxx.jpg"` to the `nameplate` shortcode.
 
-配色、字体、界面文案与菜单见[自定义](docs/customization.md)。
+For colors, fonts, interface text and menus see [Customization](docs/customization.md).
 
-## 文档
+## Documentation
 
-完整手册在 [`docs/`](docs/)——**它同时就是演示站的正文**。
+The full manual lives in [`docs/`](docs/) — **it is also the body of the demo site**. The docs are currently written in Chinese.
 
-| 想做什么 | 看这里 |
+| I want to | Read |
 |---|---|
-| 五分钟先跑起来 | [快速开始](docs/quick-start.md) |
-| 引入方式、升级与回退 | [安装与升级](docs/installation.md) |
-| `hugo.toml` 全量配置 | [站点配置](docs/configuration.md) |
-| 写作：front matter / 图片 / 公式 | [写作](docs/writing/index.md) |
-| 短代码参数表 | [短代码参考](docs/shortcodes.md) |
-| 自定义：菜单、界面文案、配色 | [自定义](docs/customization.md) |
-| 部署与站内搜索索引 | [部署](docs/deployment.md) |
-| 页面不对劲 | [常见问题](docs/troubleshooting.md) |
-| 设计理念 | [设计理念](docs/design.md) |
+| Get it running in five minutes | [Quick start](docs/quick-start.md) |
+| Installation, upgrades and rollback | [Installation & upgrade](docs/installation.md) |
+| Every `hugo.toml` option | [Site configuration](docs/configuration.md) |
+| Writing: front matter / images / math | [Writing](docs/writing/index.md) |
+| Shortcode parameter reference | [Shortcodes](docs/shortcodes.md) |
+| Customize: menus, interface text, colors | [Customization](docs/customization.md) |
+| Deployment and the search index | [Deployment](docs/deployment.md) |
+| Something looks wrong | [Troubleshooting](docs/troubleshooting.md) |
+| Design rationale | [Design](docs/design.md) |
 
-## 许可
+## License
 
-| 组成 | 许可 |
+| Component | License |
 |---|---|
-| 主题本体（模板 / CSS / JS） | MIT（见 [LICENSE](LICENSE)） |
-| 霞鹜文楷 GB、思源宋体 700、JetBrains Mono | SIL OFL 1.1 |
-| KaTeX 样式表 | MIT |
-| Material Design 图标 | Apache-2.0 |
-| Simple Icons 品牌图标 | CC0 1.0 |
-| Plyr（视频）、APlayer（音频） | MIT |
-| Waline 评论客户端 | MIT |
+| The theme itself (templates / CSS / JS) | MIT (see [LICENSE](LICENSE)) |
+| LXGW WenKai GB, Source Han Serif 700, JetBrains Mono | SIL OFL 1.1 |
+| KaTeX stylesheets | MIT |
+| Material Design icons | Apache-2.0 |
+| Simple Icons brand icons | CC0 1.0 |
+| Plyr (video), APlayer (audio) | MIT |
+| Waline comment client | MIT |
 
-第三方资产不因打包在一起而变为 MIT，各自要保留的署名与出处见[许可](docs/licenses.md)。
+Third-party assets do not become MIT because they are bundled; see [Licenses](docs/licenses.md) for the attribution and source each one requires.
 
-更新记录见 [CHANGELOG.md](CHANGELOG.md)，发布产物在 [Releases](https://github.com/ldm0715/xuanzhi/releases)。维护与开发见 [CLAUDE.md](CLAUDE.md) 与 [`dev/`](dev/README.md)。
+Release notes live in [CHANGELOG.md](CHANGELOG.md), and published builds are under [Releases](https://github.com/ldm0715/xuanzhi/releases). For maintenance and development see [CLAUDE.md](CLAUDE.md) and [`dev/`](dev/README.md).

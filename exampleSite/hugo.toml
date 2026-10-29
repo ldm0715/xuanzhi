@@ -104,7 +104,7 @@ enableEmoji = true
 # **没有**用 `themesDir = '../..' + theme = 'xuanzhi'`——那套写法要求仓库目录名必须
 # 叫 xuanzhi，本地克隆换个名字就报 "module not found"。挂载用相对路径，不挑目录名。
 #
-# 站点接入主题仍走常规的 `theme = 'xuanzhi'`，见 README「引入你的博客」。
+# 站点接入主题仍走常规的 `theme = 'xuanzhi'`，见 README「Quick start」。
 #
 # 注意：TOML 里 [module] 一旦开始，后面的键就全归它了——所以这段必须放在文件最后。
 [module]

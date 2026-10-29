@@ -1,7 +1,7 @@
 name = 'Xuanzhi'
 license = 'MIT'
 licenselink = 'https://opensource.org/license/mit'
-description = '宣纸——暖纸底、稿纸格纹、霞鹜文楷、墨阶排版的极简中文博客主题，明暗双模式，陶土橘/黛青双点缀色'
+description = 'Xuanzhi: a minimal Chinese blog theme with warm paper tones, a manuscript-style ruled grid, LXGW WenKai typography and ink-toned hierarchy, plus light/dark modes and terracotta and indigo accents'
 homepage = 'https://github.com/ldm0715/xuanzhi'
 demosite = 'https://blog.gcnanmu3125.cyou/xuanzhi/'
 tags = ['blog', 'minimal', 'light', 'dark', 'chinese', 'clean']
